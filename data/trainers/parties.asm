@@ -381,6 +381,33 @@ endc
 		tr_moves WATERFALL, BULK_UP, BULLDOZE, DRAIN_PUNCH
 	end_trainer
 
+	def_trainer 3, "Chuck"
+	tr_mon 37, PRIMEAPE, MALE
+		tr_extra DEFIANT
+		tr_evs 192 Atk
+		tr_moves KARATE_CHOP, FEINT_ATTACK, BULK_UP, CROSS_CHOP
+	tr_mon 37, FARFETCH_D, MALE | GALARIAN_FORM
+		tr_extra STEADFAST
+		tr_evs 192 Atk
+if DEF(FAITHFUL)
+		tr_moves ROCK_SMASH, BODY_SLAM, FEINT_ATTACK, SWORDS_DANCE
+else
+		tr_moves REVERSAL, BODY_SLAM, FEINT_ATTACK, SWORDS_DANCE
+endc
+	tr_mon 38, HITMONTOP, MALE
+		tr_extra INTIMIDATE
+		tr_evs 192 Atk
+		tr_moves BULK_UP, SUCKER_PUNCH, DOUBLE_KICK, RAPID_SPIN
+	tr_mon 39, HITMONCHAN, MALE
+		tr_extra IRON_FIST
+		tr_evs 192 Atk
+		tr_moves THUNDERPUNCH, ICE_PUNCH, FIRE_PUNCH, MACH_PUNCH
+	tr_mon 40, POLIWRATH @ LEFTOVERS, MALE
+		tr_extra WATER_ABSORB
+		tr_evs 192 Atk
+		tr_moves ICE_PUNCH, HYPNOSIS, WATERFALL, DYNAMICPUNCH
+	end_trainer
+
 
 SECTION "JasmineGroup", ROMX
 JasmineGroup:
@@ -437,6 +464,29 @@ endc
 		tr_extra SHEER_FORCE, ATK_UP_SATK_DOWN
 		tr_evs 252 HP, 4 SDf, 252 Atk
 		tr_moves EARTHQUAKE, ROCK_SLIDE, CRUNCH, IRON_HEAD
+	end_trainer
+
+	def_trainer 3, "Jasmine"
+	tr_mon 37, SKARMORY, FEMALE
+		tr_extra STURDY
+		tr_evs 224 HP
+		tr_moves DRILL_PECK, SPIKES, STEEL_WING, ROOST
+	tr_mon 37, MAGNETON
+		tr_extra MAGNET_PULL
+		tr_evs 224 HP
+		tr_moves THUNDER_WAVE, THUNDERBOLT, TRI_ATTACK, FLASH_CANNON
+	tr_mon 38, FORRETRESS, FEMALE
+		tr_extra STURDY
+		tr_evs 224 HP
+		tr_moves SPIKES, GYRO_BALL, DEFENSE_CURL, ROLLOUT
+	tr_mon 39, SCIZOR, FEMALE
+		tr_extra TECHNICIAN
+		tr_evs 224 HP
+		tr_moves BULLET_PUNCH, X_SCISSOR, AERIAL_ACE, SWORDS_DANCE
+	tr_mon 40, STEELIX @ LEFTOVERS, FEMALE
+		tr_extra STURDY
+		tr_evs 224 HP
+		tr_moves BODY_SLAM, BULLDOZE, ROCK_SLIDE, IRON_TAIL
 	end_trainer
 
 
@@ -502,6 +552,29 @@ endc
 		tr_extra THICK_FAT, ATK_UP_SATK_DOWN
 		tr_evs 252 HP, 4 Def, 252 Atk
 		tr_moves EARTHQUAKE, AVALANCHE, STONE_EDGE, KNOCK_OFF
+	end_trainer
+
+	def_trainer 3, "Pryce"
+	tr_mon 38, DEWGONG @ CHESTO_BERRY, MALE
+		tr_extra HYDRATION
+		tr_evs 224 HP
+		tr_moves WATERFALL, REST, RAIN_DANCE, AURORA_BEAM
+	tr_mon 38, SNEASEL, MALE
+		tr_extra INNER_FOCUS
+		tr_evs 224 Atk
+		tr_moves SWORDS_DANCE, ICICLE_CRASH, SCREECH, SLASH
+	tr_mon 39, CLOYSTER, MALE
+		tr_extra SHELL_ARMOR
+		tr_evs 224 HP
+		tr_moves DEFENSE_CURL, SUPERSONIC, WATER_PULSE, ICE_SHARD
+	tr_mon 40, LAPRAS, MALE
+		tr_extra WATER_ABSORB
+		tr_evs 224 HP
+		tr_moves SING, CONFUSE_RAY, ANCIENTPOWER, ICE_BEAM
+	tr_mon 41, MAMOSWINE @ SITRUS_BERRY, MALE
+		tr_extra OBLIVIOUS
+		tr_evs 224 Atk
+		tr_moves MAGNITUDE, ANCIENTPOWER, AVALANCHE, FURY_STRIKES
 	end_trainer
 
 
@@ -572,6 +645,37 @@ endc
 		tr_extra SNIPER, SPE_UP_SATK_DOWN
 		tr_evs 252 HP, 4 Atk, 252 Spe
 		tr_moves DRAGON_DANCE, WATERFALL, OUTRAGE, REST
+	end_trainer
+
+	def_trainer 3, "Clair"
+	tr_mon 39, GYARADOS, FEMALE
+		tr_extra INTIMIDATE
+		tr_evs 160 Atk, 160 Spe
+		tr_moves CRUNCH, DRAGON_PULSE, AQUA_TAIL, DRAGON_DANCE
+	tr_mon 39, YANMEGA, FEMALE
+		tr_extra SPEED_BOOST
+		tr_evs 160 SAt, 160 Spe
+if DEF(FAITHFUL)
+		tr_moves BUG_BUZZ, AIR_SLASH, ANCIENTPOWER, DOUBLE_TEAM
+else
+		tr_moves BUG_BUZZ, DRAGON_PULSE, ANCIENTPOWER, DOUBLE_TEAM
+endc
+	tr_mon 40, DRAGONAIR, FEMALE
+		tr_extra SHED_SKIN
+		tr_evs 192 HP, 128 Spe
+		tr_moves THUNDER_WAVE, AQUA_TAIL, FLAMETHROWER, DRAGON_PULSE
+	tr_mon 40, AMPHAROS, FEMALE
+		tr_extra STATIC
+		tr_evs 192 HP, 128 SAt
+		tr_moves THUNDER_WAVE, POWER_GEM, THUNDERBOLT, DRAGON_PULSE
+	tr_mon 41, DRAGONAIR, FEMALE
+		tr_extra SHED_SKIN
+		tr_evs 192 HP, 128 SAt
+		tr_moves THUNDER_WAVE, THUNDERBOLT, ICE_BEAM, DRAGON_PULSE
+	tr_mon 42, KINGDRA @ SHELL_BELL, FEMALE
+		tr_extra SNIPER
+		tr_evs 192 SAt, 128 Spe
+		tr_moves SMOKESCREEN, HYPER_BEAM, DRAGON_PULSE, SURF
 	end_trainer
 
 

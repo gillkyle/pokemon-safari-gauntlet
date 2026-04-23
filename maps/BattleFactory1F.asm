@@ -331,13 +331,13 @@ SafariGauntletRound3:
 	showtext SafariGauntletRound3Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
 	random 3
-	ifequalfwd 0, .Gilbert
+	ifequalfwd 0, .Tully2
 	ifequalfwd 1, .Nozomi
 	loadtrainer FISHER, WILTON2
 	sjumpfwd .Battle
 
-.Gilbert
-	loadtrainer PSYCHIC_T, GILBERT
+.Tully2
+	loadtrainer FISHER, TULLY2
 	sjumpfwd .Battle
 
 .Nozomi
@@ -364,17 +364,17 @@ SafariGauntletRound4:
 	showtext SafariGauntletRound4Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
 	random 3
-	ifequalfwd 0, .Ronda
-	ifequalfwd 1, .Wilton3
+	ifequalfwd 0, .Gilbert
+	ifequalfwd 1, .Ronda
 	loadtrainer FISHER, TULLY3
+	sjumpfwd .Battle
+
+.Gilbert
+	loadtrainer PSYCHIC_T, GILBERT
 	sjumpfwd .Battle
 
 .Ronda
 	loadtrainer BATTLE_GIRL, RONDA
-	sjumpfwd .Battle
-
-.Wilton3
-	loadtrainer FISHER, WILTON3
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -399,22 +399,22 @@ SafariGauntletBossBattle:
 	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .Jasmine
 	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .Pryce
 	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer CLAIR, 1
+	loadtrainer CLAIR, 3
 	sjumpfwd .Battle
 
 .Chuck
 	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer CHUCK, 1
+	loadtrainer CHUCK, 3
 	sjumpfwd .Battle
 
 .Jasmine
 	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer JASMINE, 1
+	loadtrainer JASMINE, 3
 	sjumpfwd .Battle
 
 .Pryce
 	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer PRYCE, 1
+	loadtrainer PRYCE, 3
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE

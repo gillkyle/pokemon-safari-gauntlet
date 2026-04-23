@@ -2,6 +2,9 @@ Special_SafariGauntlet_BeginRun:
 	xor a
 	ld [wSafariGauntletDraftAttempts], a
 	ld [wPartyCount], a
+	dec a
+	ld [wJohtoBadges], a
+	ld [wKantoBadges], a
 	call SafariGauntlet_ClearRunInventory
 	ld a, SAFARI_GAUNTLET_STEP_DRAFT
 	ld [wSafariGauntletStep], a

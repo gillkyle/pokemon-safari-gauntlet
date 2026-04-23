@@ -99,8 +99,9 @@ SafariGauntlet_InitStandalonePlayer:
 	ld de, wPlayerName
 	ld bc, NAME_LENGTH
 	rst CopyBytes
-	ld a, 1 << RISINGBADGE
+	ld a, $ff
 	ld [wJohtoBadges], a
+	ld [wKantoBadges], a
 	ret
 
 .name:
