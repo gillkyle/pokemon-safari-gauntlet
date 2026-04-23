@@ -1484,116 +1484,116 @@
 	wildmon 52, MISMAGIUS
 	end_grass_wildmons
 
-	def_grass_wildmons SAFARI_ZONE_HUB
+def_grass_wildmons SAFARI_ZONE_HUB
 	db 10 percent ; encounter rate
 	; morn
-	wildmon 55, DODUO
-	wildmon 58, DODRIO
-	wildmon 55, EXEGGCUTE
-	wildmon 59, TAUROS
-	wildmon 59, EXEGGUTOR
-	wildmon 60, TANGELA
-	wildmon 50, SCYTHER
+	wildmon 30, HOOTHOOT
+	wildmon 30, WOOPER
+	wildmon 30, MAGNEMITE
+	wildmon 30, MAREEP
+	wildmon 30, VULPIX
+	wildmon 30, SLOWPOKE
+	wildmon 30, EEVEE
 	; day
-	wildmon 55, DODUO
-	wildmon 58, DODRIO
-	wildmon 55, EXEGGCUTE
-	wildmon 59, TAUROS
-	wildmon 59, EXEGGUTOR
-	wildmon 60, TANGELA
-	wildmon 50, SCYTHER
+	wildmon 30, MAREEP
+	wildmon 30, WOOPER
+	wildmon 30, MAGNEMITE
+	wildmon 30, VULPIX
+	wildmon 30, SLOWPOKE
+	wildmon 30, EEVEE
+	wildmon 30, HOUNDOUR
 	; nite
-	wildmon 55, DODUO
-	wildmon 58, DODRIO
-	wildmon 55, EXEGGCUTE
-	wildmon 59, TAUROS
-	wildmon 59, EXEGGUTOR
-	wildmon 60, TANGELA
-	wildmon 50, SCYTHER
+	wildmon 30, HOOTHOOT
+	wildmon 30, HOUNDOUR
+	wildmon 30, MAGNEMITE
+	wildmon 30, MAREEP
+	wildmon 30, VULPIX
+	wildmon 30, SLOWPOKE
+	wildmon 30, EEVEE
 	end_grass_wildmons
 
-	def_grass_wildmons SAFARI_ZONE_EAST
-	db 10 percent ; encounter rate
+def_grass_wildmons SAFARI_ZONE_EAST
+	db 12 percent ; encounter rate
 	; morn
-	wildmon 55, PARAS
-	wildmon 57, NIDORINA
-	wildmon 57, NIDORINO
-	wildmon 59, TAUROS, PALDEAN_FORM
-	wildmon 60, NIDOKING
-	wildmon 60, NIDOQUEEN
-	wildmon 50, PARASECT
+	wildmon 30, FLAAFFY
+	wildmon 30, QUAGSIRE
+	wildmon 30, CHINCHOU
+	wildmon 30, MILTANK
+	wildmon 30, SKARMORY
+	wildmon 30, ESPEON
+	wildmon 30, HERACROSS
 	; day
-	wildmon 55, PARAS
-	wildmon 57, NIDORINA
-	wildmon 57, NIDORINO
-	wildmon 59, TAUROS, PALDEAN_FORM
-	wildmon 60, NIDOKING
-	wildmon 60, NIDOQUEEN
-	wildmon 50, PARASECT
+	wildmon 30, FLAAFFY
+	wildmon 30, QUAGSIRE
+	wildmon 30, LANTURN
+	wildmon 30, MILTANK
+	wildmon 30, SKARMORY
+	wildmon 30, ESPEON
+	wildmon 30, HERACROSS
 	; nite
-	wildmon 55, PARAS
-	wildmon 57, NIDORINA
-	wildmon 57, NIDORINO
-	wildmon 59, TAUROS, PALDEAN_FORM
-	wildmon 60, NIDOKING
-	wildmon 60, NIDOQUEEN
-	wildmon 50, PARASECT
+	wildmon 30, FLAAFFY
+	wildmon 30, QUAGSIRE
+	wildmon 30, CHINCHOU
+	wildmon 30, HOUNDOOM
+	wildmon 30, SKARMORY
+	wildmon 30, UMBREON
+	wildmon 30, HERACROSS
 	end_grass_wildmons
 
-	def_grass_wildmons SAFARI_ZONE_NORTH
-	db 10 percent ; encounter rate
+def_grass_wildmons SAFARI_ZONE_NORTH
+	db 16 percent ; encounter rate
 	; morn
-	wildmon 55, VENONAT
-	wildmon 58, VENOMOTH
-	wildmon 56, RHYHORN
-	wildmon 59, TAUROS, TAUROS_PALDEAN_FIRE_FORM
-	wildmon 59, PINSIR
-	wildmon 60, RHYDON
-	wildmon 60, CHANSEY
+	wildmon 30, DRAGONAIR
+	wildmon 30, CROBAT
+	wildmon 30, STEELIX
+	wildmon 30, KINGDRA
+	wildmon 30, SCIZOR
+	wildmon 30, CLODSIRE
+	wildmon 30, SYLVEON
 	; day
-	wildmon 55, VENONAT
-	wildmon 58, VENOMOTH
-	wildmon 56, RHYHORN
-	wildmon 59, TAUROS, TAUROS_PALDEAN_FIRE_FORM
-	wildmon 59, PINSIR
-	wildmon 60, RHYDON
-	wildmon 60, CHANSEY
+	wildmon 30, DRAGONAIR
+	wildmon 30, CROBAT
+	wildmon 30, STEELIX
+	wildmon 30, KINGDRA
+	wildmon 30, SCIZOR
+	wildmon 30, CLODSIRE
+	wildmon 30, SYLVEON
 	; nite
-	wildmon 55, VENONAT
-	wildmon 58, VENOMOTH
-	wildmon 56, RHYHORN
-	wildmon 59, TAUROS, TAUROS_PALDEAN_FIRE_FORM
-	wildmon 59, PINSIR
-	wildmon 60, RHYDON
-	wildmon 60, KANGASKHAN
+	wildmon 30, DRAGONAIR
+	wildmon 30, CROBAT
+	wildmon 30, STEELIX
+	wildmon 30, KINGDRA
+	wildmon 30, SCIZOR
+	wildmon 30, CLODSIRE
+	wildmon 30, ANNIHILAPE
 	end_grass_wildmons
 
-	def_grass_wildmons SAFARI_ZONE_WEST
-	db 10 percent ; encounter rate
+def_grass_wildmons SAFARI_ZONE_WEST
+	db 14 percent ; encounter rate
 	; morn
-	wildmon 55, VENONAT
-	wildmon 58, NIDORINA
-	wildmon 58, NIDORINO
-	wildmon 59, TAUROS, TAUROS_PALDEAN_WATER_FORM
-	wildmon 59, VENOMOTH
-	wildmon 60, KANGASKHAN
-	wildmon 60, MAROWAK
+	wildmon 30, ONIX
+	wildmon 30, PHANPY
+	wildmon 30, SCYTHER
+	wildmon 30, POLIWHIRL
+	wildmon 30, FLAAFFY
+	wildmon 30, HOUNDOOM
+	wildmon 30, SKARMORY
 	; day
-	wildmon 55, VENONAT
-	wildmon 58, NIDORINA
-	wildmon 58, NIDORINO
-	wildmon 59, TAUROS, TAUROS_PALDEAN_WATER_FORM
-	wildmon 59, VENOMOTH
-	wildmon 60, KANGASKHAN
-	wildmon 60, MAROWAK
+	wildmon 30, ONIX
+	wildmon 30, PHANPY
+	wildmon 30, SCYTHER
+	wildmon 30, POLIWHIRL
+	wildmon 30, MAGNETON
+	wildmon 30, HOUNDOOM
+	wildmon 30, SKARMORY
 	; nite
-	wildmon 55, VENONAT
-	wildmon 58, NIDORINO
-	wildmon 58, NIDORINA
-	wildmon 59, TAUROS, TAUROS_PALDEAN_WATER_FORM
-	wildmon 59, VENOMOTH
-	wildmon 60, KANGASKHAN
-	wildmon 60, MAROWAK
+	wildmon 30, ONIX
+	wildmon 30, PHANPY
+	wildmon 30, SCYTHER
+	wildmon 30, MAGNETON
+	wildmon 30, HOUNDOOM
+	wildmon 30, UMBREON
+	wildmon 30, STEELIX
 	end_grass_wildmons
 
 	def_grass_wildmons SCARY_CAVE_1F

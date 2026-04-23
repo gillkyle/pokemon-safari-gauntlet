@@ -7,6 +7,8 @@ Script_OverworldWhiteout::
 	callasm OverworldWhiteoutFade
 
 Script_Whiteout:
+	readmem wSafariGauntletStep
+	ifequalfwd SAFARI_GAUNTLET_STEP_DRAFT, .safari_gauntlet
 	callasm LoseMoney
 	iffalsefwd .whiteout_text
 	readmem wBattlePlayerAction
@@ -38,6 +40,15 @@ Script_Whiteout:
 
 .bug_contest
 	jumpstd bugcontestresultswarp
+
+.safari_gauntlet
+	writetext SafariGauntletWhiteoutText
+	waitbutton
+	special Special_SafariGauntlet_EndRunLoss
+	special FadeOutPalettes
+	pause 20
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
+	endall
 
 OverworldWhiteoutFade:
 	farcall FadeOutPalettes
@@ -138,6 +149,14 @@ LoseMoney:
 	db 80
 	db 100
 	db 120
+
+SafariGauntletWhiteoutText:
+	text "Your draft team"
+	line "was defeated."
+
+	para "The Safari"
+	line "Gauntlet run ends."
+	done
 
 DetermineWildBattlePanic:
 	ld hl, wWildBattlePanic

@@ -46,7 +46,7 @@ VBlank::
 	ld hl, wRomChecksum
 	cp [hl]
 if !DEF(DEBUG)
-	jr nz, .checksum_crash
+	jr nz, .resync_checksum
 else
 	nop ; no-optimize nops
 	nop ; no-optimize nops
@@ -55,7 +55,7 @@ endc
 	inc hl ; wRomChecksum + 1
 	cp [hl]
 if !DEF(DEBUG)
-	jr nz, .checksum_crash
+	jr nz, .resync_checksum
 else
 	nop ; no-optimize nops
 	nop ; no-optimize nops
@@ -95,8 +95,14 @@ endc
 	pop hl
 	reti
 
-.checksum_crash
-	ld a, ERR_CHECKSUM_MISMATCH
+.resync_checksum
+	; mGBA can keep runtime state while a rapidly rebuilt ROM changes
+	; underneath it. Refresh the guard instead of trapping players in BSOD.
+	ld a, [RomHeaderChecksum]
+	ld [wRomChecksum], a
+	ld a, [RomHeaderChecksum + 1]
+	ld [wRomChecksum + 1], a
+	jr .skip_crash
 .crash
 	di
 	jmp Crash

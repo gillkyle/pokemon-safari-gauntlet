@@ -21,6 +21,9 @@ PlayersHouse2F_MapScriptHeader:
 	object_event  4,  4, SPRITE_DOLL_1, SPRITEMOVEDATA_STILL, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, Doll1, EVENT_PLAYERS_HOUSE_2F_DOLL_1
 	object_event  5,  4, SPRITE_DOLL_2, SPRITEMOVEDATA_STILL, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, Doll2, EVENT_PLAYERS_HOUSE_2F_DOLL_2
 	object_event  0,  1, SPRITE_BIG_DOLL, SPRITEMOVEDATA_BIGDOLL, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, BigDoll, EVENT_PLAYERS_HOUSE_2F_BIG_DOLL
+if DEF(DEBUG)
+	object_event  5,  2, SPRITE_RECEPTIONIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_SCRIPT, 0, DebugSafariGauntletWarp, -1
+endc
 
 PlayersHouse2FInitializeRoom:
 	special ToggleDecorationsVisibility
@@ -42,6 +45,17 @@ BigDoll:
 
 GameConsole:
 	describedecoration 4
+
+DebugSafariGauntletWarp:
+	opentext
+	writethistext
+		text "Debug warp:"
+		line "Safari Gauntlet."
+		done
+	waitbutton
+	closetext
+	warpfacing UP, BATTLE_FACTORY_1F, 8, 8
+	end
 
 PlayersHousePoster:
 	dw EVENT_PLAYERS_ROOM_POSTER

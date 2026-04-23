@@ -80,9 +80,10 @@ _NewGame_FinishSetup:
 	ld [wOvercastRandomDay], a
 	call NewGame_ClearTileMapEtc
 	call WarnVBA
-	farcall SetInitialOptions
-	call ProfElmSpeech
+	call SafariGauntlet_InitStandalonePlayer
 	call InitializeWorld
+	ld a, OW_DOWN
+	ld [wPlayerDirection], a
 	ld a, 1
 	ld [wPrevLandmark], a
 
@@ -92,6 +93,56 @@ _NewGame_FinishSetup:
 	ld a, MAPSETUP_WARP
 	ldh [hMapEntryMethod], a
 	jmp FinishContinueFunction
+
+SafariGauntlet_InitStandalonePlayer:
+	ld hl, .name
+	ld de, wPlayerName
+	ld bc, NAME_LENGTH
+	rst CopyBytes
+	ld a, 1 << RISINGBADGE
+	ld [wJohtoBadges], a
+	ret
+
+.name:
+	rawchar "Gauntlet@", 0, 0
+
+SafariGauntlet_FixContinuePosition:
+	ld a, [wMapGroup]
+	cp GROUP_BATTLE_FACTORY_1F
+	jr nz, .no_fix
+	ld a, [wMapNumber]
+	cp MAP_BATTLE_FACTORY_1F
+	jr nz, .no_fix
+	ld a, [wXCoord]
+	cp 12
+	jr z, .check_y
+	cp 13
+	jr nz, .no_fix
+
+.check_y
+	ld a, [wYCoord]
+	cp 6
+	jr z, .fix
+	cp 7
+	jr z, .fix
+	cp 8
+	jr z, .fix
+	cp 9
+	jr nz, .no_fix
+
+.fix
+	ld a, 11
+	ld [wXCoord], a
+	ld a, 8
+	ld [wYCoord], a
+	ld a, OW_DOWN
+	ld [wPlayerDirection], a
+	scf
+	ret
+
+.no_fix
+	and a
+	ret
 
 ResetWRAM_NotPlus:
 	xor a
@@ -169,8 +220,7 @@ ResetWRAM:
 	xor a
 	ld [wPartyCount], a
 	ld [wMonStatusFlags], a
-	inc a ; PLAYER_FEMALE
-	ld [wPlayerGender], a
+	ld [wPlayerGender], a ; PLAYER_MALE
 
 	ld hl, wNumItems
 	call _ResetWRAM_InitList
@@ -367,7 +417,12 @@ Continue:
 	ld a, [wSpawnAfterChampion]
 	cp SPAWN_LANCE
 	jr z, .SpawnAfterE4
+	call SafariGauntlet_FixContinuePosition
 	ld a, MAPSETUP_CONTINUE
+	jr nc, .GotMapEntryMethod
+	ld a, MAPSETUP_WARP
+
+.GotMapEntryMethod
 	ldh [hMapEntryMethod], a
 	jr FinishContinueFunction
 

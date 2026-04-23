@@ -280,25 +280,25 @@
 	wildmon  66, GYARADOS
 	end_water_wildmons
 
-	def_water_wildmons SAFARI_ZONE_HUB
-	db 6 percent ; encounter rate
-	wildmon  55, SLOWBRO
-	wildmon  55, GOLDUCK
-	wildmon  55, KINGLER
+def_water_wildmons SAFARI_ZONE_HUB
+	db 8 percent ; encounter rate
+	wildmon  30, POLIWAG
+	wildmon  30, GOLDEEN
+	wildmon  30, SLOWPOKE
 	end_water_wildmons
 
-	def_water_wildmons SAFARI_ZONE_EAST
-	db 6 percent ; encounter rate
-	wildmon  55, SLOWBRO
-	wildmon  55, GOLDUCK
-	wildmon  55, KINGLER
+def_water_wildmons SAFARI_ZONE_EAST
+	db 10 percent ; encounter rate
+	wildmon  30, WOOPER
+	wildmon  30, CHINCHOU
+	wildmon  30, HORSEA
 	end_water_wildmons
 
-	def_water_wildmons SAFARI_ZONE_NORTH
-	db 6 percent ; encounter rate
-	wildmon  55, SLOWBRO
-	wildmon  55, GOLDUCK
-	wildmon  40, DRAGONAIR
+def_water_wildmons SAFARI_ZONE_NORTH
+	db 12 percent ; encounter rate
+	wildmon  30, DRATINI
+	wildmon  30, CLODSIRE
+	wildmon  30, KINGDRA
 	end_water_wildmons
 
 	def_water_wildmons SEAFOAM_ISLANDS_B4F

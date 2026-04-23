@@ -1026,7 +1026,10 @@ wStartSecond:: db
 
 wRTC:: ds 4 ; in-game wall clock time at save
 
-	ds 4 ; unused
+wSafariGauntletRewardSpecies:: db
+wSafariGauntletRewardExtSpecies:: db
+wSafariGauntletRewardPending:: db
+	ds 1 ; unused
 
 wDST::
 ; bit 7: dst
@@ -1090,7 +1093,10 @@ wEnteredMapFromContinue:: db
 
 wTimeOfDayPal:: db
 
-	ds 4 ; unused
+wSafariGauntletBoss:: db
+wSafariGauntletDraftAttempts:: db
+wSafariGauntletStep:: db
+	ds 1 ; unused
 
 wTimeOfDayPalFlags:: db
 wTimeOfDayPalset:: db
@@ -1338,7 +1344,16 @@ wNeededMonPalLight:: db ; for SPRITE_MON_ICON two-nybble palettes, stores the li
 wNeededPalType:: db ; 0 = normal palette, non-zero = mon two-nybble palette
 wLoadedObjPalType:: db ; bitmask: bit N set = slot N is a mon palette, clear = normal palette
 
-	ds 47 ; unused
+wSafariGauntletRuns:: dw
+wSafariGauntletWins:: dw
+wSafariGauntletLosses:: dw
+wSafariGauntletCurrentStreak:: db
+wSafariGauntletBestStreak:: db
+wSafariGauntletSettings:: db
+wSafariGauntletKeepCount:: db
+wSafariGauntletKeepSpecies:: ds SAFARI_GAUNTLET_KEEP_CAPACITY
+wSafariGauntletKeepExtSpecies:: flag_array SAFARI_GAUNTLET_KEEP_CAPACITY
+	ds 3 ; unused
 
 wCandyAmounts::
 	table_width 1
@@ -1766,7 +1781,7 @@ wDexAreaLastMode:: db
 
 	; Used to align wDexAreaMons. Feel free to add more data here, just don't
 	; let wDexAreaMons be misaligned (an assert will tell you if you do).
-	ds 3
+	ds 2
 
 ALIGN 8
 wDexAreaMons::

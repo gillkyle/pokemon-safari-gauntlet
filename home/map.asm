@@ -887,6 +887,7 @@ MapTextbox::
 	ld a, 1
 	ldh [hOAMUpdate], a
 	call ApplyTilemap
+	call LoadStandardFont
 	pop hl
 	call PrintTextboxText
 	xor a

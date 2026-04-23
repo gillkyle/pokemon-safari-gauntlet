@@ -301,7 +301,15 @@ CheckTileEvent:
 	cp COLL_COAST_SAND
 	call z, RenderShamoutiCoastSand
 
-.no_tile_effects
+	.no_tile_effects
+	ld a, [wMapGroup]
+	cp GROUP_BATTLE_FACTORY_1F
+	jr nz, .not_safari_gauntlet_hub
+	ld a, [wMapNumber]
+	cp MAP_BATTLE_FACTORY_1F
+	jr z, .ok
+
+.not_safari_gauntlet_hub
 	call CheckStepCountEnabled
 	jr z, .step_count_disabled
 
@@ -987,6 +995,8 @@ CountStep:
 
 .skip_poison
 	call DoBikeStep
+	call DoSafariGauntletDraftStep
+	jr c, .doscript
 
 .done
 	xor a
@@ -1264,7 +1274,45 @@ WildBattleScript:
 	randomwildmon
 	startbattle
 	reloadmapafterbattle
+	special Special_SafariGauntlet_CheckDraftComplete
+	iffalsefwd .Done
+	special Special_SafariGauntlet_CheckMinParty
+	iffalsefwd .DraftFailed
+	opentext
+	writetext SafariGauntletWildDraftDoneText
+	waitbutton
+	closetext
+	special Special_SafariGauntlet_FinishDraft
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
+
+.Done:
 	end
+
+.DraftFailed
+	opentext
+	writetext SafariGauntletWildDraftFailedText
+	waitbutton
+	closetext
+	special Special_SafariGauntlet_EndRunLoss
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
+	end
+
+SafariGauntletWildDraftDoneText:
+	text "Draft complete."
+
+	para "Return to the hub"
+	line "and prepare for"
+	cont "Round 1."
+	done
+
+SafariGauntletWildDraftFailedText:
+	text "No Balls remain,"
+	line "and your team is"
+	cont "too small."
+
+	para "The Safari"
+	line "Gauntlet run ends."
+	done
 
 RoamingSuicuneBattleScript:
 	randomwildmon
@@ -1484,6 +1532,80 @@ DoBikeStep::
 .NoCall:
 	xor a
 	ret
+
+DoSafariGauntletDraftStep:
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_DRAFT
+	ret nz
+	ld a, [wMapGroup]
+	cp GROUP_SAFARI_ZONE_HUB
+	ret nz
+	ld a, [wMapNumber]
+	cp MAP_SAFARI_ZONE_WEST + 1
+	ret nc
+	ld hl, wSafariTimeRemaining
+	ld a, [hli]
+	or [hl]
+	ret z
+	ld hl, wSafariTimeRemaining + 1
+	ld a, [hl]
+	and a
+	jr nz, .dec_low
+	dec hl
+	dec [hl]
+	inc hl
+	ld [hl], $ff
+	jr .check_done
+
+.dec_low
+	dec [hl]
+
+.check_done
+	ld hl, wSafariTimeRemaining
+	ld a, [hli]
+	or [hl]
+	ret nz
+	ld a, BANK(SafariGauntletStepLimitScript)
+	ld hl, SafariGauntletStepLimitScript
+	call CallScript
+	scf
+	ret
+
+SafariGauntletStepLimitScript:
+	opentext
+	writetext SafariGauntletStepLimitText
+	waitbutton
+	special Special_SafariGauntlet_CheckMinParty
+	iffalsefwd .DraftFailed
+	closetext
+	special Special_SafariGauntlet_FinishDraft
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
+	end
+
+.DraftFailed
+	writetext SafariGauntletStepLimitFailedText
+	waitbutton
+	closetext
+	special Special_SafariGauntlet_EndRunLoss
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
+	end
+
+SafariGauntletStepLimitText:
+	text "Time's up!"
+
+	para "The Safari draft"
+	line "step limit was"
+	cont "reached."
+	done
+
+SafariGauntletStepLimitFailedText:
+	text "You need at least"
+	line "four #mon to"
+	cont "enter the ladder."
+
+	para "The run is marked"
+	line "as a loss."
+	done
 
 INCLUDE "engine/overworld/landmarks.asm"
 INCLUDE "engine/overworld/stone_table.asm"

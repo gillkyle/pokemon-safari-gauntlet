@@ -1,25 +1,27 @@
 BattleFactory1F_MapScriptHeader:
 	def_scene_scripts
-	scene_script BattleFactory1FContinueChallenge, SCENE_BATTLEFACTORY1F_CHECKSTATE
-	scene_const SCENE_BATTLEFACTORY1F_NOOP
 
 	def_callbacks
 
 	def_warp_events
-	warp_event 12, 11, VERMILION_CITY, 15
-	warp_event 13, 11, VERMILION_CITY, 16
-	warp_event 12,  1, BATTLE_FACTORY_HALLWAY, 1
 
 	def_coord_events
 
 	def_bg_events
+	bg_event 12,  7, BGEVENT_UP, SafariGauntletReceptionistScript
+	bg_event 13,  7, BGEVENT_UP, SafariGauntletReceptionistScript
 	bg_event 14,  5, BGEVENT_READ, BattleFactory1FRulesScript
-	bg_event 10,  5, BGEVENT_JUMPTEXT, BattleFactory1FStreakText
-	bg_event 25,  6, BGEVENT_READ, PokemonJournalThortonScript
+	bg_event 10,  5, BGEVENT_JUMPTEXT, SafariGauntletRecordsText
+	bg_event 25,  6, BGEVENT_JUMPTEXT, SafariGauntletKeepBoxText
 
 	def_object_events
-	object_event 12,  5, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, BattleFactory1FReceptionistScript, -1
+	object_event 12,  5, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletReceptionistScript, -1
+	object_event 10,  7, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, SafariGauntletSettingsScript, -1
 	pc_nurse_event  6,  6
+	object_event 12, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
+	object_event 13, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
+	object_event 11, 11, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_RED, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
+	object_event 14, 11, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 18,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_RED, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_1, -1
 	object_event 20,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_2, -1
 	object_event 22,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_3, -1
@@ -27,115 +29,36 @@ BattleFactory1F_MapScriptHeader:
 	object_const_def
 	const BATTLEFACTORY1F_RECEPTIONIST
 
-BattleFactory1FContinueChallenge:
-; Triggers (usefully) if we're in an ongoing Battle Factory run.
-	; Only trigger this once.
-	setscene SCENE_BATTLEFACTORY1F_NOOP
-
-	; Check current battle status to see if we need to resume or reset winstreak
-	special Special_BattleTower_GetChallengeState
-	ifequalfwd BATTLETOWER_CHALLENGE_IN_PROGRESS, .LeftWithoutSaving
-	ifequalfwd BATTLETOWER_SAVED_AND_LEFT, .ResumeChallenge
-	ifequalfwd BATTLETOWER_LOST_CHALLENGE, .LostChallenge
-	ifequalfwd BATTLETOWER_WON_CHALLENGE, .WonChallenge
-	end
-
-.ResumeChallenge:
-	; We saved in-between rounds. Resume Battle Factory challenge.
-	opentext
-	writethistext
-		text "We've been waiting"
-		line "for you."
-		prompt
-
-	sdefer Script_ReturnToRentalChallenge
-	end
-
-.LeftWithoutSaving:
-	; The player reset the game in the middle of a battle.
-	; This counts as a battle loss, and will reset the winstreak.
-	sdefer .LeftWithoutSaving2
-	end
-.LeftWithoutSaving2:
-	opentext
-	writethistext
-		text "Excuse me!"
-		line "You didn't save"
-
-		para "before exiting"
-		line "the Battle Room."
-
-		para "I'm awfully sorry,"
-		line "but your challenge"
-
-		para "will be declared"
-		line "invalid."
-		done
-	waitbutton
-	sjumpfwd Script_CommitBattleFactoryResult
-
-.LostChallenge:
-	opentext
-	sdefer Script_CommitBattleFactoryResult
-	end
-
-.WonChallenge:
-	sdefer .WonChallenge2
-	end
-.WonChallenge2:
-	opentext
-	writethistext
-		text "Congratulations!"
-
-		para "You've beaten all"
-		line "the trainers!"
-
-		para "For that, you get"
-		line "this great prize!"
-		prompt
-	verbosegiveitem MINT_LEAF
-	; fallthrough
-Script_CommitBattleFactoryResult:
-	special Special_BattleTower_CommitChallengeResult
-	iffalsefwd .WeHopeToServeYouAgain
-	setevent EVENT_BEAT_THORTON
-.WeHopeToServeYouAgain:
-	writethistext
-		text "We hope to serve"
-		line "you again."
-		done
-	waitbutton
-	endtext
-
 BattleFactory1FRulesScript:
-	opentext
-	writethistext
-		text "Battle Factory"
-		line "rules are written"
-		cont "here."
+	jumpthistext
+		text "Safari Gauntlet"
+		line "rules:"
 
-		para "Read the rules?"
-		done
-	yesorno
-	iffalse_endtext
-	jumpthisopenedtext
-		text "You are given six"
-		line "rental #mon."
+		para "Start with the"
+		line "counter guide."
 
-		para "Three #mon may"
-		line "enter battles."
+		para "Draft Lv.30"
+		line "#mon in normal"
+		cont "wild battles."
 
-		para "All three must be"
-		line "different."
+		para "You may catch up"
+		line "to six #mon."
 
-		para "The items they"
-		line "hold must also be"
-		cont "different."
+		para "The field has a"
+		line "500-step limit."
 
-		para "After winning a"
-		line "battle, you may"
-		cont "trade a #mon"
-		cont "with the opponent."
+		para "Common #mon are"
+		line "near the start,"
+		cont "rarer ones live"
+		cont "deeper inside."
+
+		para "Then fight four"
+		line "trainers and a"
+		cont "Gym Leader."
+
+		para "Win to keep one"
+		line "#mon in the"
+		cont "Keep Box."
 		done
 
 BattleFactory1FStreakText:
@@ -149,148 +72,967 @@ BattleFactory1FStreakText:
 	text_decimal wBattleFactorySwapCount, 1, 2
 	done
 
-BattleFactory1FReceptionistScript:
+SafariGauntletCounterStartScript:
+	applyonemovement PLAYER, turn_head_up
+	sjumpfwd SafariGauntletReceptionistScript
+
+SafariGauntletReceptionistScript:
+	readmem wSafariGauntletStep
+	ifequal SAFARI_GAUNTLET_STEP_DRAFT, .ReturnToDraft
+	ifequal SAFARI_GAUNTLET_STEP_ROUND1, .Round1Ready
+	ifequal SAFARI_GAUNTLET_STEP_ROUND2, .Round2Ready
+	ifequal SAFARI_GAUNTLET_STEP_ROUND3, .Round3Ready
+	ifequal SAFARI_GAUNTLET_STEP_ROUND4, .Round4Ready
+	ifequal SAFARI_GAUNTLET_STEP_BOSS, .BossReady
 	opentext
-	writethistext
-		text "Battle Factory"
-		line "welcomes you!"
-
-		para "I can show you to"
-		line "the Battle Floor."
-		done
-	promptbutton
-	checkevent EVENT_BATTLE_FACTORY_INTRO
-	iftruefwd .BattleFactoryMenu
-
-	; only ask once, so set the flag regardless
-	setevent EVENT_BATTLE_FACTORY_INTRO
-	writethistext
-		text "Would you like to"
-		line "hear about this"
-		cont "facility?"
-		done
+	writetext SafariGauntletIntroText
 	yesorno
-	iffalsefwd .BattleFactoryMenu
+	iffalse_jumpopenedtext SafariGauntletMaybeLaterText
+	writetext SafariGauntletSaveText
+	waitbutton
+	special Special_SafariGauntlet_BeginRun
+	random 4
+	writemem wSafariGauntletBoss
+	special Special_SafariGauntlet_GetDifficulty
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .CasualSupplies
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .HardSupplies
+	givekeyitem SUPER_ROD
+	giveitem MASTER_BALL, 1
+	giveitem POKE_BALL, 20
+	giveitem GREAT_BALL, 15
+	giveitem ULTRA_BALL, 10
+	giveitem SUPER_POTION, 5
+	giveitem HYPER_POTION, 3
+	giveitem FULL_HEAL, 2
+	giveitem REVIVE, 1
+	giveitem RARE_CANDY, 10
+	giveitem THUNDERSTONE, 1
+	giveitem FIRE_STONE, 1
+	giveitem WATER_STONE, 1
+	giveitem LEAF_STONE, 1
+	giveitem ICE_STONE, 1
+	writetext SafariGauntletStandardSuppliesText
+	sjumpfwd .AfterSupplies
 
-.Explanation:
-	writethistext
-		text "Battle Factory is"
-		line "a facility where"
-		cont "you battle using"
-		cont "rental #mon."
+.CasualSupplies
+	givekeyitem SUPER_ROD
+	giveitem MASTER_BALL, 1
+	giveitem POKE_BALL, 25
+	giveitem GREAT_BALL, 20
+	giveitem ULTRA_BALL, 15
+	giveitem SUPER_POTION, 7
+	giveitem HYPER_POTION, 5
+	giveitem FULL_HEAL, 4
+	giveitem REVIVE, 2
+	giveitem RARE_CANDY, 10
+	giveitem THUNDERSTONE, 1
+	giveitem FIRE_STONE, 1
+	giveitem WATER_STONE, 1
+	giveitem LEAF_STONE, 1
+	giveitem ICE_STONE, 1
+	writetext SafariGauntletCasualSuppliesText
+	sjumpfwd .AfterSupplies
 
-		para "Countless #mon"
-		line "trainers gather"
+.HardSupplies
+	givekeyitem SUPER_ROD
+	giveitem MASTER_BALL, 1
+	giveitem POKE_BALL, 15
+	giveitem GREAT_BALL, 12
+	giveitem ULTRA_BALL, 8
+	giveitem SUPER_POTION, 3
+	giveitem HYPER_POTION, 2
+	giveitem FULL_HEAL, 1
+	giveitem RARE_CANDY, 6
+	giveitem THUNDERSTONE, 1
+	giveitem FIRE_STONE, 1
+	giveitem WATER_STONE, 1
+	giveitem LEAF_STONE, 1
+	giveitem ICE_STONE, 1
+	writetext SafariGauntletHardSuppliesText
 
-		para "from all over to"
-		line "hold battles on"
-		cont "the Battle Floor."
+.AfterSupplies
+	waitbutton
+	special Special_SafariGauntlet_GetBossReveal
+	iffalsefwd .BossHidden
+	readmem wSafariGauntletBoss
+	ifequalfwd SAFARI_GAUNTLET_BOSS_CHUCK, .RevealChuck
+	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .RevealJasmine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .RevealPryce
+	writetext SafariGauntletRevealClairText
+	sjumpfwd .StartDraft
 
-		para "Each challenge"
-		line "has 7 trainers."
+.RevealChuck
+	writetext SafariGauntletRevealChuckText
+	sjumpfwd .StartDraft
 
-		para "Beat them all to"
-		line "get Battle Points."
+.RevealJasmine
+	writetext SafariGauntletRevealJasmineText
+	sjumpfwd .StartDraft
 
-		para "To interrupt a"
-		line "session, you must"
+.RevealPryce
+	writetext SafariGauntletRevealPryceText
+	sjumpfwd .StartDraft
 
-		para "save. If not, you"
-		line "won't be able to"
+.BossHidden
+	writetext SafariGauntletRevealHiddenText
 
-		para "resume your Floor"
-		line "challenge."
-		prompt
-	; fallthrough
-.BattleFactoryMenu:
-	; Setscene here in case the player aborted a quicksave prompted by challenge
-	setscene SCENE_BATTLEFACTORY1F_NOOP
-	writethistext
-		text "Want to head onto"
-		line "the Battle Floor?"
-		done
-	loadmenu MenuDataHeader_BattleInfoCancel
-	verticalmenu
-	closewindow
-	ifequalfwd $1, .Challenge
-	ifequal $2, .Explanation
-	writethistext
-		text "We hope to serve"
-		line "you again."
-		prompt
-	endtext
-
-.Challenge:
-	writethistext
-		text "Before entering"
-		line "the Battle Floor,"
-
-		para "your progress will"
-		line "be saved."
-		done
-	yesorno
-	iffalse .BattleFactoryMenu
-	; Done here to ensure it's saved in case the player resets later.
-	; The scene script running after the player saves but before the
-	; challenge starts is harmless since there's no challenge prepared.
-	setscene SCENE_BATTLEFACTORY1F_CHECKSTATE
-	special Special_TryQuickSave
-	iffalse .BattleFactoryMenu
-
-	; Set this early in case the player leaves before picking their team.
-	; This prevents them from re-rolling without forfeiting a streak.
-	setval BATTLETOWER_CHALLENGE_IN_PROGRESS
-	special Special_BattleTower_SetChallengeState
-	special Special_BattleTower_SetupRentalMode
-
-	; Initializes opponent trainers
-	special Special_BattleTower_BeginChallenge
-	; fallthrough
-Script_ReturnToRentalChallenge:
-	; From this point onwards, resetting the game should count as a streak loss
-	setscene SCENE_BATTLEFACTORY1F_CHECKSTATE
-	setval BATTLETOWER_CHALLENGE_IN_PROGRESS
-	special Special_BattleTower_SetChallengeState
-
-	; Everything ready to go for challenge start
-	writethistext
-		text "Right this way to"
-		line "the Battle Floor."
-		done
+.StartDraft
+	writetext SafariGauntletDraftFieldText
 	waitbutton
 	closetext
-
-	follow BATTLEFACTORY1F_RECEPTIONIST, PLAYER
-	applymovement BATTLEFACTORY1F_RECEPTIONIST, .WalkToHallway
-	stopfollow
-	special Special_BattleTower_MaxVolume
-	warpsound
-	disappear BATTLEFACTORY1F_RECEPTIONIST
-	applyonemovement PLAYER, step_up
-	warpcheck
+	blackoutmod BATTLE_FACTORY_1F
+	wildon
+	warpfacing UP, SAFARI_ZONE_HUB, 16, 25
 	end
 
-.WalkToHallway:
-	step_up
-	step_up
-	step_up
-	step_up
-	step_end
+.ReturnToDraft
+	opentext
+	writetext SafariGauntletReturnToDraftText
+	waitbutton
+	closetext
+	blackoutmod BATTLE_FACTORY_1F
+	wildon
+	warpfacing UP, SAFARI_ZONE_HUB, 16, 25
+	end
 
-PokemonJournalThortonScript:
-	setflag ENGINE_READ_THORTON_JOURNAL
-	jumpthistext
+.Round1Ready
+	opentext
+	writetext SafariGauntletRound1ReadyText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletPrepLaterText
+	closetext
+	scall SafariGauntletRound1
+	iftrue SafariGauntletDefeat
+	loadmem wSafariGauntletStep, SAFARI_GAUNTLET_STEP_ROUND2
+	jumptextfaceplayer SafariGauntletBetweenRoundsText
 
-	text "#mon Journal"
+.Round2Ready
+	opentext
+	writetext SafariGauntletRound2ReadyText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletPrepLaterText
+	closetext
+	scall SafariGauntletRound2
+	iftrue SafariGauntletDefeat
+	loadmem wSafariGauntletStep, SAFARI_GAUNTLET_STEP_ROUND3
+	jumptextfaceplayer SafariGauntletBetweenRoundsText
 
-	para "Special Feature:"
-	line "Factory Head"
-	cont "Thorton!"
+.Round3Ready
+	opentext
+	writetext SafariGauntletRound3ReadyText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletPrepLaterText
+	closetext
+	scall SafariGauntletRound3
+	iftrue SafariGauntletDefeat
+	loadmem wSafariGauntletStep, SAFARI_GAUNTLET_STEP_ROUND4
+	jumptextfaceplayer SafariGauntletBetweenRoundsText
 
-	para "Thorton is said to"
-	line "only believe in"
+.Round4Ready
+	opentext
+	writetext SafariGauntletRound4ReadyText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletPrepLaterText
+	closetext
+	scall SafariGauntletRound4
+	iftrue SafariGauntletDefeat
+	loadmem wSafariGauntletStep, SAFARI_GAUNTLET_STEP_BOSS
+	jumptextfaceplayer SafariGauntletBossUnlockedText
 
-	para "what he can prove"
-	line "numerically with"
-	cont "his inventions."
+.BossReady
+	opentext
+	writetext SafariGauntletBossReadyText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletPrepLaterText
+	special Special_SafariGauntlet_GetDifficulty
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .StartBoss
+	writetext SafariGauntletBossHealText
+	waitbutton
+	closetext
+	special HealParty
+	special Special_SafariGauntlet_ClampPartyHP
+	sjumpfwd .DoBoss
+
+.StartBoss
+	closetext
+
+.DoBoss
+	scall SafariGauntletBossBattle
+	iftrue SafariGauntletDefeat
+	sjump SafariGauntletVictory
+
+SafariGauntletRound1:
+	showtext SafariGauntletRound1Text
+	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
+	random 3
+	ifequalfwd 0, .Quentin
+	ifequalfwd 1, .Todd4
+	loadtrainer FISHER, RALPH4
+	sjumpfwd .Battle
+
+.Quentin
+	loadtrainer CAMPER, QUENTIN
+	sjumpfwd .Battle
+
+.Todd4
+	loadtrainer CAMPER, TODD4
+
+.Battle
+	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	iftruefwd .Lost
+	reloadmapafterbattle
+	special Special_SafariGauntlet_ClampPartyHP
+	givebp SAFARI_GAUNTLET_ROUND_BP
+	showtext SafariGauntletRoundBPText
+	setval FALSE
+	end
+
+.Lost
+	special Special_SafariGauntlet_EndRunLoss
+	reloadmapafterbattle
+	setval TRUE
+	end
+
+SafariGauntletRound2:
+	showtext SafariGauntletRound2Text
+	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
+	random 3
+	ifequalfwd 0, .Tully2
+	ifequalfwd 1, .Wilton1
+	loadtrainer PSYCHIC_T, PHIL
+	sjumpfwd .Battle
+
+.Tully2
+	loadtrainer FISHER, TULLY2
+	sjumpfwd .Battle
+
+.Wilton1
+	loadtrainer FISHER, WILTON1
+
+.Battle
+	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	iftruefwd .Lost
+	reloadmapafterbattle
+	special Special_SafariGauntlet_ClampPartyHP
+	givebp SAFARI_GAUNTLET_ROUND_BP
+	showtext SafariGauntletRoundBPText
+	setval FALSE
+	end
+
+.Lost
+	special Special_SafariGauntlet_EndRunLoss
+	reloadmapafterbattle
+	setval TRUE
+	end
+
+SafariGauntletRound3:
+	showtext SafariGauntletRound3Text
+	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
+	random 3
+	ifequalfwd 0, .Gilbert
+	ifequalfwd 1, .Nozomi
+	loadtrainer FISHER, WILTON2
+	sjumpfwd .Battle
+
+.Gilbert
+	loadtrainer PSYCHIC_T, GILBERT
+	sjumpfwd .Battle
+
+.Nozomi
+	loadtrainer BATTLE_GIRL, NOZOMI
+
+.Battle
+	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	iftruefwd .Lost
+	reloadmapafterbattle
+	special Special_SafariGauntlet_ClampPartyHP
+	givebp SAFARI_GAUNTLET_ROUND_BP
+	showtext SafariGauntletRoundBPText
+	setval FALSE
+	end
+
+.Lost
+	special Special_SafariGauntlet_EndRunLoss
+	reloadmapafterbattle
+	setval TRUE
+	end
+
+SafariGauntletRound4:
+	showtext SafariGauntletRound4Text
+	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
+	random 3
+	ifequalfwd 0, .Ronda
+	ifequalfwd 1, .Wilton3
+	loadtrainer FISHER, TULLY3
+	sjumpfwd .Battle
+
+.Ronda
+	loadtrainer BATTLE_GIRL, RONDA
+	sjumpfwd .Battle
+
+.Wilton3
+	loadtrainer FISHER, WILTON3
+
+.Battle
+	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	iftruefwd .Lost
+	reloadmapafterbattle
+	special Special_SafariGauntlet_ClampPartyHP
+	givebp SAFARI_GAUNTLET_ROUND_BP
+	showtext SafariGauntletRoundBPText
+	setval FALSE
+	end
+
+.Lost
+	special Special_SafariGauntlet_EndRunLoss
+	reloadmapafterbattle
+	setval TRUE
+	end
+
+SafariGauntletBossBattle:
+	readmem wSafariGauntletBoss
+	ifequalfwd SAFARI_GAUNTLET_BOSS_CHUCK, .Chuck
+	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .Jasmine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .Pryce
+	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
+	loadtrainer CLAIR, 1
+	sjumpfwd .Battle
+
+.Chuck
+	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
+	loadtrainer CHUCK, 1
+	sjumpfwd .Battle
+
+.Jasmine
+	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
+	loadtrainer JASMINE, 1
+	sjumpfwd .Battle
+
+.Pryce
+	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
+	loadtrainer PRYCE, 1
+
+.Battle
+	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
+	startbattle
+	iftruefwd .Lost
+	reloadmapafterbattle
+	special Special_SafariGauntlet_ClampPartyHP
+	givebp SAFARI_GAUNTLET_BOSS_BP
+	showtext SafariGauntletBossBPText
+	setval FALSE
+	end
+
+.Lost
+	special Special_SafariGauntlet_EndRunLoss
+	reloadmapafterbattle
+	setval TRUE
+	end
+
+SafariGauntletDraftFailed:
+	special Special_SafariGauntlet_EndRunLoss
+	jumptextfaceplayer SafariGauntletDraftFailedText
+
+SafariGauntletDefeat:
+	jumptextfaceplayer SafariGauntletDefeatText
+
+SafariGauntletVictory:
+	opentext
+	writetext SafariGauntletVictoryText
+	waitbutton
+	writetext SafariGauntletKeepPromptText
+	waitbutton
+	closetext
+	special Special_SafariGauntlet_ChooseKeepMon
+	special Special_SafariGauntlet_EndRunWin
+	jumptextfaceplayer SafariGauntletReturnedText
+
+SafariGauntletSettingsScript:
+	faceplayer
+	opentext
+	writetext SafariGauntletSettingsHeaderText
+	promptbutton
+	special Special_SafariGauntlet_GetDexMode
+	iftruefwd .National
+	writetext SafariGauntletSettingsJohtoText
+	sjumpfwd .AskToggle
+
+.National
+	writetext SafariGauntletSettingsNationalText
+.AskToggle
+	yesorno
+	iffalsefwd .CarryIn
+	special Special_SafariGauntlet_ToggleDexMode
+	iftruefwd .SetNational
+	writetext SafariGauntletSetJohtoText
+	sjumpfwd .AfterDex
+
+.SetNational
+	writetext SafariGauntletSetNationalText
+.AfterDex
+	promptbutton
+
+.CarryIn
+	special Special_SafariGauntlet_GetCarryIn
+	iftruefwd .CarryEnabled
+	writetext SafariGauntletCarryOffText
+	sjumpfwd .AskCarry
+
+.CarryEnabled
+	writetext SafariGauntletCarryOnText
+.AskCarry
+	yesorno
+	iffalsefwd .BossReveal
+	special Special_SafariGauntlet_ToggleCarryIn
+	iftruefwd .CarryNowOn
+	writetext SafariGauntletCarrySetOffText
+	sjumpfwd .AfterCarry
+
+.CarryNowOn
+	writetext SafariGauntletCarrySetOnText
+.AfterCarry
+	promptbutton
+
+.BossReveal
+	special Special_SafariGauntlet_GetBossReveal
+	iftruefwd .RevealEnabled
+	writetext SafariGauntletBossRevealOffText
+	sjumpfwd .AskReveal
+
+.RevealEnabled
+	writetext SafariGauntletBossRevealOnText
+.AskReveal
+	yesorno
+	iffalsefwd .Difficulty
+	special Special_SafariGauntlet_ToggleBossReveal
+	iftruefwd .RevealNowOn
+	writetext SafariGauntletBossRevealSetOffText
+	sjumpfwd .AfterReveal
+
+.RevealNowOn
+	writetext SafariGauntletBossRevealSetOnText
+.AfterReveal
+	promptbutton
+
+.Difficulty
+	special Special_SafariGauntlet_GetDifficulty
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .DifficultyCasual
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .DifficultyHard
+	writetext SafariGauntletDifficultyStandardText
+	sjumpfwd .AskDifficulty
+
+.DifficultyCasual
+	writetext SafariGauntletDifficultyCasualText
+	sjumpfwd .AskDifficulty
+
+.DifficultyHard
+	writetext SafariGauntletDifficultyHardText
+.AskDifficulty
+	yesorno
+	iffalsefwd .SaveSettings
+	special Special_SafariGauntlet_CycleDifficulty
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .DifficultySetCasual
+	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .DifficultySetHard
+	writetext SafariGauntletDifficultySetStandardText
+	sjumpfwd .Done
+
+.DifficultySetCasual
+	writetext SafariGauntletDifficultySetCasualText
+	sjumpfwd .Done
+
+.DifficultySetHard
+	writetext SafariGauntletDifficultySetHardText
+.Done
+	promptbutton
+	sjumpfwd .SaveSettings
+
+.SaveSettings
+	special Special_SafariGauntlet_SaveSettings
+	jumpopenedtext SafariGauntletSettingsSavedText
+
+SafariGauntletRecordsText:
+	text "Safari Gauntlet"
+	line "Runs: "
+	text_decimal wSafariGauntletRuns, 2, 5
+	text " Wins: "
+	text_decimal wSafariGauntletWins, 2, 5
+
+	para "Losses: "
+	text_decimal wSafariGauntletLosses, 2, 5
+	line "Streak: "
+	text_decimal wSafariGauntletCurrentStreak, 1, 3
+	text " Best: "
+	text_decimal wSafariGauntletBestStreak, 1, 3
+
+	para "BP: "
+	text_decimal wBattlePoints, 2, 5
+	done
+
+SafariGauntletKeepBoxText:
+	text "Safari Keep Box"
+	line "Stored: "
+	text_decimal wSafariGauntletKeepCount, 1, 2
+	text "/30 #mon"
+
+	para "Win the gauntlet"
+	line "to keep one."
+
+	para "Spend BP at the"
+	line "exchange counters"
+	cont "for your team."
+	done
+
+SafariGauntletExitBlockedText:
+	text "The Safari"
+	line "Gauntlet is"
+	cont "self-contained."
+
+	para "Please stay inside"
+	line "between runs."
+	done
+
+SafariGauntletIntroText:
+	text "Safari Gauntlet!"
+
+	para "Catch a Lv.30"
+	line "draft team, then"
+	cont "clear five battles."
+
+	para "Win, and one"
+	line "#mon joins your"
+	cont "Keep Box."
+
+	para "Begin a run?"
+	done
+
+SafariGauntletSaveText:
+	text "I'll save first."
+
+	para "Your party and bag"
+	line "come back after"
+	cont "the run."
+
+	para "One moment."
+	done
+
+SafariGauntletMaybeLaterText:
+	text "The Gauntlet will"
+	line "be here."
+	done
+
+SafariGauntletStandardSuppliesText:
+	text "Run supplies are"
+	line "loaded."
+
+	para "You have a Master"
+	line "Ball, plenty of"
+	cont "other Balls,"
+	cont "healing items,"
+	cont "ten Candies,"
+	cont "Eevee stones,"
+	cont "and a Super Rod."
+	prompt
+
+SafariGauntletCasualSuppliesText:
+	text "Casual supplies"
+	line "are loaded."
+
+	para "You have a Master"
+	line "Ball, extra"
+	cont "Balls and healing,"
+	cont "ten Candies,"
+	cont "Eevee stones,"
+	cont "and a Super Rod."
+	prompt
+
+SafariGauntletHardSuppliesText:
+	text "Hard supplies are"
+	line "loaded."
+
+	para "You still get one"
+	line "Master Ball, but"
+	cont "fewer supplies"
+	cont "six Candies,"
+	cont "Eevee stones,"
+	cont "and a Super Rod."
+	prompt
+
+SafariGauntletRevealChuckText:
+	text "Boss reveal:"
+	line "Chuck waits at"
+	cont "the finish."
+	prompt
+
+SafariGauntletRevealJasmineText:
+	text "Boss reveal:"
+	line "Jasmine waits at"
+	cont "the finish."
+	prompt
+
+SafariGauntletRevealPryceText:
+	text "Boss reveal:"
+	line "Pryce waits at"
+	cont "the finish."
+	prompt
+
+SafariGauntletRevealClairText:
+	text "Boss reveal:"
+	line "Clair waits at"
+	cont "the finish."
+	prompt
+
+SafariGauntletRevealHiddenText:
+	text "Boss reveal is"
+	line "hidden this run."
+	prompt
+
+SafariGauntletDraftFieldText:
+	text "Enter the Safari"
+	line "draft field."
+
+	para "You have 500"
+	line "field steps."
+
+	para "Battle and catch"
+	line "#mon normally."
+
+	para "The draft ends"
+	line "when your party"
+	cont "fills or your"
+	cont "Balls or steps"
+	cont "run out."
+	prompt
+
+SafariGauntletReturnToDraftText:
+	text "Your draft is"
+	line "still open."
+
+	para "I'll send you back"
+	line "to the field."
+	done
+
+SafariGauntletDraftEncounterText:
+	text "A draft encounter"
+	line "appears!"
+	done
+
+SafariGauntletPrepText:
+	text "Draft complete."
+
+	para "Use your bag now,"
+	line "then the ladder"
+	cont "begins."
+	done
+
+SafariGauntletRound1ReadyText:
+	text "Round 1 is ready."
+
+	para "Heal, use items,"
+	line "or rearrange your"
+	cont "party first."
+
+	para "Start the match?"
+	done
+
+SafariGauntletRound2ReadyText:
+	text "Round 2 is ready."
+
+	para "You may heal or"
+	line "reorder before"
+	cont "continuing."
+
+	para "Start the match?"
+	done
+
+SafariGauntletRound3ReadyText:
+	text "Round 3 is ready."
+
+	para "Take your time in"
+	line "the hub."
+
+	para "Start the match?"
+	done
+
+SafariGauntletRound4ReadyText:
+	text "Round 4 is ready."
+
+	para "Use your supplies"
+	line "before entering."
+
+	para "Start the match?"
+	done
+
+SafariGauntletBossReadyText:
+	text "The Gym Leader is"
+	line "waiting."
+
+	para "This is the final"
+	line "battle."
+
+	para "Enter?"
+	done
+
+SafariGauntletPrepLaterText:
+	text "Prepare as long as"
+	line "you need."
+	done
+
+SafariGauntletBetweenRoundsText:
+	text "Round cleared."
+
+	para "Heal, switch your"
+	line "lead, or use items"
+	cont "before the next"
+	cont "match."
+	done
+
+SafariGauntletBossUnlockedText:
+	text "The ladder is"
+	line "clear."
+
+	para "Prepare for the"
+	line "Gym Leader, then"
+	cont "talk to me."
+	done
+
+SafariGauntletRound1Text:
+	text "Round 1:"
+	line "Camper Quentin!"
+	done
+
+SafariGauntletRound2Text:
+	text "Round 2:"
+	line "Fisher Tully!"
+	done
+
+SafariGauntletRound3Text:
+	text "Round 3:"
+	line "Psychic Gilbert!"
+	done
+
+SafariGauntletRound4Text:
+	text "Round 4:"
+	line "Battle Girl Ronda!"
+	done
+
+SafariGauntletBossHealText:
+	text "Final gate."
+
+	para "Your team is fully"
+	line "healed before the"
+	cont "Gym Leader."
+	done
+
+SafariGauntletRoundBPText:
+	text "<PLAYER> earned"
+	line "2 BP!"
+	done
+
+SafariGauntletBossBPText:
+	text "<PLAYER> earned"
+	line "10 BP from the"
+	cont "Gym Leader!"
+	done
+
+SafariGauntletTrainerWinText:
+	text "Round cleared!"
+	done
+
+SafariGauntletTrainerLossText:
+	text "The run ends here!"
+	done
+
+SafariGauntletBossWinText:
+	text "Boss defeated!"
+	done
+
+SafariGauntletBossLossText:
+	text "The boss ends"
+	line "your run!"
+	done
+
+SafariGauntletDraftFailedText:
+	text "You need at least"
+	line "four #mon to"
+	cont "enter the ladder."
+
+	para "Run marked as a"
+	line "loss."
+	done
+
+SafariGauntletDefeatText:
+	text "Safari Gauntlet"
+	line "run failed."
+
+	para "Your party and bag"
+	line "were restored."
+	done
+
+SafariGauntletVictoryText:
+	text "Safari Gauntlet"
+	line "cleared!"
+
+	para "Choose one #mon"
+	line "from this team to"
+	cont "keep."
+	prompt
+
+SafariGauntletKeepPromptText:
+	text "Pick carefully."
+	line "It can carry into"
+	cont "future runs."
+	prompt
+
+SafariGauntletReturnedText:
+	text "Record saved."
+
+	para "Your original"
+	line "party and bag are"
+	cont "back."
+	done
+
+SafariGauntletSettingsJohtoText:
+	text "Mode: Johto."
+
+	para "Switch to National"
+	line "draft encounters?"
+	done
+
+SafariGauntletSettingsHeaderText:
+	text "Safari Gauntlet"
+	line "settings."
+
+	para "Changes are saved."
+	done
+
+SafariGauntletSettingsNationalText:
+	text "Mode: National."
+
+	para "Expanded #mon"
+	line "can appear in the"
+	cont "draft."
+
+	para "Switch to Johto"
+	line "draft encounters?"
+	done
+
+SafariGauntletSettingsUnchangedText:
+	text "Settings unchanged."
+	done
+
+SafariGauntletSetNationalText:
+	text "National draft"
+	line "mode selected."
+	done
+
+SafariGauntletSetJohtoText:
+	text "Johto draft mode"
+	line "selected."
+	done
+
+SafariGauntletCarryOnText:
+	text "Carry-in: On."
+
+	para "Toggle carry-in?"
+	done
+
+SafariGauntletCarryOffText:
+	text "Carry-in: Off."
+
+	para "Toggle carry-in?"
+	done
+
+SafariGauntletCarrySetOnText:
+	text "Carry-in #mon"
+	line "enabled."
+	done
+
+SafariGauntletCarrySetOffText:
+	text "Carry-in #mon"
+	line "disabled."
+	done
+
+SafariGauntletBossRevealOnText:
+	text "Boss reveal: On."
+
+	para "Toggle reveal?"
+	done
+
+SafariGauntletBossRevealOffText:
+	text "Boss reveal: Off."
+
+	para "Toggle reveal?"
+	done
+
+SafariGauntletBossRevealSetOnText:
+	text "Boss reveal"
+	line "enabled."
+	done
+
+SafariGauntletBossRevealSetOffText:
+	text "Boss reveal"
+	line "disabled."
+	done
+
+SafariGauntletDifficultyStandardText:
+	text "Difficulty:"
+	line "Standard."
+
+	para "Change difficulty?"
+	done
+
+SafariGauntletDifficultyCasualText:
+	text "Difficulty:"
+	line "Casual."
+
+	para "Change difficulty?"
+	done
+
+SafariGauntletDifficultyHardText:
+	text "Difficulty:"
+	line "Hard."
+
+	para "Change difficulty?"
+	done
+
+SafariGauntletDifficultySetStandardText:
+	text "Difficulty set"
+	line "to Standard."
+	done
+
+SafariGauntletDifficultySetCasualText:
+	text "Difficulty set"
+	line "to Casual."
+	done
+
+SafariGauntletDifficultySetHardText:
+	text "Difficulty set"
+	line "to Hard."
+	done
+
+SafariGauntletSettingsSavedText:
+	text "Settings saved."
+	done
+
+BattleFactory1FReceptionistScript:
+	jumptextfaceplayer SafariGauntletGuideText
+
+SafariGauntletGuideText:
+	text "This is the"
+	line "Safari Gauntlet."
+
+	para "Talk to the"
+	line "counter guide"
+	cont "to start."
+
+	para "Settings are"
+	line "changed by the"
+	cont "blue aide."
+
+	para "They stay saved"
+	line "for future runs."
 	done

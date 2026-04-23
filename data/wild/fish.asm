@@ -23,6 +23,7 @@ FishGroups:
 	fishgroup 60 percent, (60 + 3) percent, .Remoraid_Old,         .Remoraid_Good,         .Remoraid_Super
 	fishgroup 65 percent, (65 + 5) percent, .Hisuian_Qwilfish_Old, .Hisuian_Qwilfish_Good, .Hisuian_Qwilfish_Super
 	fishgroup 65 percent, (65 + 5) percent, .Staryu_Old,           .Staryu_Good,           .Staryu_Super
+	fishgroup 70 percent, (70 + 5) percent, .Gauntlet_Old,         .Gauntlet_Good,         .Gauntlet_Super
 	assert_table_length NUM_FISHGROUPS
 
 MACRO fishentry
@@ -122,6 +123,21 @@ ENDM
 	fishentry  70 percent,     DRATINI,    40
 	fishentry  90 percent + 1, MAGIKARP,   40
 	fishentry 100 percent,     DRAGONAIR,  40
+
+.Gauntlet_Old:
+	fishentry  70 percent + 1, POLIWAG,    30
+	fishentry  85 percent + 1, WOOPER,     30
+	fishentry 100 percent,     CHINCHOU,   30
+.Gauntlet_Good:
+	fishentry  35 percent,     POLIWAG,    30
+	fishentry  70 percent,     CHINCHOU,   30
+	fishentry  90 percent + 1, HORSEA,     30
+	fishentry 100 percent,     SLOWPOKE,   30
+.Gauntlet_Super:
+	fishentry  40 percent,     DRATINI,    30
+	fishentry  70 percent,     LANTURN,    30
+	fishentry  90 percent + 1, KINGDRA,    30
+	fishentry 100 percent,     CLODSIRE,   30
 
 .Qwilfish_Swarm_Old:
 	fishentry  70 percent + 1, MAGIKARP,   5

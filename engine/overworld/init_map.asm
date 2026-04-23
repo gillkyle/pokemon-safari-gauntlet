@@ -48,6 +48,10 @@ ReanchorBGMap_NoOAMUpdate::
 LoadFonts_NoOAMUpdate::
 	ldh a, [hOAMUpdate]
 	push af
+	ldh a, [rVBK]
+	push af
+	xor a
+	ldh [rVBK], a
 	ld a, $1
 	ldh [hOAMUpdate], a
 
@@ -57,6 +61,8 @@ LoadFonts_NoOAMUpdate::
 	call SafeUpdateSprites
 	call LoadStandardFont
 
+	pop af
+	ldh [rVBK], a
 	pop af
 	ldh [hOAMUpdate], a
 	ret

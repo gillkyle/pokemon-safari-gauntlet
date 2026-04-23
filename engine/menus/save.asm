@@ -721,7 +721,7 @@ VerifyGameVersion:
 	next1 "Save version:"
 	done
 
-SaveCurrentVersion:
+SaveCurrentVersion::
 ; Writes current save version into the save.
 	ld a, BANK(sSaveVersion)
 	call GetSRAMBank

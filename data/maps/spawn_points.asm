@@ -1,5 +1,5 @@
 MACRO spawn
-; map, y, x
+; map, x, y
 	map_id \1
 	db \2, \3
 ENDM
@@ -8,7 +8,7 @@ SpawnPoints:
 ; entries correspond to SPAWN_* constants
 	table_width 4
 
-	spawn PLAYERS_HOUSE_2F,            3,  3
+	spawn BATTLE_FACTORY_1F,          11,  8
 
 	spawn PALLET_TOWN,                 5,  6
 	spawn VIRIDIAN_CITY,              23, 26
