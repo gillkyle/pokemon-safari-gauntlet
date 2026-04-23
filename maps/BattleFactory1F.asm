@@ -898,6 +898,10 @@ SafariGauntletReturnedText:
 SafariGauntletSettingsJohtoText:
 	text "Mode: Johto."
 
+	para "Any Johto #mon"
+	line "can appear in"
+	cont "the draft."
+
 	para "Switch to National"
 	line "draft encounters?"
 	done
@@ -912,9 +916,9 @@ SafariGauntletSettingsHeaderText:
 SafariGauntletSettingsNationalText:
 	text "Mode: National."
 
-	para "Expanded #mon"
-	line "can appear in the"
-	cont "draft."
+	para "Any National"
+	line "#mon can"
+	cont "appear in draft."
 
 	para "Switch to Johto"
 	line "draft encounters?"

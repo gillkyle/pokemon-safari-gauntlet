@@ -246,6 +246,13 @@ endr
 	ld c, [hl]
 	ret
 
+DEF SAFARI_GAUNTLET_JOHTO_POOL_COUNT EQU 251
+DEF SAFARI_GAUNTLET_JOHTO_COMMON_END EQU 170
+DEF SAFARI_GAUNTLET_JOHTO_UNCOMMON_END EQU 230
+DEF SAFARI_GAUNTLET_NATIONAL_POOL_COUNT EQU NUM_POKEMON
+DEF SAFARI_GAUNTLET_NATIONAL_COMMON_END EQU 190
+DEF SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END EQU 260
+
 ChooseWildEncounter:
 	ld c, $ff
 _ChooseWildEncounter:
@@ -260,7 +267,14 @@ _ChooseWildEncounter:
 	jmp c, .startwildbattle
 	xor a ; BATTLETYPE_NORMAL
 	ld [wBattleType], a
+	push bc
+	call TrySafariGauntletWildEncounter
+	pop bc
+	jr nc, .normal_lookup
+	ld b, a
+	jp .loadwildmon
 
+.normal_lookup
 	inc hl ; skip map group
 	inc hl ; skip map number
 	inc hl ; skip encounter chance
@@ -438,6 +452,148 @@ _ChooseWildEncounter:
 
 .nowildbattle
 	ld a, 1
+	and a
+	ret
+
+TrySafariGauntletWildEncounter:
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_DRAFT
+	jp nz, .no_override
+	ld a, [wMapGroup]
+	cp GROUP_SAFARI_ZONE_HUB
+	jp nz, .no_override
+	ld a, [wMapNumber]
+	cp MAP_SAFARI_ZONE_WEST + 1
+	jp nc, .no_override
+
+	ld a, 100
+	call RandomRange
+	ld e, a
+	ld a, [wMapNumber]
+	cp MAP_SAFARI_ZONE_NORTH
+	jr z, .north_depth
+	cp MAP_SAFARI_ZONE_EAST
+	jr z, .mid_depth
+	cp MAP_SAFARI_ZONE_WEST
+	jr z, .mid_depth
+
+	; Hub: mostly common encounters, with very rare spawns occasionally appearing.
+	ld d, 0
+	ld a, e
+	cp 80
+	jr c, .pick_bucket
+	inc d
+	cp 97
+	jr c, .pick_bucket
+	inc d
+	jr .pick_bucket
+
+.mid_depth
+	ld d, 0
+	ld a, e
+	cp 58
+	jr c, .pick_bucket
+	inc d
+	cp 90
+	jr c, .pick_bucket
+	inc d
+	jr .pick_bucket
+
+.north_depth
+	ld d, 0
+	ld a, e
+	cp 35
+	jr c, .pick_bucket
+	inc d
+	cp 72
+	jr c, .pick_bucket
+	inc d
+
+.pick_bucket
+	ld a, [wSafariGauntletSettings]
+	bit SAFARI_GAUNTLET_SETTINGS_NATIONAL_F, a
+	jr z, .johto_pool
+
+.national_pool
+	ld a, d
+	and a
+	jr z, .national_common
+	dec a
+	jr z, .national_uncommon
+	ld hl, SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END
+	ld bc, SAFARI_GAUNTLET_NATIONAL_POOL_COUNT - SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END
+	jr .roll_index
+
+.national_common
+	ld hl, 0
+	ld bc, SAFARI_GAUNTLET_NATIONAL_COMMON_END
+	jr .roll_index
+
+.national_uncommon
+	ld hl, SAFARI_GAUNTLET_NATIONAL_COMMON_END
+	ld bc, SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END - SAFARI_GAUNTLET_NATIONAL_COMMON_END
+	jr .roll_index
+
+.johto_pool
+	ld a, d
+	and a
+	jr z, .johto_common
+	dec a
+	jr z, .johto_uncommon
+	ld hl, SAFARI_GAUNTLET_JOHTO_UNCOMMON_END
+	ld bc, SAFARI_GAUNTLET_JOHTO_POOL_COUNT - SAFARI_GAUNTLET_JOHTO_UNCOMMON_END
+	jr .roll_index
+
+.johto_common
+	ld hl, 0
+	ld bc, SAFARI_GAUNTLET_JOHTO_COMMON_END
+	jr .roll_index
+
+.johto_uncommon
+	ld hl, SAFARI_GAUNTLET_JOHTO_COMMON_END
+	ld bc, SAFARI_GAUNTLET_JOHTO_UNCOMMON_END - SAFARI_GAUNTLET_JOHTO_COMMON_END
+
+.roll_index
+	push hl
+	call RandomRange16
+	pop hl
+	add hl, bc ; encounter index in [0, pool_count)
+	ld b, h
+	ld c, l
+	inc bc ; convert to 1-based dex index
+	ld a, b
+	and a
+	jr nz, .extended_species_block
+	ld a, c
+	cp $ff
+	jr c, .plain_species
+	ld a, 1
+	ld [wCurSpecies], a
+	ld a, 1 << MON_EXTSPECIES_F
+	ld [wCurForm], a
+	jr .set_level
+
+.extended_species_block
+	ld a, c
+	add 2
+	ld [wCurSpecies], a
+	ld a, 1 << MON_EXTSPECIES_F
+	ld [wCurForm], a
+	jr .set_level
+
+.plain_species
+	ld [wCurSpecies], a
+	xor a
+	ld [wCurForm], a
+
+.set_level
+	ld a, 30
+	ld [wCurPartyLevel], a
+	ld a, [wCurSpecies]
+	scf
+	ret
+
+.no_override
 	and a
 	ret
 
