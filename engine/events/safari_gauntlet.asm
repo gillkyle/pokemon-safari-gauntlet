@@ -48,7 +48,7 @@ Special_SafariGauntlet_BeginRun:
 	ld [wCurForm], a
 
 .give_starter
-	ld a, 30
+	ld a, 35
 	ld [wCurPartyLevel], a
 	xor a
 	ld [wCurItem], a

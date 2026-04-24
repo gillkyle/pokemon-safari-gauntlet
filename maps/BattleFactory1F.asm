@@ -17,6 +17,7 @@ BattleFactory1F_MapScriptHeader:
 	def_object_events
 	object_event 12,  5, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletReceptionistScript, -1
 	object_event 10,  7, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, SafariGauntletSettingsScript, -1
+	object_event 16,  6, SPRITE_GRAMPS, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletMoveReminderScript, -1
 	pc_nurse_event  6,  6
 	object_event 12, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 13, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
@@ -104,8 +105,9 @@ SafariGauntletReceptionistScript:
 	giveitem SUPER_POTION, 5
 	giveitem HYPER_POTION, 3
 	giveitem FULL_HEAL, 2
+	giveitem SUPER_REPEL, 3
 	giveitem REVIVE, 1
-	giveitem RARE_CANDY, 10
+	giveitem RARE_CANDY, 12
 	giveitem THUNDERSTONE, 1
 	giveitem FIRE_STONE, 1
 	giveitem WATER_STONE, 1
@@ -123,8 +125,9 @@ SafariGauntletReceptionistScript:
 	giveitem SUPER_POTION, 7
 	giveitem HYPER_POTION, 5
 	giveitem FULL_HEAL, 4
+	giveitem SUPER_REPEL, 3
 	giveitem REVIVE, 2
-	giveitem RARE_CANDY, 10
+	giveitem RARE_CANDY, 12
 	giveitem THUNDERSTONE, 1
 	giveitem FIRE_STONE, 1
 	giveitem WATER_STONE, 1
@@ -142,7 +145,8 @@ SafariGauntletReceptionistScript:
 	giveitem SUPER_POTION, 3
 	giveitem HYPER_POTION, 2
 	giveitem FULL_HEAL, 1
-	giveitem RARE_CANDY, 6
+	giveitem SUPER_REPEL, 3
+	giveitem RARE_CANDY, 12
 	giveitem THUNDERSTONE, 1
 	giveitem FIRE_STONE, 1
 	giveitem WATER_STONE, 1
@@ -446,10 +450,25 @@ SafariGauntletVictory:
 	waitbutton
 	writetext SafariGauntletKeepPromptText
 	waitbutton
-	closetext
 	special Special_SafariGauntlet_ChooseKeepMon
 	special Special_SafariGauntlet_EndRunWin
-	jumptextfaceplayer SafariGauntletReturnedText
+	jumpopenedtext SafariGauntletReturnedText
+
+SafariGauntletMoveReminderScript:
+	faceplayer
+	opentext
+	writetext SafariGauntletMoveReminderIntroText
+	yesorno
+	iffalse_jumpopenedtext SafariGauntletMoveReminderLaterText
+	setval NO_MOVE
+	writetext SafariGauntletMoveReminderWhichMonText
+	waitbutton
+	special Special_MoveTutor
+	ifequalfwd $0, .Learned
+	jumpopenedtext SafariGauntletMoveReminderLaterText
+
+.Learned
+	jumpopenedtext SafariGauntletMoveReminderDoneText
 
 SafariGauntletSettingsScript:
 	faceplayer
@@ -632,7 +651,9 @@ SafariGauntletStandardSuppliesText:
 	line "Ball, plenty of"
 	cont "other Balls,"
 	cont "healing items,"
-	cont "ten Candies,"
+	cont "12 Candies,"
+	cont "3 Super"
+	cont "Repels,"
 	cont "Eevee stones,"
 	cont "and a Super Rod."
 	prompt
@@ -644,7 +665,9 @@ SafariGauntletCasualSuppliesText:
 	para "You have a Master"
 	line "Ball, extra"
 	cont "Balls and healing,"
-	cont "ten Candies,"
+	cont "12 Candies,"
+	cont "3 Super"
+	cont "Repels,"
 	cont "Eevee stones,"
 	cont "and a Super Rod."
 	prompt
@@ -656,10 +679,31 @@ SafariGauntletHardSuppliesText:
 	para "You still get one"
 	line "Master Ball, but"
 	cont "fewer supplies"
-	cont "six Candies,"
+	cont "12 Candies,"
+	cont "3 Super"
+	cont "Repels,"
 	cont "Eevee stones,"
 	cont "and a Super Rod."
 	prompt
+
+SafariGauntletMoveReminderIntroText:
+	text "Need old moves?"
+	line "I can help."
+
+	para "Use relearner?"
+	done
+
+SafariGauntletMoveReminderWhichMonText:
+	text "Pick a #mon."
+	done
+
+SafariGauntletMoveReminderLaterText:
+	text "Come back later."
+	done
+
+SafariGauntletMoveReminderDoneText:
+	text "Old move taught."
+	done
 
 SafariGauntletRevealChuckText:
 	text "Boss reveal:"
