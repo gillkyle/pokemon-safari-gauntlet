@@ -61,9 +61,9 @@ _TitleScreen:
 	ld a, 3
 	rst ByteFill
 
-; 'POLISHED CRYSTAL'
+; 'SAFARI GAUNTLET'
 	hlbgcoord 5, 9
-	ld bc, 11
+	ld bc, 11 ; length of subtitle text
 	ld a, 1
 	rst ByteFill
 
