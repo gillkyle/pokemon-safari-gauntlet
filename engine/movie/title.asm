@@ -72,9 +72,9 @@ _TitleScreen:
 	ld a, 6
 	call ByteFill
 
-; 'CRYSTAL VERSION'
+; 'SAFARI GAUNTLET'
 	hlbgcoord 5, 9
-	ld bc, 11 ; length of version text
+	ld bc, 11 ; length of subtitle text
 	ld a, 1
 	call ByteFill
 
