@@ -689,7 +689,11 @@ SafariGauntlet_SeedStarterPC:
 	pop hl
 	jr .next_species
 
+	; Two extra Eevees let players keep the starter Eevee intact and still
+	; experiment with Eeveelutions.
 .StarterPCSpecies:
+	db EEVEE
+	db EEVEE
 	db BULBASAUR
 	db CHARMANDER
 	db SQUIRTLE
@@ -845,8 +849,9 @@ SafariGauntlet_ClampPartyHP:
 SafariGauntlet_RestoreRunData:
 	farcall LoadPokemonData
 	call SafariGauntlet_ClearRunInventory
-	xor a
-	ld [wPartyCount], a
+	; Preserve the one Pokemon the player brought into the run. BeginRun saves
+	; the user's hub party before temporary Safari catches are added, so loading
+	; PokemonData is enough to discard run catches without regenerating Eevee.
 	ret
 
 SafariGauntlet_ClearRunInventory:

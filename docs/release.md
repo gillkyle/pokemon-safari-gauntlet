@@ -6,7 +6,7 @@ Build release artifacts with:
 python3 utils/build_safari_release_artifacts.py --base-rom /path/to/clean-crystal.gbc
 ```
 
-By default, artifacts use the Safari Gauntlet release version `1.0.2`. Pass `--version <version>` for a later release.
+By default, artifacts use the Safari Gauntlet release version `1.0.3`. Pass `--version <version>` for a later release.
 
 The clean base ROM should be:
 

@@ -67,7 +67,7 @@ BattleFactory1FRulesScript:
 
 		para "Then fight four"
 		line "trainers and a"
-		cont "Gym Leader."
+		cont "special boss."
 
 		para "Win to keep one"
 		line "#mon in the"
@@ -115,7 +115,7 @@ SafariGauntletReceptionistScript:
 	writetext SafariGauntletSaveText
 	waitbutton
 	special Special_SafariGauntlet_BeginRun
-	random 4
+	random SAFARI_GAUNTLET_BOSS_COUNT
 	writemem wSafariGauntletBoss
 	random SAFARI_GAUNTLET_TM_SHOP_SET_COUNT
 	writemem wSafariGauntletTMShopSet
@@ -189,23 +189,7 @@ SafariGauntletReceptionistScript:
 	waitbutton
 	special Special_SafariGauntlet_GetBossReveal
 	iffalsefwd .BossHidden
-	readmem wSafariGauntletBoss
-	ifequalfwd SAFARI_GAUNTLET_BOSS_CHUCK, .RevealChuck
-	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .RevealJasmine
-	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .RevealPryce
-	writetext SafariGauntletRevealClairText
-	sjumpfwd .StartDraft
-
-.RevealChuck
-	writetext SafariGauntletRevealChuckText
-	sjumpfwd .StartDraft
-
-.RevealJasmine
-	writetext SafariGauntletRevealJasmineText
-	sjumpfwd .StartDraft
-
-.RevealPryce
-	writetext SafariGauntletRevealPryceText
+	scall SafariGauntletRevealBoss
 	sjumpfwd .StartDraft
 
 .BossHidden
@@ -671,28 +655,228 @@ SafariGauntletRound4:
 	setval TRUE
 	end
 
-SafariGauntletBossBattle:
+SafariGauntletRevealBoss:
 	readmem wSafariGauntletBoss
+	ifequalfwd SAFARI_GAUNTLET_BOSS_FALKNER, .Falkner
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BUGSY, .Bugsy
+	ifequalfwd SAFARI_GAUNTLET_BOSS_WHITNEY, .Whitney
+	ifequalfwd SAFARI_GAUNTLET_BOSS_MORTY, .Morty
 	ifequalfwd SAFARI_GAUNTLET_BOSS_CHUCK, .Chuck
 	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .Jasmine
 	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .Pryce
+	ifequalfwd SAFARI_GAUNTLET_BOSS_CLAIR, .Clair
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BROCK, .Brock
+	ifequalfwd SAFARI_GAUNTLET_BOSS_MISTY, .Misty
+	ifequalfwd SAFARI_GAUNTLET_BOSS_LT_SURGE, .LtSurge
+	ifequalfwd SAFARI_GAUNTLET_BOSS_ERIKA, .Erika
+	ifequalfwd SAFARI_GAUNTLET_BOSS_JANINE, .Janine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_SABRINA, .Sabrina
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BLAINE, .Blaine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BLUE, .Blue
+	ifequalfwd SAFARI_GAUNTLET_BOSS_WILL, .Will
+	ifequalfwd SAFARI_GAUNTLET_BOSS_KOGA, .Koga
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BRUNO, .Bruno
+	ifequalfwd SAFARI_GAUNTLET_BOSS_KAREN, .Karen
+	ifequalfwd SAFARI_GAUNTLET_BOSS_LANCE, .Lance
+	gettrainername RED, 1, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Falkner
+	gettrainername FALKNER, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Bugsy
+	gettrainername BUGSY, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Whitney
+	gettrainername WHITNEY, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Morty
+	gettrainername MORTY, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Chuck
+	gettrainername CHUCK, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Jasmine
+	gettrainername JASMINE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Pryce
+	gettrainername PRYCE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Clair
+	gettrainername CLAIR, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Brock
+	gettrainername BROCK, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Misty
+	gettrainername MISTY, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.LtSurge
+	gettrainername LT_SURGE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Erika
+	gettrainername ERIKA, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Janine
+	gettrainername JANINE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Sabrina
+	gettrainername SABRINA, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Blaine
+	gettrainername BLAINE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Blue
+	gettrainername BLUE, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Will
+	gettrainername WILL, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Koga
+	gettrainername KOGA, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Bruno
+	gettrainername BRUNO, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Karen
+	gettrainername KAREN, 2, STRING_BUFFER_4
+	sjumpfwd .Reveal
+
+.Lance
+	gettrainername CHAMPION, LANCE2, STRING_BUFFER_4
+
+.Reveal
+	writetext SafariGauntletRevealBossText
+	end
+
+SafariGauntletBossBattle:
+	readmem wSafariGauntletBoss
 	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer CLAIR, 3
+	ifequalfwd SAFARI_GAUNTLET_BOSS_FALKNER, .Falkner
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BUGSY, .Bugsy
+	ifequalfwd SAFARI_GAUNTLET_BOSS_WHITNEY, .Whitney
+	ifequalfwd SAFARI_GAUNTLET_BOSS_MORTY, .Morty
+	ifequalfwd SAFARI_GAUNTLET_BOSS_CHUCK, .Chuck
+	ifequalfwd SAFARI_GAUNTLET_BOSS_JASMINE, .Jasmine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_PRYCE, .Pryce
+	ifequalfwd SAFARI_GAUNTLET_BOSS_CLAIR, .Clair
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BROCK, .Brock
+	ifequalfwd SAFARI_GAUNTLET_BOSS_MISTY, .Misty
+	ifequalfwd SAFARI_GAUNTLET_BOSS_LT_SURGE, .LtSurge
+	ifequalfwd SAFARI_GAUNTLET_BOSS_ERIKA, .Erika
+	ifequalfwd SAFARI_GAUNTLET_BOSS_JANINE, .Janine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_SABRINA, .Sabrina
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BLAINE, .Blaine
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BLUE, .Blue
+	ifequalfwd SAFARI_GAUNTLET_BOSS_WILL, .Will
+	ifequalfwd SAFARI_GAUNTLET_BOSS_KOGA, .Koga
+	ifequalfwd SAFARI_GAUNTLET_BOSS_BRUNO, .Bruno
+	ifequalfwd SAFARI_GAUNTLET_BOSS_KAREN, .Karen
+	ifequalfwd SAFARI_GAUNTLET_BOSS_LANCE, .Lance
+	loadtrainer RED, 1
+	sjumpfwd .Battle
+
+.Falkner
+	loadtrainer FALKNER, 2
+	sjumpfwd .Battle
+
+.Bugsy
+	loadtrainer BUGSY, 2
+	sjumpfwd .Battle
+
+.Whitney
+	loadtrainer WHITNEY, 2
+	sjumpfwd .Battle
+
+.Morty
+	loadtrainer MORTY, 2
 	sjumpfwd .Battle
 
 .Chuck
-	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer CHUCK, 3
+	loadtrainer CHUCK, 2
 	sjumpfwd .Battle
 
 .Jasmine
-	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer JASMINE, 3
+	loadtrainer JASMINE, 2
 	sjumpfwd .Battle
 
 .Pryce
-	winlosstext SafariGauntletBossWinText, SafariGauntletBossLossText
-	loadtrainer PRYCE, 3
+	loadtrainer PRYCE, 2
+	sjumpfwd .Battle
+
+.Clair
+	loadtrainer CLAIR, 2
+	sjumpfwd .Battle
+
+.Brock
+	loadtrainer BROCK, 2
+	sjumpfwd .Battle
+
+.Misty
+	loadtrainer MISTY, 2
+	sjumpfwd .Battle
+
+.LtSurge
+	loadtrainer LT_SURGE, 2
+	sjumpfwd .Battle
+
+.Erika
+	loadtrainer ERIKA, 2
+	sjumpfwd .Battle
+
+.Janine
+	loadtrainer JANINE, 2
+	sjumpfwd .Battle
+
+.Sabrina
+	loadtrainer SABRINA, 2
+	sjumpfwd .Battle
+
+.Blaine
+	loadtrainer BLAINE, 2
+	sjumpfwd .Battle
+
+.Blue
+	loadtrainer BLUE, 2
+	sjumpfwd .Battle
+
+.Will
+	loadtrainer WILL, 2
+	sjumpfwd .Battle
+
+.Koga
+	loadtrainer KOGA, 2
+	sjumpfwd .Battle
+
+.Bruno
+	loadtrainer BRUNO, 2
+	sjumpfwd .Battle
+
+.Karen
+	loadtrainer KAREN, 2
+	sjumpfwd .Battle
+
+.Lance
+	loadtrainer CHAMPION, LANCE2
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -1310,27 +1494,11 @@ SafariGauntletTMVendorMenuData2:
 	db "TM65 SCLAW 4BP@"
 	db "TM73 TWAVE 3BP@"
 
-SafariGauntletRevealChuckText:
+SafariGauntletRevealBossText:
 	text "Boss reveal:"
-	line "Chuck waits at"
-	cont "the finish."
-	prompt
-
-SafariGauntletRevealJasmineText:
-	text "Boss reveal:"
-	line "Jasmine waits at"
-	cont "the finish."
-	prompt
-
-SafariGauntletRevealPryceText:
-	text "Boss reveal:"
-	line "Pryce waits at"
-	cont "the finish."
-	prompt
-
-SafariGauntletRevealClairText:
-	text "Boss reveal:"
-	line "Clair waits at"
+	line ""
+	text_ram wStringBuffer4
+	text " waits at"
 	cont "the finish."
 	prompt
 
@@ -1416,7 +1584,7 @@ SafariGauntletRound4ReadyText:
 	done
 
 SafariGauntletBossReadyText:
-	text "The Gym Leader is"
+	text "The final boss is"
 	line "waiting."
 
 	para "This is the final"
@@ -1444,7 +1612,7 @@ SafariGauntletBossUnlockedText:
 	line "clear."
 
 	para "Prepare for the"
-	line "Gym Leader, then"
+	line "final boss, then"
 	cont "talk to me."
 	done
 
@@ -1473,7 +1641,7 @@ SafariGauntletBossHealText:
 
 	para "Your team is fully"
 	line "healed before the"
-	cont "Gym Leader."
+	cont "final boss."
 	done
 
 SafariGauntletRoundBPText:
@@ -1484,7 +1652,7 @@ SafariGauntletRoundBPText:
 SafariGauntletBossBPText:
 	text "<PLAYER> earned"
 	line "10 BP from the"
-	cont "Gym Leader!"
+	cont "final boss!"
 	done
 
 SafariGauntletTrainerWinText:

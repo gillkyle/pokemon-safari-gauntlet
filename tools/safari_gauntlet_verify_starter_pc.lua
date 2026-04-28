@@ -30,12 +30,20 @@ local W = {
 	script_mode = 0xd437,
 	keep_count = 0xd7f1,
 	keep_species = 0xd7f2,
+	bills_box_list = 0xca0f,
 	crash_code = 0xffe5,
 }
 
 local GROUP_BATTLE_FACTORY = 12
 local MAP_BATTLE_FACTORY_1F = 17
 local OW_UP = 0x04
+local EEVEE = 133
+local BULBASAUR = 1
+local CHARMANDER = 4
+local SQUIRTLE = 7
+local CHIKORITA = 152
+local CYNDAQUIL = 155
+local TOTODILE = 158
 
 local f = assert(io.open(log_path, "w"))
 
@@ -199,11 +207,29 @@ local function open_pc_to_box_ui()
 	pulse(A, 10, 70)
 	emu:screenshot(bills_menu_screenshot)
 	log("bills_menu_screenshot=" .. bills_menu_screenshot)
-	pulse(A, 10, 600)
+	pulse(A, 10, 360)
 	emu:screenshot(storage_text_screenshot)
 	log("storage_text_screenshot=" .. storage_text_screenshot)
+	pulse(A, 10, 600)
+	pulse(A, 10, 600)
 	emu:screenshot(box_ui_screenshot)
 	log("box_ui_screenshot=" .. box_ui_screenshot)
+	local expected = {
+		EEVEE,
+		EEVEE,
+		BULBASAUR,
+		CHARMANDER,
+		SQUIRTLE,
+		CHIKORITA,
+		CYNDAQUIL,
+		TOTODILE,
+	}
+	for i, species in ipairs(expected) do
+		local actual = read8(W.bills_box_list + (i - 1) * 2)
+		if actual ~= species then
+			fail(string.format("FAILED_STARTER_PC_SLOT_%d_EXPECTED_%d_GOT_%d", i, species, actual), box_ui_screenshot)
+		end
+	end
 	state_line("VERIFIED_STARTER_PC_STORAGE_TEXT")
 end
 
