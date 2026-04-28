@@ -96,8 +96,31 @@ This is an unofficial fan project. Pokémon is owned by Nintendo, Game Freak, an
 
 ## Screenshots
 
+### Title and Hub
+
 ![Safari Gauntlet title screen](screenshots/safari-gauntlet/title.png)
 ![Safari Gauntlet hub](screenshots/safari-gauntlet/hub.png)
+
+### Draft Field and Battles
+
 ![Safari Gauntlet draft field](screenshots/safari-gauntlet/draft-field.png)
+![Safari Gauntlet Safari Zone entrance](screenshots/safari-gauntlet/safari-center.png)
+![Safari Gauntlet Safari Zone grass](screenshots/safari-gauntlet/safari-field.png)
+![Safari Gauntlet Tangela battle](screenshots/safari-gauntlet/battle-tangela.png)
+![Safari Gauntlet Kakuna battle](screenshots/safari-gauntlet/battle-kakuna.png)
+![Safari Gauntlet Dunsparce battle](screenshots/safari-gauntlet/battle-dunsparce.png)
+
+### Party and Storage
+
+![Safari Gauntlet party menu](screenshots/safari-gauntlet/party-menu.png)
+![Safari Gauntlet Pokémon summary](screenshots/safari-gauntlet/pokemon-summary.png)
+![Safari Gauntlet box management](screenshots/safari-gauntlet/box-management.png)
+
+### Hub Services
+
+![Safari Gauntlet move tutor](screenshots/safari-gauntlet/move-tutor.png)
 ![Safari Gauntlet BP TM shop](screenshots/safari-gauntlet/tm-shop.png)
+![Safari Gauntlet red BP merchant](screenshots/safari-gauntlet/bp-merchant-red.png)
+![Safari Gauntlet green BP merchant](screenshots/safari-gauntlet/bp-merchant-green.png)
+![Safari Gauntlet blue BP merchant](screenshots/safari-gauntlet/bp-merchant-blue.png)
 ![Safari Gauntlet run saved](screenshots/safari-gauntlet/run-saved.png)
