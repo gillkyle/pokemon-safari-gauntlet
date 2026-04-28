@@ -12,7 +12,7 @@ This project is derived from the official [Polished Crystal 3.2.3](https://githu
 
 ## Download and Play
 
-The current Safari Gauntlet release target is **v1.0.1**.
+The current Safari Gauntlet release target is **v1.0.2**.
 
 Release artifacts are built with the repo-local release helper:
 
@@ -30,11 +30,11 @@ MD5: 9f2922b235a5eeb78d65594e82ef5dde
 The release helper follows Polished Crystal's release layout and writes artifacts such as:
 
 ```text
-build/safari-gauntlet-1.0.1.gbc
-build/safari-gauntlet-1.0.1.sym
-build/safari-gauntlet-1.0.1.bps
-build/safari-gauntlet-1.0.1.ips
-build/safari-gauntlet-1.0.1.3ds-vc.patch
+build/safari-gauntlet-1.0.2.gbc
+build/safari-gauntlet-1.0.2.sym
+build/safari-gauntlet-1.0.2.bps
+build/safari-gauntlet-1.0.2.ips
+build/safari-gauntlet-1.0.2.3ds-vc.patch
 ```
 
 If you are building locally without release patches, run:
@@ -50,9 +50,9 @@ Then load the built `.gbc` in an accurate Game Boy Color emulator such as [mGBA]
 Safari Gauntlet turns Polished Crystal into a repeatable draft-and-battle challenge.
 
 - Start in a sealed Battle Factory-style hub with a nurse, PC access, settings, shops, a move reminder, and the run desk.
-- Enter with exactly one Pokémon, or disable carry-ins and receive a level 35 Eevee starter.
+- Enter with exactly one Pokémon, or disable carry-ins and receive a level 55 Eevee starter.
 - Draft normally in the Safari Zone with Safari Balls, regular balls, a Super Rod, limited steps, and limited supplies.
-- Catch at least four Pokémon, up to a full party of six, before returning to the hub.
+- Catch up to a full party of six, or proceed with only your starter if you want the risk.
 - Fight four trainer rounds and then a boss battle.
 - Win BP after each round and a larger BP payout for the boss.
 - On victory, keep one Pokémon in the Safari Keep Box for future carry-in choices.
