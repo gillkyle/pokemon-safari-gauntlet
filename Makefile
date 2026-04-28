@@ -12,7 +12,7 @@ ROMVERSION := 0x32
 
 FILLER := 0xff
 
-COPYRIGHT = @$(shell date '+%Y') $(AUTHOR) v$(VERSION)
+COPYRIGHT = @KYLE GILL v1.0.1
 
 ifneq ($(wildcard rgbds/.*),)
 RGBDS ?= rgbds/

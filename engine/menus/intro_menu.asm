@@ -81,6 +81,8 @@ _NewGame_FinishSetup:
 	call NewGame_ClearTileMapEtc
 	call WarnVBA
 	call SafariGauntlet_InitStandalonePlayer
+	farcall SafariGauntlet_EnsureStarterKeepBox
+	farcall SafariGauntlet_SeedStarterPC
 	call InitializeWorld
 	ld a, OW_DOWN
 	ld [wPlayerDirection], a
@@ -105,7 +107,7 @@ SafariGauntlet_InitStandalonePlayer:
 	ret
 
 .name:
-	rawchar "Gauntlet@", 0, 0
+	rawchar "TRAINER@", 0, 0, 0
 
 SafariGauntlet_FixContinuePosition:
 	ld a, [wMapGroup]

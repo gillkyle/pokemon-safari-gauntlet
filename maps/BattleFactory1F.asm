@@ -2,6 +2,7 @@ BattleFactory1F_MapScriptHeader:
 	def_scene_scripts
 
 	def_callbacks
+	callback MAPCALLBACK_NEWMAP, SafariGauntletHubLoadCallback
 
 	def_warp_events
 
@@ -12,13 +13,24 @@ BattleFactory1F_MapScriptHeader:
 	bg_event 13,  7, BGEVENT_UP, SafariGauntletReceptionistScript
 	bg_event 14,  5, BGEVENT_READ, BattleFactory1FRulesScript
 	bg_event 10,  5, BGEVENT_JUMPTEXT, SafariGauntletRecordsText
-	bg_event 25,  6, BGEVENT_JUMPTEXT, SafariGauntletKeepBoxText
+	bg_event  4,  6, BGEVENT_READ, SafariGauntletKeepBoxScript
+	bg_event  5,  6, BGEVENT_READ, SafariGauntletKeepBoxScript
+	bg_event  4,  7, BGEVENT_UP, SafariGauntletKeepBoxScript
+	bg_event  5,  7, BGEVENT_UP, SafariGauntletKeepBoxScript
+	bg_event  8,  6, BGEVENT_READ, SafariGauntletKeepBoxScript
+	bg_event  9,  6, BGEVENT_READ, SafariGauntletKeepBoxScript
+	bg_event  8,  7, BGEVENT_UP, SafariGauntletKeepBoxScript
+	bg_event  9,  7, BGEVENT_UP, SafariGauntletKeepBoxScript
+	bg_event  9, 11, BGEVENT_READ, SafariGauntletSettingsMenu
+	bg_event 16, 11, BGEVENT_READ, SafariGauntletMoveReminderMenu
+	bg_event 25,  6, BGEVENT_READ, SafariGauntletKeepBoxScript
 
 	def_object_events
 	object_event 12,  5, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletReceptionistScript, -1
-	object_event 10,  7, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, SafariGauntletSettingsScript, -1
-	object_event 16,  6, SPRITE_GRAMPS, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletMoveReminderScript, -1
-	pc_nurse_event  6,  6
+	object_event  9, 11, SPRITE_SCIENTIST, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_SCRIPT, 0, SafariGauntletSettingsScript, -1
+	object_event 16, 10, SPRITE_GRAMPS, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletMoveReminderScript, -1
+	object_event 24, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BROWN, OBJECTTYPE_SCRIPT, 0, SafariGauntletTMVendorScript, -1
+	object_event  6,  6, SPRITE_BOWING_NURSE, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, 0, OBJECTTYPE_SCRIPT, 0, SafariGauntletNurseScript, -1
 	object_event 12, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 13, 10, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 11, 11, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_RED, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
@@ -77,7 +89,16 @@ SafariGauntletCounterStartScript:
 	applyonemovement PLAYER, turn_head_up
 	sjumpfwd SafariGauntletReceptionistScript
 
+SafariGauntletNurseScript:
+	special Special_SafariGauntlet_EnsureHubParty
+	jumpstd pokecenternurse
+
+SafariGauntletHubLoadCallback:
+	special Special_SafariGauntlet_EnsureHubParty
+	endcallback
+
 SafariGauntletReceptionistScript:
+	special Special_SafariGauntlet_EnsureHubParty
 	readmem wSafariGauntletStep
 	ifequal SAFARI_GAUNTLET_STEP_DRAFT, .ReturnToDraft
 	ifequal SAFARI_GAUNTLET_STEP_ROUND1, .Round1Ready
@@ -89,6 +110,8 @@ SafariGauntletReceptionistScript:
 	writetext SafariGauntletIntroText
 	yesorno
 	iffalse_jumpopenedtext SafariGauntletMaybeLaterText
+	readvar VAR_PARTYCOUNT
+	ifnotequal 1, .NeedOnePokemon
 	writetext SafariGauntletSaveText
 	waitbutton
 	special Special_SafariGauntlet_BeginRun
@@ -113,6 +136,8 @@ SafariGauntletReceptionistScript:
 	giveitem WATER_STONE, 1
 	giveitem LEAF_STONE, 1
 	giveitem ICE_STONE, 1
+	giveitem SUN_STONE, 1
+	giveitem MOON_STONE, 1
 	writetext SafariGauntletStandardSuppliesText
 	sjumpfwd .AfterSupplies
 
@@ -133,6 +158,8 @@ SafariGauntletReceptionistScript:
 	giveitem WATER_STONE, 1
 	giveitem LEAF_STONE, 1
 	giveitem ICE_STONE, 1
+	giveitem SUN_STONE, 1
+	giveitem MOON_STONE, 1
 	writetext SafariGauntletCasualSuppliesText
 	sjumpfwd .AfterSupplies
 
@@ -152,6 +179,8 @@ SafariGauntletReceptionistScript:
 	giveitem WATER_STONE, 1
 	giveitem LEAF_STONE, 1
 	giveitem ICE_STONE, 1
+	giveitem SUN_STONE, 1
+	giveitem MOON_STONE, 1
 	writetext SafariGauntletHardSuppliesText
 
 .AfterSupplies
@@ -188,6 +217,9 @@ SafariGauntletReceptionistScript:
 	wildon
 	warpfacing UP, SAFARI_ZONE_HUB, 16, 25
 	end
+
+.NeedOnePokemon
+	jumpopenedtext SafariGauntletNeedOnePokemonText
 
 .ReturnToDraft
 	opentext
@@ -268,18 +300,83 @@ SafariGauntletReceptionistScript:
 SafariGauntletRound1:
 	showtext SafariGauntletRound1Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 3
-	ifequalfwd 0, .Quentin
-	ifequalfwd 1, .Todd4
-	loadtrainer FISHER, RALPH4
+	random 16
+	ifequalfwd 0, .Joey1
+	ifequalfwd 1, .Todd1
+	ifequalfwd 2, .Gina1
+	ifequalfwd 3, .Dana1
+	ifequalfwd 4, .Jack1
+	ifequalfwd 5, .Wade1
+	ifequalfwd 6, .Jose1
+	ifequalfwd 7, .Anthony1
+	ifequalfwd 8, .Huey1
+	ifequalfwd 9, .Stan
+	ifequalfwd 10, .Brent1
+	ifequalfwd 11, .Victoria
+	ifequalfwd 12, .Derek1
+	ifequalfwd 13, .Nathan
+	ifequalfwd 14, .Otis
+	loadtrainer BLACKBELT_T, KENJI1
 	sjumpfwd .Battle
 
-.Quentin
-	loadtrainer CAMPER, QUENTIN
+.Joey1
+	loadtrainer YOUNGSTER, JOEY1
 	sjumpfwd .Battle
 
-.Todd4
-	loadtrainer CAMPER, TODD4
+.Todd1
+	loadtrainer CAMPER, TODD1
+	sjumpfwd .Battle
+
+.Gina1
+	loadtrainer PICNICKER, GINA1
+	sjumpfwd .Battle
+
+.Dana1
+	loadtrainer LASS, DANA1
+	sjumpfwd .Battle
+
+.Jack1
+	loadtrainer SCHOOLBOY, JACK1
+	sjumpfwd .Battle
+
+.Wade1
+	loadtrainer BUG_CATCHER, WADE1
+	sjumpfwd .Battle
+
+.Jose1
+	loadtrainer BIRD_KEEPER, JOSE1
+	sjumpfwd .Battle
+
+.Anthony1
+	loadtrainer HIKER, ANTHONY1
+	sjumpfwd .Battle
+
+.Huey1
+	loadtrainer SAILOR, HUEY1
+	sjumpfwd .Battle
+
+.Stan
+	loadtrainer SUPER_NERD, STAN
+	sjumpfwd .Battle
+
+.Brent1
+	loadtrainer POKEMANIAC, BRENT1
+	sjumpfwd .Battle
+
+.Victoria
+	loadtrainer BEAUTY, VICTORIA
+	sjumpfwd .Battle
+
+.Derek1
+	loadtrainer POKEFANM, DEREK1
+	sjumpfwd .Battle
+
+.Nathan
+	loadtrainer PSYCHIC_T, NATHAN
+	sjumpfwd .Battle
+
+.Otis
+	loadtrainer FIREBREATHER, OTIS
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -301,18 +398,83 @@ SafariGauntletRound1:
 SafariGauntletRound2:
 	showtext SafariGauntletRound2Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 3
-	ifequalfwd 0, .Tully2
-	ifequalfwd 1, .Wilton1
+	random 16
+	ifequalfwd 0, .Joey3
+	ifequalfwd 1, .Todd3
+	ifequalfwd 2, .Gina3
+	ifequalfwd 3, .Liz3
+	ifequalfwd 4, .Alan3
+	ifequalfwd 5, .Vance1
+	ifequalfwd 6, .Anthony3
+	ifequalfwd 7, .Parry1
+	ifequalfwd 8, .Phil
+	ifequalfwd 9, .Huey2
+	ifequalfwd 10, .Eric
+	ifequalfwd 11, .Dennett
+	ifequalfwd 12, .Yoshi
+	ifequalfwd 13, .Subaru
+	ifequalfwd 14, .Ned
+	loadtrainer BOARDER, RONALD
+	sjumpfwd .Battle
+
+.Joey3
+	loadtrainer YOUNGSTER, JOEY3
+	sjumpfwd .Battle
+
+.Todd3
+	loadtrainer CAMPER, TODD3
+	sjumpfwd .Battle
+
+.Gina3
+	loadtrainer PICNICKER, GINA3
+	sjumpfwd .Battle
+
+.Liz3
+	loadtrainer PICNICKER, LIZ3
+	sjumpfwd .Battle
+
+.Alan3
+	loadtrainer SCHOOLBOY, ALAN3
+	sjumpfwd .Battle
+
+.Anthony3
+	loadtrainer HIKER, ANTHONY3
+	sjumpfwd .Battle
+
+.Parry1
+	loadtrainer HIKER, PARRY1
+	sjumpfwd .Battle
+
+.Vance1
+	loadtrainer BIRD_KEEPER, VANCE1
+	sjumpfwd .Battle
+
+.Phil
 	loadtrainer PSYCHIC_T, PHIL
 	sjumpfwd .Battle
 
-.Tully2
-	loadtrainer FISHER, TULLY2
+.Huey2
+	loadtrainer SAILOR, HUEY2
 	sjumpfwd .Battle
 
-.Wilton1
-	loadtrainer FISHER, WILTON1
+.Eric
+	loadtrainer SUPER_NERD, ERIC
+	sjumpfwd .Battle
+
+.Dennett
+	loadtrainer SCIENTIST, DENNETT
+	sjumpfwd .Battle
+
+.Yoshi
+	loadtrainer BLACKBELT_T, YOSHI
+	sjumpfwd .Battle
+
+.Subaru
+	loadtrainer BATTLE_GIRL, SUBARU
+	sjumpfwd .Battle
+
+.Ned
+	loadtrainer FIREBREATHER, NED
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -334,18 +496,83 @@ SafariGauntletRound2:
 SafariGauntletRound3:
 	showtext SafariGauntletRound3Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 3
-	ifequalfwd 0, .Tully2
-	ifequalfwd 1, .Nozomi
-	loadtrainer FISHER, WILTON2
+	random 16
+	ifequalfwd 0, .Todd5
+	ifequalfwd 1, .Gina4
+	ifequalfwd 2, .Tiffany3
+	ifequalfwd 3, .Anthony4
+	ifequalfwd 4, .Parry2
+	ifequalfwd 5, .Vance2
+	ifequalfwd 6, .Gilbert
+	ifequalfwd 7, .Nozomi
+	ifequalfwd 8, .Kevin
+	ifequalfwd 9, .Reena1
+	ifequalfwd 10, .Huey3
+	ifequalfwd 11, .Natalie
+	ifequalfwd 12, .Dennett
+	ifequalfwd 13, .Margaret
+	ifequalfwd 14, .Winston
+	loadtrainer BUG_MANIAC, LOU
 	sjumpfwd .Battle
 
-.Tully2
-	loadtrainer FISHER, TULLY2
+.Todd5
+	loadtrainer CAMPER, TODD5
+	sjumpfwd .Battle
+
+.Gina4
+	loadtrainer PICNICKER, GINA4
+	sjumpfwd .Battle
+
+.Tiffany3
+	loadtrainer PICNICKER, TIFFANY3
+	sjumpfwd .Battle
+
+.Anthony4
+	loadtrainer HIKER, ANTHONY4
+	sjumpfwd .Battle
+
+.Parry2
+	loadtrainer HIKER, PARRY2
+	sjumpfwd .Battle
+
+.Vance2
+	loadtrainer BIRD_KEEPER, VANCE2
+	sjumpfwd .Battle
+
+.Gilbert
+	loadtrainer PSYCHIC_T, GILBERT
 	sjumpfwd .Battle
 
 .Nozomi
 	loadtrainer BATTLE_GIRL, NOZOMI
+	sjumpfwd .Battle
+
+.Kevin
+	loadtrainer COOLTRAINERM, KEVIN
+	sjumpfwd .Battle
+
+.Reena1
+	loadtrainer COOLTRAINERF, REENA1
+	sjumpfwd .Battle
+
+.Huey3
+	loadtrainer SAILOR, HUEY3
+	sjumpfwd .Battle
+
+.Natalie
+	loadtrainer HEX_MANIAC, NATALIE
+	sjumpfwd .Battle
+
+.Dennett
+	loadtrainer SCIENTIST, DENNETT
+	sjumpfwd .Battle
+
+.Margaret
+	loadtrainer BAKER, MARGARET
+	sjumpfwd .Battle
+
+.Winston
+	loadtrainer RICH_BOY, WINSTON
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -367,18 +594,63 @@ SafariGauntletRound3:
 SafariGauntletRound4:
 	showtext SafariGauntletRound4Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 3
-	ifequalfwd 0, .Gilbert
-	ifequalfwd 1, .Ronda
-	loadtrainer FISHER, TULLY3
+	random 12
+	ifequalfwd 0, .Falkner
+	ifequalfwd 1, .Bugsy
+	ifequalfwd 2, .Whitney
+	ifequalfwd 3, .Morty
+	ifequalfwd 4, .Chuck
+	ifequalfwd 5, .Jasmine
+	ifequalfwd 6, .Pryce
+	ifequalfwd 7, .Clair
+	ifequalfwd 8, .Brock
+	ifequalfwd 9, .Misty
+	ifequalfwd 10, .Surge
+	loadtrainer ERIKA, 1
 	sjumpfwd .Battle
 
-.Gilbert
-	loadtrainer PSYCHIC_T, GILBERT
+.Falkner
+	loadtrainer FALKNER, 1
 	sjumpfwd .Battle
 
-.Ronda
-	loadtrainer BATTLE_GIRL, RONDA
+.Bugsy
+	loadtrainer BUGSY, 1
+	sjumpfwd .Battle
+
+.Whitney
+	loadtrainer WHITNEY, 1
+	sjumpfwd .Battle
+
+.Morty
+	loadtrainer MORTY, 1
+	sjumpfwd .Battle
+
+.Chuck
+	loadtrainer CHUCK, 1
+	sjumpfwd .Battle
+
+.Jasmine
+	loadtrainer JASMINE, 1
+	sjumpfwd .Battle
+
+.Pryce
+	loadtrainer PRYCE, 1
+	sjumpfwd .Battle
+
+.Clair
+	loadtrainer CLAIR, 1
+	sjumpfwd .Battle
+
+.Brock
+	loadtrainer BROCK, 1
+	sjumpfwd .Battle
+
+.Misty
+	loadtrainer MISTY, 1
+	sjumpfwd .Battle
+
+.Surge
+	loadtrainer LT_SURGE, 1
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -455,11 +727,16 @@ SafariGauntletVictory:
 	jumpopenedtext SafariGauntletReturnedText
 
 SafariGauntletMoveReminderScript:
+	special Special_SafariGauntlet_EnsureHubParty
 	faceplayer
+
+SafariGauntletMoveReminderMenu:
 	opentext
 	writetext SafariGauntletMoveReminderIntroText
 	yesorno
 	iffalse_jumpopenedtext SafariGauntletMoveReminderLaterText
+	readvar VAR_PARTYCOUNT
+	ifequalfwd 0, .NoParty
 	setval NO_MOVE
 	writetext SafariGauntletMoveReminderWhichMonText
 	waitbutton
@@ -467,111 +744,216 @@ SafariGauntletMoveReminderScript:
 	ifequalfwd $0, .Learned
 	jumpopenedtext SafariGauntletMoveReminderLaterText
 
+.NoParty
+	jumpopenedtext SafariGauntletMoveReminderNoPartyText
+
 .Learned
 	jumpopenedtext SafariGauntletMoveReminderDoneText
 
-SafariGauntletSettingsScript:
+SafariGauntletTMVendorScript:
+	special Special_SafariGauntlet_EnsureHubParty
 	faceplayer
 	opentext
-	writetext SafariGauntletSettingsHeaderText
-	promptbutton
-	special Special_SafariGauntlet_GetDexMode
-	iftruefwd .National
-	writetext SafariGauntletSettingsJohtoText
-	sjumpfwd .AskToggle
+.Loop
+	writetext SafariGauntletTMVendorPickText
+	loadmenu SafariGauntletTMVendorMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .Thunderbolt
+	ifequalfwd $2, .Flamethrower
+	ifequalfwd $3, .IceBeam
+	ifequalfwd $4, .ShadowBall
+	jumpopenedtext SafariGauntletTMVendorLaterText
 
-.National
-	writetext SafariGauntletSettingsNationalText
-.AskToggle
-	yesorno
-	iffalsefwd .CarryIn
-	special Special_SafariGauntlet_ToggleDexMode
-	iftruefwd .SetNational
+.Thunderbolt
+	checktmhm TM_THUNDERBOLT
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_THUNDERBOLT, STRING_BUFFER_3
+	givetmhm TM_THUNDERBOLT
+	takebp 5
+	sjumpfwd .Bought
+
+.Flamethrower
+	checktmhm TM_FLAMETHROWER
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_FLAMETHROWER, STRING_BUFFER_3
+	givetmhm TM_FLAMETHROWER
+	takebp 5
+	sjumpfwd .Bought
+
+.IceBeam
+	checktmhm TM_ICE_BEAM
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_ICE_BEAM, STRING_BUFFER_3
+	givetmhm TM_ICE_BEAM
+	takebp 5
+	sjumpfwd .Bought
+
+.ShadowBall
+	checktmhm TM_SHADOW_BALL
+	iftruefwd .AlreadyOwned
+	checkbp 4
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_SHADOW_BALL, STRING_BUFFER_3
+	givetmhm TM_SHADOW_BALL
+	takebp 4
+
+.Bought
+	playsound SFX_TRANSACTION
+	writetext SafariGauntletTMVendorBoughtText
+	waitbutton
+	sjump .Loop
+
+.AlreadyOwned
+	writetext SafariGauntletTMVendorAlreadyOwnedText
+	waitbutton
+	sjump .Loop
+
+.NotEnoughBP
+	writetext SafariGauntletTMVendorNotEnoughBPText
+	waitbutton
+	sjump .Loop
+
+SafariGauntletKeepBoxNPCScript:
+	faceplayer
+	sjumpfwd SafariGauntletKeepBoxScript
+
+SafariGauntletKeepBoxScript:
+	special Special_SafariGauntlet_EnsureHubParty
+	jumpstd pcscript
+
+SafariGauntletSettingsScript:
+	faceplayer
+	sjumpfwd SafariGauntletSettingsMenu
+
+SafariGauntletSettingsStartMenuScript:
+SafariGauntletSettingsMenu:
+	opentext
+.Loop
+	writetext SafariGauntletSettingsHeaderText
+	loadmenu SafariGauntletSettingsMainMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .DexMode
+	ifequalfwd $2, .CarryIn
+	ifequalfwd $3, .BossReveal
+	ifequalfwd $4, .Difficulty
+	jumpopenedtext SafariGauntletSettingsSavedText
+
+.DexMode
+	writetext SafariGauntletSettingsDexPromptText
+	loadmenu SafariGauntletDexModeMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .SetJohto
+	ifequalfwd $2, .SetNational
+	sjump .Loop
+
+.SetJohto
+	setval FALSE
+	special Special_SafariGauntlet_SetDexMode
+	special Special_SafariGauntlet_SaveSettings
 	writetext SafariGauntletSetJohtoText
-	sjumpfwd .AfterDex
+	promptbutton
+	sjump .Loop
 
 .SetNational
+	setval TRUE
+	special Special_SafariGauntlet_SetDexMode
+	special Special_SafariGauntlet_SaveSettings
 	writetext SafariGauntletSetNationalText
-.AfterDex
 	promptbutton
+	sjump .Loop
 
 .CarryIn
-	special Special_SafariGauntlet_GetCarryIn
-	iftruefwd .CarryEnabled
-	writetext SafariGauntletCarryOffText
-	sjumpfwd .AskCarry
+	writetext SafariGauntletSettingsCarryPromptText
+	loadmenu SafariGauntletOnOffMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .CarryOn
+	ifequalfwd $2, .CarryOff
+	sjump .Loop
 
-.CarryEnabled
-	writetext SafariGauntletCarryOnText
-.AskCarry
-	yesorno
-	iffalsefwd .BossReveal
-	special Special_SafariGauntlet_ToggleCarryIn
-	iftruefwd .CarryNowOn
-	writetext SafariGauntletCarrySetOffText
-	sjumpfwd .AfterCarry
-
-.CarryNowOn
+.CarryOn
+	setval TRUE
+	special Special_SafariGauntlet_SetCarryIn
+	special Special_SafariGauntlet_SaveSettings
 	writetext SafariGauntletCarrySetOnText
-.AfterCarry
 	promptbutton
+	sjump .Loop
+
+.CarryOff
+	setval FALSE
+	special Special_SafariGauntlet_SetCarryIn
+	special Special_SafariGauntlet_SaveSettings
+	writetext SafariGauntletCarrySetOffText
+	promptbutton
+	sjump .Loop
 
 .BossReveal
-	special Special_SafariGauntlet_GetBossReveal
-	iftruefwd .RevealEnabled
-	writetext SafariGauntletBossRevealOffText
-	sjumpfwd .AskReveal
+	writetext SafariGauntletSettingsBossPromptText
+	loadmenu SafariGauntletBossRevealMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .RevealOn
+	ifequalfwd $2, .RevealOff
+	sjump .Loop
 
-.RevealEnabled
-	writetext SafariGauntletBossRevealOnText
-.AskReveal
-	yesorno
-	iffalsefwd .Difficulty
-	special Special_SafariGauntlet_ToggleBossReveal
-	iftruefwd .RevealNowOn
-	writetext SafariGauntletBossRevealSetOffText
-	sjumpfwd .AfterReveal
-
-.RevealNowOn
+.RevealOn
+	setval TRUE
+	special Special_SafariGauntlet_SetBossReveal
+	special Special_SafariGauntlet_SaveSettings
 	writetext SafariGauntletBossRevealSetOnText
-.AfterReveal
 	promptbutton
+	sjump .Loop
+
+.RevealOff
+	setval FALSE
+	special Special_SafariGauntlet_SetBossReveal
+	special Special_SafariGauntlet_SaveSettings
+	writetext SafariGauntletBossRevealSetOffText
+	promptbutton
+	sjump .Loop
 
 .Difficulty
-	special Special_SafariGauntlet_GetDifficulty
-	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .DifficultyCasual
-	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .DifficultyHard
-	writetext SafariGauntletDifficultyStandardText
-	sjumpfwd .AskDifficulty
-
-.DifficultyCasual
-	writetext SafariGauntletDifficultyCasualText
-	sjumpfwd .AskDifficulty
-
-.DifficultyHard
-	writetext SafariGauntletDifficultyHardText
-.AskDifficulty
-	yesorno
-	iffalsefwd .SaveSettings
-	special Special_SafariGauntlet_CycleDifficulty
-	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .DifficultySetCasual
-	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .DifficultySetHard
-	writetext SafariGauntletDifficultySetStandardText
-	sjumpfwd .Done
+	writetext SafariGauntletSettingsDifficultyPromptText
+	loadmenu SafariGauntletDifficultyMenuData
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .DifficultySetCasual
+	ifequalfwd $2, .DifficultySetStandard
+	ifequalfwd $3, .DifficultySetHard
+	sjump .Loop
 
 .DifficultySetCasual
+	setval SAFARI_GAUNTLET_DIFFICULTY_CASUAL
+	special Special_SafariGauntlet_SetDifficulty
+	special Special_SafariGauntlet_SaveSettings
 	writetext SafariGauntletDifficultySetCasualText
-	sjumpfwd .Done
+	promptbutton
+	sjump .Loop
+
+.DifficultySetStandard
+	setval SAFARI_GAUNTLET_DIFFICULTY_STANDARD
+	special Special_SafariGauntlet_SetDifficulty
+	special Special_SafariGauntlet_SaveSettings
+	writetext SafariGauntletDifficultySetStandardText
+	promptbutton
+	sjump .Loop
 
 .DifficultySetHard
-	writetext SafariGauntletDifficultySetHardText
-.Done
-	promptbutton
-	sjumpfwd .SaveSettings
-
-.SaveSettings
+	setval SAFARI_GAUNTLET_DIFFICULTY_HARD
+	special Special_SafariGauntlet_SetDifficulty
 	special Special_SafariGauntlet_SaveSettings
-	jumpopenedtext SafariGauntletSettingsSavedText
+	writetext SafariGauntletDifficultySetHardText
+	promptbutton
+	sjump .Loop
 
 SafariGauntletRecordsText:
 	text "Safari Gauntlet"
@@ -600,9 +982,43 @@ SafariGauntletKeepBoxText:
 	para "Win the gauntlet"
 	line "to keep one."
 
-	para "Spend BP at the"
-	line "exchange counters"
-	cont "for your team."
+	para "Your newest kept"
+	line "#mon becomes"
+	cont "your carry-in."
+	done
+
+SafariGauntletKeepBoxDoneText:
+	text "Come back anytime."
+	done
+
+SafariGauntletKeepBoxEmptyText:
+	text "No stored #mon"
+	line "yet."
+
+	para "Win a run and keep"
+	line "one to unlock"
+	cont "carry-in selection."
+	done
+
+SafariGauntletCarryChoiceText:
+	text "Choose which"
+	line "stored #mon"
+	cont "to carry in."
+	done
+
+SafariGauntletCarryChoiceChangedText:
+	text "Carry-in updated."
+	done
+
+SafariGauntletCarryChoiceSavedText:
+	text "Carry-in choice"
+	line "saved."
+	done
+
+SafariGauntletKeepBoxOpenPCText:
+	text "Open your PC to"
+	line "manage your team"
+	cont "and boxes?"
 	done
 
 SafariGauntletExitBlockedText:
@@ -615,32 +1031,23 @@ SafariGauntletExitBlockedText:
 	done
 
 SafariGauntletIntroText:
-	text "Safari Gauntlet!"
-
-	para "Catch a Lv.30"
-	line "draft team, then"
-	cont "clear five battles."
-
-	para "Win, and one"
-	line "#mon joins your"
-	cont "Keep Box."
-
-	para "Begin a run?"
+	text "Start a Safari"
+	line "Gauntlet run?"
 	done
 
 SafariGauntletSaveText:
-	text "I'll save first."
-
-	para "Your party and bag"
-	line "come back after"
-	cont "the run."
-
-	para "One moment."
+	text "Saving and loading"
+	line "run supplies."
 	done
 
 SafariGauntletMaybeLaterText:
 	text "The Gauntlet will"
 	line "be here."
+	done
+
+SafariGauntletNeedOnePokemonText:
+	text "Choose exactly"
+	line "one #mon first."
 	done
 
 SafariGauntletStandardSuppliesText:
@@ -654,7 +1061,8 @@ SafariGauntletStandardSuppliesText:
 	cont "12 Candies,"
 	cont "3 Super"
 	cont "Repels,"
-	cont "Eevee stones,"
+	cont "Eevee stones"
+	cont "(Sun/Moon too),"
 	cont "and a Super Rod."
 	prompt
 
@@ -668,7 +1076,8 @@ SafariGauntletCasualSuppliesText:
 	cont "12 Candies,"
 	cont "3 Super"
 	cont "Repels,"
-	cont "Eevee stones,"
+	cont "Eevee stones"
+	cont "(Sun/Moon too),"
 	cont "and a Super Rod."
 	prompt
 
@@ -682,7 +1091,8 @@ SafariGauntletHardSuppliesText:
 	cont "12 Candies,"
 	cont "3 Super"
 	cont "Repels,"
-	cont "Eevee stones,"
+	cont "Eevee stones"
+	cont "(Sun/Moon too),"
 	cont "and a Super Rod."
 	prompt
 
@@ -697,6 +1107,11 @@ SafariGauntletMoveReminderWhichMonText:
 	text "Pick a #mon."
 	done
 
+SafariGauntletMoveReminderNoPartyText:
+	text "Bring at least one"
+	line "#mon first."
+	done
+
 SafariGauntletMoveReminderLaterText:
 	text "Come back later."
 	done
@@ -704,6 +1119,62 @@ SafariGauntletMoveReminderLaterText:
 SafariGauntletMoveReminderDoneText:
 	text "Old move taught."
 	done
+
+SafariGauntletTMVendorIntroText:
+	text "TM stock is ready."
+	line "Open TM shop?"
+	done
+
+SafariGauntletTMVendorLaterText:
+	text "Come back anytime."
+	done
+
+SafariGauntletTMVendorPickText:
+	text "BP: "
+	text_decimal wBattlePoints, 2, 5
+	line "Pick a TM to buy."
+	done
+
+SafariGauntletTMVendorConfirmText:
+	text_ram wStringBuffer3
+	text " costs BP."
+	line "Buy it?"
+	done
+
+SafariGauntletTMVendorBoughtText:
+	text "Bought "
+	text_ram wStringBuffer3
+	text "."
+	done
+
+SafariGauntletTMVendorThanksText:
+	text "Done. Anything"
+	line "else?"
+	done
+
+SafariGauntletTMVendorAlreadyOwnedText:
+	text "You already have"
+	line "that TM."
+	done
+
+SafariGauntletTMVendorNotEnoughBPText:
+	text "You need more BP."
+	done
+
+SafariGauntletTMVendorMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 19, 11
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 5 ; items
+	db "TM24 TBOLT  5BP@"
+	db "TM35 FLAME  5BP@"
+	db "TM13 ICEBM  5BP@"
+	db "TM30 SHADOW 4BP@"
+	db "Cancel@"
 
 SafariGauntletRevealChuckText:
 	text "Boss reveal:"
@@ -845,22 +1316,22 @@ SafariGauntletBossUnlockedText:
 
 SafariGauntletRound1Text:
 	text "Round 1:"
-	line "Camper Quentin!"
+	line "Trainer selected!"
 	done
 
 SafariGauntletRound2Text:
 	text "Round 2:"
-	line "Fisher Tully!"
+	line "Trainer selected!"
 	done
 
 SafariGauntletRound3Text:
 	text "Round 3:"
-	line "Psychic Gilbert!"
+	line "Trainer selected!"
 	done
 
 SafariGauntletRound4Text:
 	text "Round 4:"
-	line "Battle Girl Ronda!"
+	line "Trainer selected!"
 	done
 
 SafariGauntletBossHealText:
@@ -956,6 +1427,90 @@ SafariGauntletSettingsHeaderText:
 
 	para "Changes are saved."
 	done
+
+SafariGauntletSettingsDexPromptText:
+	text "Draft mode?"
+	done
+
+SafariGauntletSettingsCarryPromptText:
+	text "Carry-in?"
+	done
+
+SafariGauntletSettingsBossPromptText:
+	text "Boss reveal?"
+	done
+
+SafariGauntletSettingsDifficultyPromptText:
+	text "Difficulty?"
+	done
+
+SafariGauntletSettingsMainMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 16, 10
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 5 ; items
+	db "Draft Mode@"
+	db "Carry-in@"
+	db "Boss Reveal@"
+	db "Difficulty@"
+	db "Done@"
+
+SafariGauntletDexModeMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 15, 8
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 3 ; items
+	db "Johto@"
+	db "National@"
+	db "Back@"
+
+SafariGauntletOnOffMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 12, 8
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 3 ; items
+	db "On@"
+	db "Off@"
+	db "Back@"
+
+SafariGauntletBossRevealMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 12, 8
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 3 ; items
+	db "Reveal@"
+	db "Hide@"
+	db "Back@"
+
+SafariGauntletDifficultyMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 14, 9
+	dw .Items
+	db 2 ; default option
+
+.Items:
+	db $80 ; flags
+	db 4 ; items
+	db "Casual@"
+	db "Standard@"
+	db "Hard@"
+	db "Back@"
 
 SafariGauntletSettingsNationalText:
 	text "Mode: National."
@@ -1078,8 +1633,8 @@ SafariGauntletGuideText:
 	cont "to start."
 
 	para "Settings are"
-	line "changed by the"
-	cont "blue aide."
+	line "under Rules in"
+	cont "the Start menu."
 
 	para "They stay saved"
 	line "for future runs."

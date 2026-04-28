@@ -1,5 +1,8 @@
-local log_path = "/tmp/safari-gauntlet-start.log"
-local screenshot_path = "/tmp/safari-gauntlet-start.png"
+local log_path = "/tmp/safari-gauntlet-starter-pc.log"
+local pc_menu_screenshot = "/tmp/safari-gauntlet-starter-pc-menu.png"
+local bills_menu_screenshot = "/tmp/safari-gauntlet-starter-bills-pc-menu.png"
+local storage_text_screenshot = "/tmp/safari-gauntlet-starter-storage-text.png"
+local box_ui_screenshot = "/tmp/safari-gauntlet-starter-storage-ready.png"
 
 local KEY = C.GB_KEY
 local function bit(key)
@@ -19,34 +22,19 @@ local W = {
 	map_number = 0xdcad,
 	y = 0xdcae,
 	x = 0xdcaf,
+	player_direction = 0xd4d4,
 	options2 = 0xcff5,
 	party_count = 0xdcce,
 	map_status = 0xd431,
-	battle_mode = 0xd233,
-	num_balls = 0xd90b,
-	balls = 0xd90c,
-	boss = 0xd7da,
-	draft_attempts = 0xd7db,
-	step = 0xd7dc,
-	time_remaining = 0xdc93,
-	settings = 0xdba1,
-	keep_count = 0xdba2,
-	keep_species = 0xdba3,
-	player_direction = 0xd4d4,
-	script_flags = 0xd433,
-	script_mode = 0xd436,
-	last_talked = 0xffc7,
-	script_bank = 0xffeb,
-	script_pos = 0xffec,
+	script_flags = 0xd434,
+	script_mode = 0xd437,
+	keep_count = 0xd7f1,
+	keep_species = 0xd7f2,
 	crash_code = 0xffe5,
 }
 
 local GROUP_BATTLE_FACTORY = 12
 local MAP_BATTLE_FACTORY_1F = 17
-local GROUP_SAFARI_ZONE = 32
-local MAP_SAFARI_ZONE_HUB = 1
-local SAFARI_GAUNTLET_STEP_DRAFT = 1
-local MASTER_BALL = 4
 local OW_UP = 0x04
 
 local f = assert(io.open(log_path, "w"))
@@ -77,14 +65,6 @@ local function write8(addr, value)
 	end
 end
 
-local function read16(hi)
-	return read8(hi) * 256 + read8(hi + 1)
-end
-
-local function read16le(lo)
-	return read8(lo) + read8(lo + 1) * 256
-end
-
 local function log(msg)
 	local line = string.format("%08d %s", emu:currentFrame(), msg)
 	f:write(line .. "\n")
@@ -92,20 +72,9 @@ local function log(msg)
 	console:log(line)
 end
 
-local function ball_qty(item)
-	local count = read8(W.num_balls)
-	for i = 0, count - 1 do
-		local slot = W.balls + i * 2
-		if read8(slot) == item then
-			return read8(slot + 1)
-		end
-	end
-	return 0
-end
-
 local function state_line(prefix)
 	log(string.format(
-		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x status=%02x talked=%d script=%02x/%02x pc=%02x:%04x party=%d battle=%d step=%d attempts=%d boss=%d steps_left=%d settings=%02x keep=%d keep0=%d master=%d",
+		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x status=%02x script=%02x/%02x party=%d keep=%d keep0=%d",
 		prefix,
 		read8(W.crash_code),
 		read8(W.map_group),
@@ -114,32 +83,27 @@ local function state_line(prefix)
 		read8(W.y),
 		read8(W.player_direction),
 		read8(W.map_status),
-		read8(W.last_talked),
 		read8(W.script_flags),
 		read8(W.script_mode),
-		read8(W.script_bank),
-		read16le(W.script_pos),
 		read8(W.party_count),
-		read8(W.battle_mode),
-		read8(W.step),
-		read8(W.draft_attempts),
-		read8(W.boss),
-		read16(W.time_remaining),
-		read8(W.settings),
 		read8(W.keep_count),
-		read8(W.keep_species),
-		ball_qty(MASTER_BALL)
+		read8(W.keep_species)
 	))
 end
 
 local function apply_keys(keys)
-	emu:setKeys(keys)
-	for _, key in ipairs({ KEY.A, KEY.B, KEY.SELECT, KEY.START, KEY.LEFT, KEY.RIGHT, KEY.UP, KEY.DOWN }) do
-		emu:clearKey(key)
-		if (keys & bit(key)) ~= 0 then
-			emu:addKey(key)
-		end
+	emu:clearKeys(0xffffffff)
+	if keys ~= 0 then
+		emu:addKeys(keys)
 	end
+end
+
+local function fail(reason, screenshot_path)
+	state_line(reason)
+	emu:screenshot(screenshot_path or box_ui_screenshot)
+	log("screenshot=" .. (screenshot_path or box_ui_screenshot))
+	apply_keys(0)
+	error(reason)
 end
 
 local function run_frames(keys, frames)
@@ -148,38 +112,20 @@ local function run_frames(keys, frames)
 		write8(W.options2, read8(W.options2) & 0x3f)
 		emu:runFrame()
 		if read8(W.crash_code) ~= 0 then
-			state_line("FAILED_CRASH")
-			emu:screenshot(screenshot_path)
-			log("screenshot=" .. screenshot_path)
-			apply_keys(0)
-			error("crash")
+			fail("FAILED_CRASH")
 		end
 	end
 	apply_keys(0)
 end
 
-local function pulse(keys)
-	run_frames(keys, 8)
-	run_frames(0, 22)
+local function pulse(keys, down_frames, up_frames)
+	run_frames(keys, down_frames or 8)
+	run_frames(0, up_frames or 24)
 end
 
 local function in_hub()
 	return read8(W.map_group) == GROUP_BATTLE_FACTORY
 		and read8(W.map_number) == MAP_BATTLE_FACTORY_1F
-end
-
-local function in_draft()
-	return read8(W.map_group) == GROUP_SAFARI_ZONE
-		and read8(W.map_number) == MAP_SAFARI_ZONE_HUB
-		and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT
-end
-
-local function fail(reason)
-	state_line(reason)
-	emu:screenshot(screenshot_path)
-	log("screenshot=" .. screenshot_path)
-	apply_keys(0)
-	return false
 end
 
 local function boot_to_hub()
@@ -196,9 +142,6 @@ local function boot_to_hub()
 	local hub_frame = nil
 	for i = 1, 9000 do
 		run_frames(0, 1)
-		if i % 300 == 0 then
-			state_line("boot_wait")
-		end
 		if in_hub() and not hub_frame then
 			hub_frame = emu:currentFrame()
 			state_line("hub_seen")
@@ -209,12 +152,15 @@ local function boot_to_hub()
 			and read8(W.map_status) == 2
 			and read8(W.script_flags) == 0
 			and read8(W.script_mode) == 0
-			and read8(W.party_count) > 0 then
+			and read8(W.party_count) == 1 then
 			state_line("hub_ready")
-			return true
+			return
+		end
+		if i % 300 == 0 then
+			state_line("boot_wait")
 		end
 	end
-	return fail("FAILED_BOOT_TO_HUB")
+	fail("FAILED_BOOT_TO_HUB")
 end
 
 local function move_toward(tx, ty)
@@ -230,46 +176,40 @@ local function move_toward(tx, ty)
 	return 0
 end
 
-local function stand_at_reception()
+local function stand_at_pc()
 	for i = 1, 2400 do
-		local keys = move_toward(12, 8)
+		local keys = move_toward(5, 8)
 		if keys == 0 then
 			write8(W.player_direction, OW_UP)
-			state_line("reception_ready")
-			return true
+			state_line("pc_ready")
+			return
 		end
 		run_frames(keys, 1)
 		if i % 300 == 0 then
 			state_line("move_wait")
 		end
 	end
-	return fail("FAILED_REACH_RECEPTION")
+	fail("FAILED_REACH_PC")
 end
 
-local function start_gauntlet()
-	for i = 1, 900 do
-		if in_draft() then
-			state_line("VERIFIED_START_DRAFT")
-			emu:screenshot(screenshot_path)
-			log("screenshot=" .. screenshot_path)
-			apply_keys(0)
-			return true
-		end
-		if i % 10 == 0 then
-			state_line("start_wait")
-		end
-		pulse(A)
-	end
-	return fail("FAILED_START_DRAFT")
+local function open_pc_to_box_ui()
+	pulse(A, 10, 70)
+	emu:screenshot(pc_menu_screenshot)
+	log("pc_menu_screenshot=" .. pc_menu_screenshot)
+	pulse(A, 10, 70)
+	emu:screenshot(bills_menu_screenshot)
+	log("bills_menu_screenshot=" .. bills_menu_screenshot)
+	pulse(A, 10, 600)
+	emu:screenshot(storage_text_screenshot)
+	log("storage_text_screenshot=" .. storage_text_screenshot)
+	emu:screenshot(box_ui_screenshot)
+	log("box_ui_screenshot=" .. box_ui_screenshot)
+	state_line("VERIFIED_STARTER_PC_STORAGE_TEXT")
 end
 
-log("Safari Gauntlet start verifier loaded")
+log("Safari Gauntlet starter PC verifier loaded")
 state_line("initial")
-
-local ok = boot_to_hub()
-if ok then
-	ok = stand_at_reception()
-end
-if ok then
-	start_gauntlet()
-end
+boot_to_hub()
+stand_at_pc()
+open_pc_to_box_ui()
+apply_keys(0)

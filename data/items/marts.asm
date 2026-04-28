@@ -540,12 +540,12 @@ BattleFactoryMart2:
 
 BattleFactoryMart3:
 	db 8 ; # items
-	db TM_THUNDERBOLT, 24
-	db TM_FLAMETHROWER, 24
-	db TM_ICE_BEAM, 24
-	db TM_PSYCHIC, 24
-	db TM_SHADOW_BALL, 24
-	db TM_EARTHQUAKE, 32
-	db TM_DRAIN_PUNCH, 32
-	db TM_ROOST, 24
+	db CLEAR_AMULET, 16
+	db BINDING_BAND, 32
+	db GRIP_CLAW,    32
+	db LOADED_DICE,  16
+	db THROAT_SPRAY, 24
+	db ROOM_SERVICE, 24
+	db LIFE_ORB,     48
+	db MINT_LEAF,    32
 	db -1

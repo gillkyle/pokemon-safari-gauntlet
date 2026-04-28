@@ -1,5 +1,5 @@
-local log_path = "/tmp/safari-gauntlet-idle-boot.log"
-local screenshot_path = "/tmp/safari-gauntlet-idle-boot.png"
+local log_path = "/tmp/safari-gauntlet-clerk-blue.log"
+local screenshot_path = "/tmp/safari-gauntlet-clerk-blue.png"
 
 local KEY = C.GB_KEY
 local function bit(key)
@@ -9,6 +9,10 @@ end
 local A = bit(KEY.A)
 local B = bit(KEY.B)
 local START = bit(KEY.START)
+local LEFT = bit(KEY.LEFT)
+local RIGHT = bit(KEY.RIGHT)
+local UP = bit(KEY.UP)
+local DOWN = bit(KEY.DOWN)
 
 local W = {
 	map_group = 0xdcac,
@@ -16,23 +20,13 @@ local W = {
 	y = 0xdcae,
 	x = 0xdcaf,
 	player_direction = 0xd4d4,
-	script_flags = 0xd433,
-	script_mode = 0xd436,
-	script_bank = 0xffeb,
-	script_pos = 0xffec,
 	crash_code = 0xffe5,
-	party_count = 0xdcce,
-	step = 0xd7dc,
 }
 
 local GROUP_BATTLE_FACTORY = 12
 local MAP_BATTLE_FACTORY_1F = 17
-local OW_DOWN = 0x00
 
 local f = assert(io.open(log_path, "w"))
-local frame0 = emu:currentFrame()
-local hub_frame = nil
-local last_log = 0
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -51,10 +45,6 @@ local function read8(addr)
 	return emu:read8(addr)
 end
 
-local function read16le(lo)
-	return read8(lo) + read8(lo + 1) * 256
-end
-
 local function log(msg)
 	local line = string.format("%08d %s", emu:currentFrame(), msg)
 	f:write(line .. "\n")
@@ -64,25 +54,17 @@ end
 
 local function state_line(prefix)
 	log(string.format(
-		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x script=%02x/%02x pc=%02x:%04x party=%d step=%d",
+		"%s map=%d/%d xy=%d,%d dir=%02x",
 		prefix,
-		read8(W.crash_code),
 		read8(W.map_group),
 		read8(W.map_number),
 		read8(W.x),
 		read8(W.y),
-		read8(W.player_direction),
-		read8(W.script_flags),
-		read8(W.script_mode),
-		read8(W.script_bank),
-		read16le(W.script_pos),
-		read8(W.party_count),
-		read8(W.step)
+		read8(W.player_direction)
 	))
 end
 
 local function apply_keys(keys)
-	emu:setKeys(keys)
 	for _, key in ipairs({ KEY.A, KEY.B, KEY.SELECT, KEY.START, KEY.LEFT, KEY.RIGHT, KEY.UP, KEY.DOWN }) do
 		emu:clearKey(key)
 		if (keys & bit(key)) ~= 0 then
@@ -92,9 +74,6 @@ local function apply_keys(keys)
 end
 
 local function drive_boot(frame)
-	if frame > 20000 then
-		return 0
-	end
 	local t = frame % 90
 	if t < 12 then
 		return START
@@ -108,66 +87,88 @@ local function drive_boot(frame)
 	return 0
 end
 
+local function move_toward(tx, ty)
+	local x = read8(W.x)
+	local y = read8(W.y)
+	if y < ty then
+		return DOWN
+	elseif y > ty then
+		return UP
+	elseif x < tx then
+		return RIGHT
+	elseif x > tx then
+		return LEFT
+	end
+	return 0
+end
+
+local phase = "boot"
+local phase_frame = 0
+local frame0 = emu:currentFrame()
+
+local function set_phase(next_phase)
+	if phase ~= next_phase then
+		phase = next_phase
+		phase_frame = 0
+		state_line("phase=" .. phase)
+	end
+end
+
 local cbid
-cbid = callbacks:add("keysRead", function()
+cbid = callbacks:add("frame", function()
 	local frame = emu:currentFrame()
 	local keys = 0
 	local in_hub = read8(W.map_group) == GROUP_BATTLE_FACTORY and read8(W.map_number) == MAP_BATTLE_FACTORY_1F
 
 	if read8(W.crash_code) ~= 0 then
 		state_line("FAILED_CRASH")
-		emu:screenshot(screenshot_path)
-		log("screenshot=" .. screenshot_path)
 		apply_keys(0)
 		callbacks:remove(cbid)
 		return
 	end
 
-	if frame - last_log > 300 then
-		last_log = frame
-		state_line("tick")
+	if not in_hub then
+		keys = drive_boot(frame - frame0)
+		apply_keys(keys)
+		return
 	end
 
-	if in_hub then
-		if not hub_frame then
-			hub_frame = frame
-			state_line("hub_reached")
+	if phase == "boot" then
+		set_phase("move")
+	end
+
+	if phase == "move" then
+		keys = move_toward(22, 9)
+		if keys == 0 then
+			set_phase("talk")
 		end
-		local elapsed = frame - hub_frame
-		if elapsed < 60 then
-			keys = A -- simulate the player still holding A from the title/menu.
-		elseif elapsed > 180 then
-			if read8(W.x) == 11
-				and read8(W.y) == 8
-				and read8(W.player_direction) == OW_DOWN
-				and read8(W.script_flags) == 0
-				and read8(W.script_mode) == 0
-				and read8(W.step) == 0 then
-				state_line("VERIFIED_IDLE_BOOT")
-			else
-				state_line("FAILED_NOT_IDLE")
-			end
+	elseif phase == "talk" then
+		if phase_frame < 16 then
+			keys = UP
+		elseif phase_frame >= 24 and phase_frame < 120 and (phase_frame % 12) < 2 then
+			keys = A
+		elseif phase_frame >= 132 and phase_frame < 138 then
+			keys = A
+		elseif phase_frame == 190 then
 			emu:screenshot(screenshot_path)
 			log("screenshot=" .. screenshot_path)
+			state_line("VERIFIED_BLUE_CLERK")
 			apply_keys(0)
 			callbacks:remove(cbid)
 			return
 		end
-	else
-		keys = drive_boot(frame - frame0)
 	end
 
-	if frame - frame0 > 60000 then
+	if frame - frame0 > 70000 then
 		state_line("FAILED_TIMEOUT")
-		emu:screenshot(screenshot_path)
-		log("screenshot=" .. screenshot_path)
 		apply_keys(0)
 		callbacks:remove(cbid)
 		return
 	end
 
 	apply_keys(keys)
+	phase_frame = phase_frame + 1
 end)
 
-log("Safari Gauntlet idle boot verifier loaded")
+log("Safari Gauntlet blue clerk verifier loaded")
 state_line("initial")

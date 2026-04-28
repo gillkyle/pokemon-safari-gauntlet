@@ -1353,7 +1353,9 @@ wSafariGauntletSettings:: db
 wSafariGauntletKeepCount:: db
 wSafariGauntletKeepSpecies:: ds SAFARI_GAUNTLET_KEEP_CAPACITY
 wSafariGauntletKeepExtSpecies:: flag_array SAFARI_GAUNTLET_KEEP_CAPACITY
-	ds 3 ; unused
+wSafariGauntletCarrySlot:: db ; selected Keep Box slot used for carry-in
+wSafariGauntletTMShopSet:: db ; randomized TM shop set for current run
+	ds 1 ; unused
 
 wCandyAmounts::
 	table_width 1

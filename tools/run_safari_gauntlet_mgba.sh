@@ -14,7 +14,24 @@ hash="$(shasum -a 256 "$rom" | awk '{print substr($1, 1, 12)}')"
 run_dir="/tmp/mgba-safari-gauntlet-$hash"
 run_rom="$run_dir/PKPCRYSTAL-$hash.gbc"
 
-if [[ "${1:-}" == "--fresh" ]]; then
+fresh=0
+fast=0
+for arg in "$@"; do
+	case "$arg" in
+		--fresh)
+			fresh=1
+			;;
+		--fast)
+			fast=1
+			;;
+		*)
+			echo "usage: $0 [--fresh] [--fast]" >&2
+			exit 2
+			;;
+	esac
+done
+
+if [[ "$fresh" == 1 ]]; then
 	rm -rf "$run_dir"
 fi
 
@@ -24,14 +41,21 @@ cp "$rom" "$run_rom"
 pkill -x mGBA 2>/dev/null || true
 sleep 1
 
+force_fast_forward=0
+fps_target=60
+if [[ "$fast" == 1 ]]; then
+	force_fast_forward=1
+	fps_target=600
+fi
+
 for _ in 1 2 3 4 5; do
 	if open -a /Applications/mGBA.app --args \
 		-C mute=1 \
 		-C volume=0 \
 		-C audioSync=1 \
-		-C videoSync=1 \
-		-C fpsTarget=60 \
-		-C forceFastForward=0; then
+		-C videoSync=0 \
+		-C fpsTarget="$fps_target" \
+		-C forceFastForward="$force_fast_forward"; then
 		break
 	fi
 	sleep 1

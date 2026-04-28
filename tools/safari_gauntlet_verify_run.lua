@@ -360,7 +360,7 @@ cbid = callbacks:add("frame", function()
 		state_line("tick")
 	end
 
-	if read16(W.runs_hi) >= 1 and read16(W.wins_hi) >= 1 and read8(W.keep_count) >= 1 and read16(W.bp_hi) >= 18 and (read8(W.johto_badges) & 0x80) ~= 0 and read8(W.party_count) == 0 and supplies_seen then
+	if read16(W.runs_hi) >= 1 and read16(W.wins_hi) >= 1 and read8(W.keep_count) >= 1 and read16(W.bp_hi) >= 18 and (read8(W.johto_badges) & 0x80) ~= 0 and read8(W.party_count) == 1 and supplies_seen then
 		state_line("VERIFIED_RUN")
 		emu:screenshot(screenshot_path)
 		log("screenshot=" .. screenshot_path)

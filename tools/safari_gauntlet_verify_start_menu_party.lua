@@ -1,5 +1,5 @@
-local log_path = "/tmp/safari-gauntlet-idle-boot.log"
-local screenshot_path = "/tmp/safari-gauntlet-idle-boot.png"
+local log_path = "/tmp/safari-gauntlet-start-menu-party.log"
+local screenshot_path = "/tmp/safari-gauntlet-start-menu-party.png"
 
 local KEY = C.GB_KEY
 local function bit(key)
@@ -18,11 +18,11 @@ local W = {
 	player_direction = 0xd4d4,
 	script_flags = 0xd433,
 	script_mode = 0xd436,
-	script_bank = 0xffeb,
-	script_pos = 0xffec,
 	crash_code = 0xffe5,
 	party_count = 0xdcce,
 	step = 0xd7dc,
+	settings = 0xdba1,
+	keep_count = 0xdba2,
 }
 
 local GROUP_BATTLE_FACTORY = 12
@@ -31,7 +31,9 @@ local OW_DOWN = 0x00
 
 local f = assert(io.open(log_path, "w"))
 local frame0 = emu:currentFrame()
-local hub_frame = nil
+local phase = "boot"
+local phase_frame = 0
+local phase_start_frame = frame0
 local last_log = 0
 
 local function wram_offset(addr)
@@ -51,10 +53,6 @@ local function read8(addr)
 	return emu:read8(addr)
 end
 
-local function read16le(lo)
-	return read8(lo) + read8(lo + 1) * 256
-end
-
 local function log(msg)
 	local line = string.format("%08d %s", emu:currentFrame(), msg)
 	f:write(line .. "\n")
@@ -64,7 +62,7 @@ end
 
 local function state_line(prefix)
 	log(string.format(
-		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x script=%02x/%02x pc=%02x:%04x party=%d step=%d",
+		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x script=%02x/%02x party=%d step=%d",
 		prefix,
 		read8(W.crash_code),
 		read8(W.map_group),
@@ -74,10 +72,13 @@ local function state_line(prefix)
 		read8(W.player_direction),
 		read8(W.script_flags),
 		read8(W.script_mode),
-		read8(W.script_bank),
-		read16le(W.script_pos),
 		read8(W.party_count),
 		read8(W.step)
+	))
+	log(string.format(
+		"state settings=%02x keep=%d",
+		read8(W.settings),
+		read8(W.keep_count)
 	))
 end
 
@@ -91,11 +92,22 @@ local function apply_keys(keys)
 	end
 end
 
-local function drive_boot(frame)
-	if frame > 20000 then
-		return 0
+local function in_hub()
+	return read8(W.map_group) == GROUP_BATTLE_FACTORY
+		and read8(W.map_number) == MAP_BATTLE_FACTORY_1F
+end
+
+local function set_phase(next_phase)
+	if phase ~= next_phase then
+		phase = next_phase
+		phase_frame = 0
+		phase_start_frame = emu:currentFrame()
+		state_line("phase=" .. phase)
 	end
-	local t = frame % 90
+end
+
+local function drive_boot()
+	local t = phase_frame % 90
 	if t < 12 then
 		return START
 	elseif t < 36 then
@@ -111,8 +123,8 @@ end
 local cbid
 cbid = callbacks:add("keysRead", function()
 	local frame = emu:currentFrame()
+	local elapsed = frame - phase_start_frame
 	local keys = 0
-	local in_hub = read8(W.map_group) == GROUP_BATTLE_FACTORY and read8(W.map_number) == MAP_BATTLE_FACTORY_1F
 
 	if read8(W.crash_code) ~= 0 then
 		state_line("FAILED_CRASH")
@@ -128,24 +140,42 @@ cbid = callbacks:add("keysRead", function()
 		state_line("tick")
 	end
 
-	if in_hub then
-		if not hub_frame then
-			hub_frame = frame
-			state_line("hub_reached")
+	if phase == "boot" then
+		keys = drive_boot()
+		if in_hub()
+			and read8(W.x) == 11
+			and read8(W.y) == 8
+			and read8(W.player_direction) == OW_DOWN
+			and read8(W.script_flags) == 0
+			and read8(W.script_mode) == 0
+			and read8(W.step) == 0 then
+			set_phase("settle")
 		end
-		local elapsed = frame - hub_frame
-		if elapsed < 60 then
-			keys = A -- simulate the player still holding A from the title/menu.
-		elseif elapsed > 180 then
-			if read8(W.x) == 11
-				and read8(W.y) == 8
-				and read8(W.player_direction) == OW_DOWN
-				and read8(W.script_flags) == 0
-				and read8(W.script_mode) == 0
-				and read8(W.step) == 0 then
-				state_line("VERIFIED_IDLE_BOOT")
+	elseif phase == "settle" then
+		if elapsed > 90 then
+			set_phase("open_start")
+		end
+	elseif phase == "open_start" then
+		if elapsed < 30 then
+			keys = START
+		elseif elapsed > 150 then
+			set_phase("select_pokemon")
+		end
+	elseif phase == "select_pokemon" then
+		if elapsed > 30 and elapsed < 300 then
+			keys = A
+		elseif read8(W.party_count) >= 1 then
+			state_line("VERIFIED_START_MENU_POKEMON_SEEDS_PARTY")
+			emu:screenshot(screenshot_path)
+			log("screenshot=" .. screenshot_path)
+			apply_keys(0)
+			callbacks:remove(cbid)
+			return
+		elseif elapsed > 900 then
+			if read8(W.party_count) >= 1 then
+				state_line("VERIFIED_START_MENU_POKEMON_SEEDS_PARTY")
 			else
-				state_line("FAILED_NOT_IDLE")
+				state_line("FAILED_START_MENU_POKEMON_NO_PARTY")
 			end
 			emu:screenshot(screenshot_path)
 			log("screenshot=" .. screenshot_path)
@@ -153,11 +183,9 @@ cbid = callbacks:add("keysRead", function()
 			callbacks:remove(cbid)
 			return
 		end
-	else
-		keys = drive_boot(frame - frame0)
 	end
 
-	if frame - frame0 > 60000 then
+	if frame - frame0 > 90000 then
 		state_line("FAILED_TIMEOUT")
 		emu:screenshot(screenshot_path)
 		log("screenshot=" .. screenshot_path)
@@ -166,8 +194,9 @@ cbid = callbacks:add("keysRead", function()
 		return
 	end
 
+	phase_frame = phase_frame + 1
 	apply_keys(keys)
 end)
 
-log("Safari Gauntlet idle boot verifier loaded")
+log("Safari Gauntlet start-menu party verifier loaded")
 state_line("initial")

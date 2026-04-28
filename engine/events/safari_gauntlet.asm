@@ -1,7 +1,7 @@
 Special_SafariGauntlet_BeginRun:
+	call SafariGauntlet_SaveGame
 	xor a
 	ld [wSafariGauntletDraftAttempts], a
-	ld [wPartyCount], a
 	dec a
 	ld [wJohtoBadges], a
 	ld [wKantoBadges], a
@@ -20,32 +20,26 @@ Special_SafariGauntlet_BeginRun:
 	ld [wSafariTimeRemaining], a
 	ld a, LOW(SAFARI_GAUNTLET_DRAFT_STEPS)
 	ld [wSafariTimeRemaining + 1], a
+	call SafariGauntlet_ClampKeepCount
 	ld a, [wSafariGauntletSettings]
 	bit SAFARI_GAUNTLET_SETTINGS_NO_CARRY_F, a
 	jr nz, .use_starter
-	ld a, [wSafariGauntletKeepCount]
-	and a
-	jr nz, .use_carry
+	ld a, [wPartyCount]
+	cp 1
+	jr z, .use_party
+
 .use_starter
+	xor a
+	ld [wPartyCount], a
 	ld a, LOW(EEVEE)
 	ld [wCurPartySpecies], a
 	ld a, HIGH(EEVEE) << MON_EXTSPECIES_F | PLAIN_FORM
 	ld [wCurForm], a
 	jr .give_starter
 
-.use_carry
-	ld hl, wSafariGauntletKeepSpecies
-	ld a, [hl]
-	ld [wCurPartySpecies], a
-	xor a
-	call SafariGauntlet_GetKeepExtFlag
-	ld a, [hl]
-	and b
-	ld a, PLAIN_FORM
-	jr z, .got_carry_form
-	ld a, EXTSPECIES_MASK | PLAIN_FORM
-.got_carry_form
-	ld [wCurForm], a
+.use_party
+	call SafariGauntlet_NormalizePartyLead
+	jr .run_ready
 
 .give_starter
 	ld a, 35
@@ -58,29 +52,8 @@ Special_SafariGauntlet_BeginRun:
 	call SafariGauntlet_GiveMonNoNickname
 	farcall HealParty
 	call SafariGauntlet_ClampPartyHP
+.run_ready
 	ld a, TRUE
-	ldh [hScriptVar], a
-	ret
-
-Special_SafariGauntlet_CanDraft:
-	ld a, [wSafariGauntletStep]
-	cp SAFARI_GAUNTLET_STEP_DRAFT
-	jr nz, .no
-	ld a, [wPartyCount]
-	cp PARTY_LENGTH
-	jr nc, .no
-	call SafariGauntlet_HasStepsRemaining
-	and a
-	jr z, .no
-	call SafariGauntlet_HasUsableBalls
-	and a
-	jr z, .no
-	ld a, TRUE
-	jr .done
-
-.no
-	xor a
-.done
 	ldh [hScriptVar], a
 	ret
 
@@ -122,13 +95,6 @@ Special_SafariGauntlet_FinishDraft:
 	ldh [hScriptVar], a
 	ret
 
-Special_SafariGauntlet_NextDraftAttempt:
-	ld hl, wSafariGauntletDraftAttempts
-	inc [hl]
-	ld a, [hl]
-	ldh [hScriptVar], a
-	ret
-
 Special_SafariGauntlet_CheckMinParty:
 	ld a, [wPartyCount]
 	cp SAFARI_GAUNTLET_MIN_TEAM
@@ -159,6 +125,7 @@ Special_SafariGauntlet_ChooseKeepMon:
 	call GetPartyParamLocationAndValue
 	and EXTSPECIES_MASK
 	ld [wSafariGauntletRewardExtSpecies], a
+	call SafariGauntlet_StoreSelectedRewardInPC
 	ld a, TRUE
 	ld [wSafariGauntletRewardPending], a
 	jr .done
@@ -186,6 +153,7 @@ Special_SafariGauntlet_EndRunWin:
 	ld [wSafariGauntletBestStreak], a
 .streak_ok
 	call SafariGauntlet_SaveReward
+	call SafariGauntlet_EnsureHubParty
 	call SafariGauntlet_SaveGame
 	ld a, TRUE
 	ldh [hScriptVar], a
@@ -203,6 +171,7 @@ Special_SafariGauntlet_EndRunLoss:
 	ld [wSafariGauntletCurrentStreak], a
 	xor a
 	ld [wBattleResult], a
+	call SafariGauntlet_EnsureHubParty
 	call SafariGauntlet_SaveGame
 	ld a, TRUE
 	ldh [hScriptVar], a
@@ -227,6 +196,22 @@ SafariGauntlet_ReturnBoolean:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_SetDexMode:
+	ld hl, wSafariGauntletSettings
+	ldh a, [hScriptVar]
+	and a
+	jr z, .johto
+	set SAFARI_GAUNTLET_SETTINGS_NATIONAL_F, [hl]
+	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
+.johto
+	res SAFARI_GAUNTLET_SETTINGS_NATIONAL_F, [hl]
+	xor a
+	ldh [hScriptVar], a
+	ret
+
 Special_SafariGauntlet_ToggleCarryIn:
 	ld hl, wSafariGauntletSettings
 	ld a, 1 << SAFARI_GAUNTLET_SETTINGS_NO_CARRY_F
@@ -246,6 +231,22 @@ SafariGauntlet_ReturnInverseBoolean:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_SetCarryIn:
+	ld hl, wSafariGauntletSettings
+	ldh a, [hScriptVar]
+	and a
+	jr z, .off
+	res SAFARI_GAUNTLET_SETTINGS_NO_CARRY_F, [hl]
+	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
+.off
+	set SAFARI_GAUNTLET_SETTINGS_NO_CARRY_F, [hl]
+	xor a
+	ldh [hScriptVar], a
+	ret
+
 Special_SafariGauntlet_ToggleBossReveal:
 	ld hl, wSafariGauntletSettings
 	ld a, 1 << SAFARI_GAUNTLET_SETTINGS_HIDE_BOSS_F
@@ -258,6 +259,22 @@ Special_SafariGauntlet_GetBossReveal:
 	ld a, [wSafariGauntletSettings]
 	and 1 << SAFARI_GAUNTLET_SETTINGS_HIDE_BOSS_F
 	jr SafariGauntlet_ReturnInverseBoolean
+
+Special_SafariGauntlet_SetBossReveal:
+	ld hl, wSafariGauntletSettings
+	ldh a, [hScriptVar]
+	and a
+	jr z, .off
+	res SAFARI_GAUNTLET_SETTINGS_HIDE_BOSS_F, [hl]
+	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
+.off
+	set SAFARI_GAUNTLET_SETTINGS_HIDE_BOSS_F, [hl]
+	xor a
+	ldh [hScriptVar], a
+	ret
 
 Special_SafariGauntlet_CycleDifficulty:
 	ld hl, wSafariGauntletSettings
@@ -284,6 +301,27 @@ Special_SafariGauntlet_CycleDifficulty:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_SetDifficulty:
+	ldh a, [hScriptVar]
+	cp SAFARI_GAUNTLET_DIFFICULTY_HARD + 1
+	jr c, .valid
+	xor a
+
+.valid
+	ld b, a
+	rept SAFARI_GAUNTLET_SETTINGS_DIFFICULTY_SHIFT
+		sla a
+	endr
+	ld c, a
+	ld hl, wSafariGauntletSettings
+	ld a, [hl]
+	and SAFARI_GAUNTLET_SETTINGS_DIFFICULTY_CLEAR
+	or c
+	ld [hl], a
+	ld a, b
+	ldh [hScriptVar], a
+	ret
+
 Special_SafariGauntlet_GetDifficulty:
 	ld a, [wSafariGauntletSettings]
 	and SAFARI_GAUNTLET_SETTINGS_DIFFICULTY_MASK
@@ -299,8 +337,76 @@ Special_SafariGauntlet_SaveSettings:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_SelectCarryMon:
+	call SafariGauntlet_ClampKeepCount
+	call SafariGauntlet_GetCarrySlotIndex
+	ld a, [wSafariGauntletKeepCount]
+	and a
+	jr z, .cancel
+	call LoadStandardMenuHeader
+	ld hl, .MenuDataHeader
+	call CopyMenuHeader
+	ld a, [wSafariGauntletCarrySlot]
+	inc a
+	ld [wMenuCursorBuffer], a
+	xor a
+	ld [wMenuScrollPosition], a
+	call InitScrollingMenu
+	call ScrollingMenu
+	call CloseWindow
+	call ExitMenu
+	ld a, [wMenuJoypad]
+	cp PAD_B
+	jr z, .cancel
+	ld a, [wScrollingMenuCursorPosition]
+	ld [wSafariGauntletCarrySlot], a
+	ld a, TRUE
+	jr .done
+
+.cancel
+	xor a
+.done
+	ldh [hScriptVar], a
+	ret
+
+.MenuDataHeader:
+	db MENU_BACKUP_TILES
+	menu_coords 1, 1, 18, 10
+	dw .MenuData2
+	db 1 ; default option
+
+	db 0
+
+.MenuData2:
+	db $10 ; flags
+	db 6, 0
+	db 1
+	dbw 0, wSafariGauntletKeepCount
+	dba .PlaceKeepMonName
+	dba NULL
+	dba NULL
+
+.PlaceKeepMonName:
+	ld a, [wMenuSelection]
+	and a
+	ret z
+	push de
+	ld [wNamedObjectIndex], a
+	xor a
+	ld [wNamedObjectIndex + 1], a
+	call GetPokemonName
+	pop hl
+	rst PlaceString
+	ret
+
 Special_SafariGauntlet_ClampPartyHP:
 	call SafariGauntlet_ClampPartyHP
+	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
+Special_SafariGauntlet_EnsureHubParty:
+	call SafariGauntlet_EnsureHubParty
 	ld a, TRUE
 	ldh [hScriptVar], a
 	ret
@@ -310,6 +416,73 @@ SafariGauntlet_SaveGame:
 	ld [wSavedAtLeastOnce], a
 	farcall SaveGameData
 	farcall SaveCurrentVersion
+	ret
+
+SafariGauntlet_NormalizePartyLead:
+	xor a
+	ld [wCurPartyMon], a
+	ld a, 35
+	ld [wCurPartyLevel], a
+	ld a, MON_LEVEL
+	call GetPartyParamLocationAndValue
+	ld [hl], 35
+	ld a, MON_SPECIES
+	call GetPartyParamLocationAndValue
+	ld [wCurSpecies], a
+	ld a, MON_FORM
+	call GetPartyParamLocationAndValue
+	ld [wCurForm], a
+	call GetBaseData
+	ld d, 35
+	farcall CalcExpAtLevel
+	ld a, MON_EXP
+	call GetPartyParamLocationAndValue
+	ldh a, [hMultiplicand]
+	ld [hli], a
+	ldh a, [hMultiplicand + 1]
+	ld [hli], a
+	ldh a, [hMultiplicand + 2]
+	ld [hl], a
+	farcall UpdatePkmnStats
+	farcall HealParty
+	call SafariGauntlet_ClampPartyHP
+	ret
+
+SafariGauntlet_StoreSelectedRewardInPC:
+	ld a, [wCurPartyMon]
+	inc a
+	ld c, a
+	ld b, 1
+	farcall CopyBetweenPartyAndTemp
+	call SafariGauntlet_NormalizeTempReward
+	farcall NewStorageBoxPointer
+	ret c
+	ld a, c
+	ld [wTempMonSlot], a
+	ld a, b
+	ld [wTempMonBox], a
+	farcall UpdateStorageBoxMonFromTemp
+	ret
+
+SafariGauntlet_NormalizeTempReward:
+	ld a, 35
+	ld [wTempMonLevel], a
+	ld [wCurPartyLevel], a
+	ld a, [wTempMonSpecies]
+	ld [wCurSpecies], a
+	ld a, [wTempMonForm]
+	ld [wCurForm], a
+	call GetBaseData
+	ld d, 35
+	farcall CalcExpAtLevel
+	ld hl, wTempMonExp
+	ldh a, [hMultiplicand]
+	ld [hli], a
+	ldh a, [hMultiplicand + 1]
+	ld [hli], a
+	ldh a, [hMultiplicand + 2]
+	ld [hl], a
+	farcall SetTempPartyMonData
 	ret
 
 SafariGauntlet_Inc16:
@@ -384,6 +557,7 @@ SafariGauntlet_SaveReward:
 
 .inc_count
 	pop af
+	ld [wSafariGauntletCarrySlot], a
 	ld hl, wSafariGauntletKeepCount
 	inc [hl]
 	ret
@@ -405,6 +579,196 @@ SafariGauntlet_GetKeepExtFlag:
 	sla b
 	dec a
 	jr nz, .mask_loop
+	ret
+
+SafariGauntlet_ClampKeepCount:
+	ld a, [wSafariGauntletKeepCount]
+	cp SAFARI_GAUNTLET_KEEP_CAPACITY + 1
+	ret c
+	ld a, SAFARI_GAUNTLET_KEEP_CAPACITY
+	ld [wSafariGauntletKeepCount], a
+	ret
+
+SafariGauntlet_GetCarrySlotIndex:
+	call SafariGauntlet_ClampKeepCount
+	ld a, [wSafariGauntletKeepCount]
+	and a
+	jr nz, .have_keep
+	xor a
+	ld [wSafariGauntletCarrySlot], a
+	ret
+
+.have_keep
+	ld b, a
+	ld a, [wSafariGauntletCarrySlot]
+	cp b
+	jr c, .valid
+	xor a
+	ld [wSafariGauntletCarrySlot], a
+	ret
+
+.valid
+	ret
+
+SafariGauntlet_EnsureStarterKeepBox:
+	ld a, [wSafariGauntletSettings]
+	bit SAFARI_GAUNTLET_SETTINGS_KEEPBOX_SEEDED_F, a
+	ret nz
+	call SafariGauntlet_ClampKeepCount
+	ld hl, .StarterSpecies
+.next_species
+	ld a, [hli]
+	cp -1
+	jr z, .mark_seeded
+	push hl
+	call SafariGauntlet_AddKeepSpeciesIfMissing
+	pop hl
+	jr .next_species
+
+.mark_seeded
+	ld hl, wSafariGauntletSettings
+	set SAFARI_GAUNTLET_SETTINGS_KEEPBOX_SEEDED_F, [hl]
+	ret
+
+.StarterSpecies:
+	db EEVEE
+	db BULBASAUR
+	db CHARMANDER
+	db SQUIRTLE
+	db CHIKORITA
+	db CYNDAQUIL
+	db TOTODILE
+	db -1
+
+SafariGauntlet_AddKeepSpeciesIfMissing:
+	ld c, a
+	ld a, [wSafariGauntletKeepCount]
+	ld b, a
+	ld hl, wSafariGauntletKeepSpecies
+.scan
+	ld a, b
+	and a
+	jr z, .append
+	ld a, [hli]
+	cp c
+	ret z
+	dec b
+	jr .scan
+
+.append
+	ld a, [wSafariGauntletKeepCount]
+	cp SAFARI_GAUNTLET_KEEP_CAPACITY
+	ret nc
+	ld e, c
+	push af
+	ld hl, wSafariGauntletKeepSpecies
+	ld bc, 1
+	rst AddNTimes
+	ld a, e
+	ld [hl], a
+	pop af
+	push af
+	call SafariGauntlet_GetKeepExtFlag
+	ld a, b
+	cpl
+	and [hl]
+	ld [hl], a
+	pop af
+	inc a
+	ld [wSafariGauntletKeepCount], a
+	ret
+
+SafariGauntlet_SeedStarterPC:
+	ld hl, .StarterPCSpecies
+.next_species
+	ld a, [hli]
+	cp -1
+	ret z
+	push hl
+	call SafariGauntlet_AddStarterToPC
+	pop hl
+	jr .next_species
+
+.StarterPCSpecies:
+	db BULBASAUR
+	db CHARMANDER
+	db SQUIRTLE
+	db CHIKORITA
+	db CYNDAQUIL
+	db TOTODILE
+	db -1
+
+SafariGauntlet_AddStarterToPC:
+	ld [wCurPartySpecies], a
+	ld [wCurSpecies], a
+	ld a, PLAIN_FORM
+	ld [wCurForm], a
+	ld a, 35
+	ld [wCurPartyLevel], a
+	call SafariGauntlet_AddMonSilently
+	ld a, [wPartyCount]
+	and a
+	ret z
+	ld c, a
+	ld b, 1
+	farcall CopyBetweenPartyAndTemp
+	farcall NewStorageBoxPointer
+	push af
+	ld a, c
+	ld [wTempMonSlot], a
+	ld a, b
+	ld [wTempMonBox], a
+	pop af
+	call nc, .store_temp
+	ld a, [wPartyCount]
+	dec a
+	ld [wCurPartyMon], a
+	farcall RemoveMonFromParty
+	ret
+
+.store_temp
+	farcall UpdateStorageBoxMonFromTemp
+	ret
+
+SafariGauntlet_EnsureHubParty:
+	call SafariGauntlet_ClampKeepCount
+	ld a, [wPartyCount]
+	and a
+	ret nz
+
+.check_map
+	ld a, [wMapGroup]
+	cp GROUP_BATTLE_FACTORY_1F
+	ret nz
+	ld a, [wMapNumber]
+	cp MAP_BATTLE_FACTORY_1F
+	ret nz
+.build_party
+	; Keep hub bootstrap deterministic and resilient to stale carry data.
+	; Carry selection is still applied at run start in BeginRun.
+	ld a, LOW(EEVEE)
+	ld [wCurPartySpecies], a
+	ld a, HIGH(EEVEE) << MON_EXTSPECIES_F | PLAIN_FORM
+	ld [wCurForm], a
+
+.give_mon
+	ld a, 35
+	ld [wCurPartyLevel], a
+	xor a
+	ld [wCurItem], a
+	ld [wCurPlayerMove], a
+	ld a, POKE_BALL
+	ld [wGiftMonBall], a
+	call SafariGauntlet_AddMonSilently
+	farcall HealParty
+	call SafariGauntlet_ClampPartyHP
+	ret
+
+SafariGauntlet_AddMonSilently:
+	xor a
+	ld [wMonType], a
+	ld [wBattleMode], a
+	farcall TryAddMonToParty
 	ret
 
 SafariGauntlet_GiveMonNoNickname:
@@ -508,7 +872,7 @@ SafariGauntletGiftData:
 	bigdw 0
 
 SafariGauntletGiftNickname:
-	db "EEVEE@"
+	db "TRAINER@"
 
 SafariGauntletGiftOT:
 	db "SAFARI@"

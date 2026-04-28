@@ -1,5 +1,5 @@
-local log_path = "/tmp/safari-gauntlet-start.log"
-local screenshot_path = "/tmp/safari-gauntlet-start.png"
+local log_path = "/tmp/safari-gauntlet-native-party-start.log"
+local screenshot_path = "/tmp/safari-gauntlet-native-party-start.png"
 
 local KEY = C.GB_KEY
 local function bit(key)
@@ -21,23 +21,14 @@ local W = {
 	x = 0xdcaf,
 	options2 = 0xcff5,
 	party_count = 0xdcce,
+	party_mon1_species = 0xdcd6,
+	party_mon1_form = 0xdceb,
+	party_mon1_level = 0xdcf5,
 	map_status = 0xd431,
-	battle_mode = 0xd233,
-	num_balls = 0xd90b,
-	balls = 0xd90c,
-	boss = 0xd7da,
-	draft_attempts = 0xd7db,
 	step = 0xd7dc,
-	time_remaining = 0xdc93,
-	settings = 0xdba1,
-	keep_count = 0xdba2,
-	keep_species = 0xdba3,
 	player_direction = 0xd4d4,
 	script_flags = 0xd433,
 	script_mode = 0xd436,
-	last_talked = 0xffc7,
-	script_bank = 0xffeb,
-	script_pos = 0xffec,
 	crash_code = 0xffe5,
 }
 
@@ -46,7 +37,8 @@ local MAP_BATTLE_FACTORY_1F = 17
 local GROUP_SAFARI_ZONE = 32
 local MAP_SAFARI_ZONE_HUB = 1
 local SAFARI_GAUNTLET_STEP_DRAFT = 1
-local MASTER_BALL = 4
+local BULBASAUR = 1
+local EEVEE = 133
 local OW_UP = 0x04
 
 local f = assert(io.open(log_path, "w"))
@@ -77,14 +69,6 @@ local function write8(addr, value)
 	end
 end
 
-local function read16(hi)
-	return read8(hi) * 256 + read8(hi + 1)
-end
-
-local function read16le(lo)
-	return read8(lo) + read8(lo + 1) * 256
-end
-
 local function log(msg)
 	local line = string.format("%08d %s", emu:currentFrame(), msg)
 	f:write(line .. "\n")
@@ -92,54 +76,38 @@ local function log(msg)
 	console:log(line)
 end
 
-local function ball_qty(item)
-	local count = read8(W.num_balls)
-	for i = 0, count - 1 do
-		local slot = W.balls + i * 2
-		if read8(slot) == item then
-			return read8(slot + 1)
-		end
-	end
-	return 0
-end
-
 local function state_line(prefix)
 	log(string.format(
-		"%s crash=%d map=%d/%d xy=%d,%d dir=%02x status=%02x talked=%d script=%02x/%02x pc=%02x:%04x party=%d battle=%d step=%d attempts=%d boss=%d steps_left=%d settings=%02x keep=%d keep0=%d master=%d",
+		"%s crash=%d map=%d/%d xy=%d,%d status=%02x script=%02x/%02x party=%d species=%d level=%d step=%d",
 		prefix,
 		read8(W.crash_code),
 		read8(W.map_group),
 		read8(W.map_number),
 		read8(W.x),
 		read8(W.y),
-		read8(W.player_direction),
 		read8(W.map_status),
-		read8(W.last_talked),
 		read8(W.script_flags),
 		read8(W.script_mode),
-		read8(W.script_bank),
-		read16le(W.script_pos),
 		read8(W.party_count),
-		read8(W.battle_mode),
-		read8(W.step),
-		read8(W.draft_attempts),
-		read8(W.boss),
-		read16(W.time_remaining),
-		read8(W.settings),
-		read8(W.keep_count),
-		read8(W.keep_species),
-		ball_qty(MASTER_BALL)
+		read8(W.party_mon1_species),
+		read8(W.party_mon1_level),
+		read8(W.step)
 	))
 end
 
 local function apply_keys(keys)
-	emu:setKeys(keys)
-	for _, key in ipairs({ KEY.A, KEY.B, KEY.SELECT, KEY.START, KEY.LEFT, KEY.RIGHT, KEY.UP, KEY.DOWN }) do
-		emu:clearKey(key)
-		if (keys & bit(key)) ~= 0 then
-			emu:addKey(key)
-		end
+	emu:clearKeys(0xffffffff)
+	if keys ~= 0 then
+		emu:addKeys(keys)
 	end
+end
+
+local function fail(reason)
+	state_line(reason)
+	emu:screenshot(screenshot_path)
+	log("screenshot=" .. screenshot_path)
+	apply_keys(0)
+	error(reason)
 end
 
 local function run_frames(keys, frames)
@@ -148,11 +116,7 @@ local function run_frames(keys, frames)
 		write8(W.options2, read8(W.options2) & 0x3f)
 		emu:runFrame()
 		if read8(W.crash_code) ~= 0 then
-			state_line("FAILED_CRASH")
-			emu:screenshot(screenshot_path)
-			log("screenshot=" .. screenshot_path)
-			apply_keys(0)
-			error("crash")
+			fail("FAILED_CRASH")
 		end
 	end
 	apply_keys(0)
@@ -174,14 +138,6 @@ local function in_draft()
 		and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT
 end
 
-local function fail(reason)
-	state_line(reason)
-	emu:screenshot(screenshot_path)
-	log("screenshot=" .. screenshot_path)
-	apply_keys(0)
-	return false
-end
-
 local function boot_to_hub()
 	for _ = 1, 80 do
 		pulse(START)
@@ -196,9 +152,6 @@ local function boot_to_hub()
 	local hub_frame = nil
 	for i = 1, 9000 do
 		run_frames(0, 1)
-		if i % 300 == 0 then
-			state_line("boot_wait")
-		end
 		if in_hub() and not hub_frame then
 			hub_frame = emu:currentFrame()
 			state_line("hub_seen")
@@ -209,12 +162,15 @@ local function boot_to_hub()
 			and read8(W.map_status) == 2
 			and read8(W.script_flags) == 0
 			and read8(W.script_mode) == 0
-			and read8(W.party_count) > 0 then
+			and read8(W.party_count) == 1 then
 			state_line("hub_ready")
-			return true
+			return
+		end
+		if i % 300 == 0 then
+			state_line("boot_wait")
 		end
 	end
-	return fail("FAILED_BOOT_TO_HUB")
+	fail("FAILED_BOOT_TO_HUB")
 end
 
 local function move_toward(tx, ty)
@@ -236,40 +192,52 @@ local function stand_at_reception()
 		if keys == 0 then
 			write8(W.player_direction, OW_UP)
 			state_line("reception_ready")
-			return true
+			return
 		end
 		run_frames(keys, 1)
 		if i % 300 == 0 then
 			state_line("move_wait")
 		end
 	end
-	return fail("FAILED_REACH_RECEPTION")
+	fail("FAILED_REACH_RECEPTION")
+end
+
+local function seed_native_party_lead()
+	if read8(W.party_mon1_species) ~= EEVEE then
+		fail("FAILED_EXPECTED_BOOT_EEVEE")
+	end
+	write8(W.party_mon1_species, BULBASAUR)
+	write8(W.party_mon1_form, 0)
+	write8(W.party_mon1_level, 44)
+	state_line("seeded_bulbasaur_lead")
 end
 
 local function start_gauntlet()
 	for i = 1, 900 do
 		if in_draft() then
-			state_line("VERIFIED_START_DRAFT")
+			if read8(W.party_mon1_species) ~= BULBASAUR then
+				fail("FAILED_PARTY_LEAD_REGENERATED")
+			end
+			if read8(W.party_mon1_level) ~= 35 then
+				fail("FAILED_PARTY_LEAD_NOT_NORMALIZED")
+			end
+			state_line("VERIFIED_NATIVE_PARTY_START")
 			emu:screenshot(screenshot_path)
 			log("screenshot=" .. screenshot_path)
 			apply_keys(0)
-			return true
+			return
 		end
-		if i % 10 == 0 then
+		if i % 60 == 0 then
 			state_line("start_wait")
 		end
 		pulse(A)
 	end
-	return fail("FAILED_START_DRAFT")
+	fail("FAILED_START_DRAFT")
 end
 
-log("Safari Gauntlet start verifier loaded")
+log("Safari Gauntlet native party start verifier loaded")
 state_line("initial")
-
-local ok = boot_to_hub()
-if ok then
-	ok = stand_at_reception()
-end
-if ok then
-	start_gauntlet()
-end
+boot_to_hub()
+seed_native_party_lead()
+stand_at_reception()
+start_gauntlet()

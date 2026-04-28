@@ -9,6 +9,7 @@
 	const STARTMENUITEM_EXIT     ; 6
 	const STARTMENUITEM_POKEGEAR ; 7
 	const STARTMENUITEM_QUIT     ; 8
+	const STARTMENUITEM_GAUNTLET ; 9
 
 StartMenu::
 
@@ -169,6 +170,7 @@ StartMenu::
 	dw StartMenu_Exit,     .ExitString
 	dw StartMenu_Pokegear, .PokegearString
 	dw StartMenu_Quit,     .QuitString
+	dw StartMenu_Gauntlet, .GauntletString
 
 .PokedexString:  db "#dex@"
 .PartyString:    db "#mon@"
@@ -179,6 +181,7 @@ StartMenu::
 .ExitString:     db "Exit@"
 .PokegearString: db "<PO><KE>gear@"
 .QuitString:     db "Quit@"
+.GauntletString: db "Rules@"
 
 .OpenMenu:
 	ld a, [wMenuSelection]
@@ -224,7 +227,10 @@ endr
 
 	ld a, [wPartyCount]
 	and a
-	jr z, .no_pokemon
+	jr nz, .append_pokemon
+	call .InSafariGauntletHubIdle
+	jr nc, .no_pokemon
+.append_pokemon
 	ld a, STARTMENUITEM_POKEMON
 	call .AppendMenuList
 .no_pokemon
@@ -249,6 +255,12 @@ endr
 	ld a, STARTMENUITEM_STATUS
 	call .AppendMenuList
 
+	call .InSafariGauntletHubIdle
+	jr nc, .no_gauntlet
+	ld a, STARTMENUITEM_GAUNTLET
+	call .AppendMenuList
+.no_gauntlet
+
 	ld a, [wLinkMode]
 	and a
 	jr nz, .no_save
@@ -267,6 +279,23 @@ endr
 	call .AppendMenuList
 	ld a, c
 	ld [wMenuItemsList], a
+	ret
+
+.InSafariGauntletHubIdle:
+	ld a, [wMapGroup]
+	cp GROUP_BATTLE_FACTORY_1F
+	jr nz, .not_gauntlet
+	ld a, [wMapNumber]
+	cp MAP_BATTLE_FACTORY_1F
+	jr nz, .not_gauntlet
+	ld a, [wSafariGauntletStep]
+	and a
+	jr nz, .not_gauntlet
+	scf
+	ret
+
+.not_gauntlet
+	and a
 	ret
 
 .FillMenuList:
@@ -338,6 +367,13 @@ StartMenu_Option:
 	ld a, 6
 	ret
 
+StartMenu_Gauntlet:
+	ld a, BANK(SafariGauntletSettingsStartMenuScript)
+	ld hl, SafariGauntletSettingsStartMenuScript
+	call FarQueueScript
+	ld a, 4
+	ret
+
 StartMenu_Status:
 	call FadeToMenu
 	farcall TrainerCard
@@ -386,6 +422,18 @@ _ExitStartMenuAndDoScript:
 	ret
 
 StartMenu_Pokemon:
+	ld a, [wMapGroup]
+	cp GROUP_BATTLE_FACTORY_1F
+	jr nz, .check_party
+	ld a, [wMapNumber]
+	cp MAP_BATTLE_FACTORY_1F
+	jr nz, .check_party
+	ld a, [wSafariGauntletStep]
+	and a
+	jr nz, .check_party
+	farcall Special_SafariGauntlet_EnsureHubParty
+
+.check_party
 	ld a, [wPartyCount]
 	and a
 	jr z, .return
