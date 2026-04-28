@@ -27,6 +27,7 @@ data/tilesets/*_collision.bin
 
 # compiled patch
 *.bsp
+*.bps
 *.ips
 
 # rgbds extras

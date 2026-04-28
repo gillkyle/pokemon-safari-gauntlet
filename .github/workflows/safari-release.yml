@@ -1,0 +1,82 @@
+name: "Safari Gauntlet Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Safari Gauntlet release version"
+        required: true
+        default: "1.0.1"
+      tag:
+        description: "Release tag"
+        required: true
+        default: "v1.0.1"
+      draft:
+        description: "Create as draft release"
+        required: true
+        default: false
+        type: boolean
+      prerelease:
+        description: "Mark release as prerelease"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  RGBDS_VERSION: "v1.0.1"
+
+jobs:
+  release:
+    name: "Build and Publish Release"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Install build dependencies"
+        run: |
+          sudo apt-get update
+          sudo apt-get install bison gcc git make libpng-dev -y
+
+      - name: "Checkout gbdev/rgbds"
+        uses: actions/checkout@v4
+        with:
+          path: rgbds
+          ref: ${{ env.RGBDS_VERSION }}
+          repository: gbdev/rgbds
+
+      - name: "Install gbdev/rgbds"
+        working-directory: rgbds
+        run: sudo make install
+
+      - name: "Checkout Safari Gauntlet"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Build release artifacts"
+        run: |
+          python3 utils/build_safari_release_artifacts.py --version "${{ inputs.version }}"
+
+      - name: "Create tag if needed"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --tags
+          if ! git rev-parse "${{ inputs.tag }}" >/dev/null 2>&1; then
+            git tag "${{ inputs.tag }}" "$GITHUB_SHA"
+            git push origin "${{ inputs.tag }}"
+          fi
+
+      - name: "Publish GitHub release"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: "Safari Gauntlet ${{ inputs.version }}"
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          fail_on_unmatched_files: true
+          files: |
+            build/safari-gauntlet-${{ inputs.version }}.gbc
+            build/safari-gauntlet-${{ inputs.version }}.sym
+            build/safari-gauntlet-${{ inputs.version }}.3ds-vc.patch

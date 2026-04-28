@@ -1,130 +1,103 @@
-# Pokémon Polished Crystal
+# Pokémon Safari Gauntlet
 
-This is a custom Pokémon game based on [the Pokémon Crystal disassembly](https://github.com/pret/pokecrystal).
+Safari Gauntlet is a self-contained challenge game built on top of [Pokémon Polished Crystal](https://github.com/Rangi42/polishedcrystal), which itself is based on [the Pokémon Crystal disassembly](https://github.com/pret/pokecrystal).
 
-My goal is to create what the title says: an improved, polished version of Pokémon Crystal. It fixes bugs, takes into account the official game changes since 2001, and adds some new ideas of my own. Many features restore what was removed from R/B/Y, or original to HG/SS.
+Instead of playing the full Johto/Kanto adventure, you enter a compact roguelite-style facility: bring or receive one Pokémon, draft a team in the Safari Zone, climb a short battle ladder, earn BP, and keep one winner for future runs.
 
-I've had vague plans to make a Pokémon game for years. I'm very impressed by the effort that's gone into disassembling Pokémon Crystal and making the code so well-organized. Thanks to making it open-source (and to the ROM hackers that inspired me), I'm finally making this game a reality.
+This project is derived from the official [Polished Crystal 3.2.3](https://github.com/Rangi42/polishedcrystal/releases/tag/v3.2.3) codebase. It inherits Polished Crystal's modernized battle system, expanded Pokédex, quality-of-life work, maps, music, graphics, and engine improvements, then adds the Safari Gauntlet mode, release packaging, title branding, and focused emulator verifiers.
 
-> There are many ways to create games but the way we work at Game Freak may be a little different from other companies. That is, we constantly change and tweak what we have come up with. To make a fun game even more fun and polish it up, we take what we have made and start thinking about it from scratch. And to make the game the most fun to play we make endless changes and tweaks no matter how long it takes. It may not be the best way, but I think these tweaks are important to make our games fun and better.
+> There are many ways to create games but the way we work at Game Freak may be a little different from other companies. That is, we constantly change and tweak what we have come up with. To make a fun game even more fun and polish it up, we take what we have made and start thinking about it from scratch.
 >
-> — Junichi Masuda, "[HIDDEN POWER of masuda No. 7](https://www.gamefreak.co.jp/blog/dir_english/?p=21)"
+> - Junichi Masuda, "[HIDDEN POWER of masuda No. 7](https://www.gamefreak.co.jp/blog/dir_english/?p=21)"
 
 ## Download and Play
 
-The **current official release** is **v3.2.3** (the “Polished Crystal” release). It's fully playable from start to finish and includes major overhauls to gameplay, mechanics, and quality of life. A more detailed changelog is forthcoming, but you can find the major highlights below.
+The current Safari Gauntlet release target is **v1.0.1**.
 
-- **[Download v3.2.3 here](https://github.com/Rangi42/polishedcrystal/releases/tag/v3.2.3)**
+Release artifacts are built with the repo-local release helper:
 
-The previous official version was [v3.1.1](https://github.com/Rangi42/polishedcrystal/releases/tag/v3.1.1) (February 1, 2025).
+```bash
+python3 utils/build_safari_release_artifacts.py --base-rom /path/to/clean-crystal.gbc
+```
 
-*If you have any questions about playing or patching, [read the FAQ](FAQ.md)!*
+The clean base ROM should be:
 
-## What’s New in v3.2.3
+```text
+Pokemon - Crystal Version (UE) (V1.0) [C][!].gbc
+MD5: 9f2922b235a5eeb78d65594e82ef5dde
+```
 
-Below is a brief summary of the major changes and additions. A more detailed changelog will be released soon.
+The release helper follows Polished Crystal's release layout and writes artifacts such as:
 
-- **Customizable New Game Setup:** You can now toggle Natures and Abilities on/off, choose how EVs work (classic no-limit, modern 510 limit, or disabled), and configure various other gameplay options before starting a new adventure.
-- **DVs No Longer Determine Natures/Shininess/Gender/Unown Form:** DVs still affect color variation (slightly different hues for the same species), but everything else is now handled separately.
-- **Overhauled Battle Engine and HUD:**
-  - Abilities are now supported.
-  - Moves have been updated to behave more like their modern counterparts.
-  - Minor HUD improvements make battles more streamlined.
-- **Revamped Move Animations:** Many moves have updated animations.
-- **Optimized Engine and 60fps Overworld:** The game engine has been heavily optimized for smoother performance, and the overworld now runs at 60 frames per second.
-- **Storage System Redesign:** The PC storage interface is more like modern Pokémon games. You can switch boxes, move Pokémon around, and manage your party with minimal saving hassles.
-- **HGSS-Inspired Pokédex:** The new Pokédex includes base stats, egg groups, and a more comprehensive encounter map showing *all* methods of obtaining Pokémon.
-- **Enhanced Overworld Weather:** Instead of just darkening the screen, you’ll now see proper rain, snow, or sandstorms in applicable areas.
-- **Revamped Summary Screen:** Replaces the vanilla stats screen. Shows nature, abilities, seen and caught data, and more.
+```text
+build/safari-gauntlet-1.0.1.gbc
+build/safari-gauntlet-1.0.1.sym
+build/safari-gauntlet-1.0.1.bps
+build/safari-gauntlet-1.0.1.ips
+build/safari-gauntlet-1.0.1.3ds-vc.patch
+```
 
-## Features
+If you are building locally without release patches, run:
 
-A full list of features is in [FEATURES.md](FEATURES.md). Some highlights:
+```bash
+make -j8
+```
 
-- **289 Pokémon species**, including some new evolutions, plus **56 cosmetic forms** (e.g., Magikarp patterns, Pikachu Fly/Surf, Arbok patterns, Unown Forms) and **46 variants** (Alolan, Galarian, Hisuian, etc.)—for a total of **391 unique Pokémon**.
-- **73 new moves** (72 on faithful builds), **75 TMs**, and **31 move tutors**.
-- Modern mechanics, such as the **Fairy type**, **Physical/Special split**, **Natures**, **Abilities**, and more.
-- **Unlimited TMs** and quality-of-life features like **Running Shoes** and continuous **Repel**.
-- **New/Revamped Maps**: Some from R/B/Y, some devamped from HG/SS, plus original locations.
-- **New Characters** including Lorelei and Agatha (R/B/Y), Lyra and the Team Rocket Executives (HG/SS), and others.
-- **More Post-Game Content**: Gym Leader rematches, a new event after battling Red, and more.
-- **Improved Level Curve** with steadily increasing challenges.
-- **Music and Graphics** devamped from newer generations.
+Then load the built `.gbc` in an accurate Game Boy Color emulator such as [mGBA](https://mgba.io/), [SameBoy](https://sameboy.github.io/), [BGB](https://bgb.bircd.org/), or Gambatte. Do not use VBA or VBA-M.
 
-## Discussion
+## What Is Safari Gauntlet?
 
-If you have questions or comments, please check or post on any of these sites. (Read the [FAQ](FAQ.md) first if you have general questions!)
+Safari Gauntlet turns Polished Crystal into a repeatable draft-and-battle challenge.
 
-- [Discord](https://discord.gg/ZK5pqK8)
-- [Skeetendo](https://hax.iimarckus.org/topic/6874/)
-- [PokéCommunity](http://www.pokecommunity.com/showthread.php?t=373172)
-- [Romhack.me](http://www.romhack.me/polishedcrystal/wall/)
-- [/r/PokemonROMHacks](https://www.reddit.com/r/PokemonROMhacks/comments/51kbcn/pok%C3%A9mon_polished_crystal_200/)
-- [Nuzlocke Forums](http://s7.zetaboards.com/Nuzlocke_Forum/topic/11003710/)
-- [Pokémon Hackers Online](http://www.pokemonhackersonline.com/showthread.php?t=15811)
+- Start in a sealed Battle Factory-style hub with a nurse, PC access, settings, shops, a move reminder, and the run desk.
+- Enter with exactly one Pokémon, or disable carry-ins and receive a level 35 Eevee starter.
+- Draft normally in the Safari Zone with Safari Balls, regular balls, a Super Rod, limited steps, and limited supplies.
+- Catch at least four Pokémon, up to a full party of six, before returning to the hub.
+- Fight four trainer rounds and then a boss battle.
+- Win BP after each round and a larger BP payout for the boss.
+- On victory, keep one Pokémon in the Safari Keep Box for future carry-in choices.
 
-Additional resource:
+## Safari Features
 
-- [PolishedDex](https://www.polisheddex.app/) — An online companion for Polished Crystal. PolishedDex provides a searchable Pokédex, move list, item list, locations, abilities, special events, and a team builder. It also includes a FAQ and links to the official ROM releases, making it a convenient reference while playing.
+- **Safari draft field:** a 500-step draft zone with common Pokémon near the entrance, stronger role players to the east and west, and rare anchors in the north.
+- **Run supplies:** the run desk loads balls, healing items, Repels, Rare Candies, evolution stones, a Master Ball, and a Super Rod.
+- **Three difficulties:** Casual, Standard, and Hard adjust supply pressure and boss handling.
+- **Draft pool settings:** choose Johto or National-style Safari draft pools.
+- **Carry-in settings:** use your newest kept Pokémon, pick another stored keep, or turn carry-ins off for the Eevee starter path.
+- **Boss reveal setting:** choose whether the run desk reveals the final boss before the draft.
+- **Battle ladder:** four trainer rounds followed by one of Chuck, Jasmine, Pryce, or Clair as the boss.
+- **BP economy:** earn BP during runs and spend it on hub shops, including a focused TM vendor.
+- **Keep Box:** winning stores one selected Pokémon, normalizes it for future runs, and supports up to 30 kept Pokémon.
+- **Focused verification:** Safari Gauntlet behavior is covered by mGBA Lua verifiers in `tools/safari_gauntlet_verify_*.lua`.
+
+## Inherited From Polished Crystal
+
+Safari Gauntlet keeps Polished Crystal's larger game foundation. See [FEATURES.md](FEATURES.md), [FAQ.md](FAQ.md), and [CREDITS.md](CREDITS.md) for the full upstream feature and credit surface.
+
+Highlights include:
+
+- 289 Pokédex entries, plus later-generation evolutions, forms, and variants related to Gen 1 and Gen 2 Pokémon.
+- Modernized mechanics such as the Fairy type, Physical/Special split, Natures, Abilities, updated moves, and updated type interactions.
+- Expanded move, TM, tutor, item, held-item, and battle-engine systems.
+- Quality-of-life features such as unlimited-use TMs, Running Shoes, continuous Repel prompts, improved storage, and richer summary screens.
+- Restored, expanded, and devamped Johto/Kanto content from R/B/Y, HG/SS, and later Pokémon games.
+- New music, graphics, maps, events, trainer classes, and postgame systems from Polished Crystal's long-running development.
+
+## Credits
+
+Safari Gauntlet exists because of the Pokémon Crystal disassembly and Pokémon Polished Crystal.
+
+- [pret](https://github.com/pret/pokecrystal) created and maintains the Pokémon Crystal disassembly that makes this kind of source-level work possible.
+- [Rangi42](https://github.com/Rangi42) and the [Polished Crystal contributors](https://github.com/Rangi42/polishedcrystal) designed and developed the game this project is derived from.
+- Polished Crystal's documentation, release flow, feature set, credits, and source organization are the baseline for this project.
+- Safari Gauntlet adds the challenge format, hub flow, draft/run rules, title branding, release packaging, and project-specific verification work.
+
+This is an unofficial fan project. Pokémon is owned by Nintendo, Game Freak, and The Pokémon Company.
 
 ## Screenshots
 
-![title-screen](screenshots/title-screen.png)
-![which-photo](screenshots/which-photo.png)
-![running-shoes](screenshots/running-shoes.png)
-![town-map](screenshots/town-map.png)
-  
-![lyra](screenshots/lyra.png)
-![cherrygrove-city](screenshots/cherrygrove-city.png)
-![pokemon-center](screenshots/pokemon-center.png)
-![bag](screenshots/bag.png)
-  
-![oaks-aide](screenshots/oaks-aide.png)
-![move-tutor](screenshots/move-tutor.png)
-![moss-rock](screenshots/moss-rock.png)
-![rich-boy](screenshots/rich-boy.png)
-  
-![tm43](screenshots/tm43.png)
-![game-corner-prizes](screenshots/game-corner-prizes.png)
-![goldenrod-move-tutor](screenshots/goldenrod-move-tutor.png)
-![eviolite](screenshots/eviolite.png)
-  
-![wonder-trade](screenshots/wonder-trade.png)
-![ecruteak-shrine](screenshots/ecruteak-shrine.png)
-![cowgirl](screenshots/cowgirl.png)
-![olivine-city](screenshots/olivine-city.png)
-  
-![remoraid](screenshots/remoraid.png)
-![team-rocket](screenshots/team-rocket.png)
-![steelix](screenshots/steelix.png)
-![custom-map](screenshots/custom-map.png)
-  
-![ice-rock](screenshots/ice-rock.png)
-![hex-maniac](screenshots/hex-maniac.png)
-![route-45](screenshots/route-45.png)
-![summary](screenshots/summary.png)
-
-![leppa-berry](screenshots/leppa-berry.png)
-![regional-forms](screenshots/regional-forms.png)
-![move-reminder](screenshots/move-reminder.png)
-![moves](screenshots/moves.png)
-  
-![sylveon-moonblast](screenshots/sylveon-moonblast.png)
-![togetic-fairy-wind](screenshots/togetic-fairy-wind.png)
-![aerodactyl-fossil](screenshots/aerodactyl-fossil.png)
-![cerulean-city](screenshots/cerulean-city.png)
-  
-![celadon-city](screenshots/celadon-city.png)
-![weather](screenshots/weather.png)
-![viridian-forest](screenshots/viridian-forest.png)
-![mismagius](screenshots/mismagius.png)
-  
-![fighting-dojo](screenshots/fighting-dojo.png)
-![silph-co](screenshots/silph-co.png)
-![stormy-beach](screenshots/stormy-beach.png)
-![rock-tunnel](screenshots/rock-tunnel.png)
-  
-![safari-zone](screenshots/safari-zone.png)
-![soul-house](screenshots/soul-house.png)
-![cinnabar-island](screenshots/cinnabar-island.png)
-![seafoam-islands](screenshots/seafoam-islands.png)
+![Safari Gauntlet title screen](screenshots/safari-gauntlet/title.png)
+![Safari Gauntlet hub](screenshots/safari-gauntlet/hub.png)
+![Safari Gauntlet draft field](screenshots/safari-gauntlet/draft-field.png)
+![Safari Gauntlet BP TM shop](screenshots/safari-gauntlet/tm-shop.png)
+![Safari Gauntlet run saved](screenshots/safari-gauntlet/run-saved.png)
