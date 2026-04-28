@@ -1283,6 +1283,7 @@ WildBattleScript:
 	waitbutton
 	closetext
 	special Special_SafariGauntlet_FinishDraft
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 
 .Done:
@@ -1294,6 +1295,7 @@ WildBattleScript:
 	waitbutton
 	closetext
 	special Special_SafariGauntlet_EndRunLoss
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -1308,7 +1310,7 @@ SafariGauntletWildDraftDoneText:
 SafariGauntletWildDraftFailedText:
 	text "No Balls remain,"
 	line "and your team is"
-	cont "too small."
+	cont "empty."
 
 	para "The Safari"
 	line "Gauntlet run ends."
@@ -1579,6 +1581,7 @@ SafariGauntletStepLimitScript:
 	iffalsefwd .DraftFailed
 	closetext
 	special Special_SafariGauntlet_FinishDraft
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -1587,6 +1590,7 @@ SafariGauntletStepLimitScript:
 	waitbutton
 	closetext
 	special Special_SafariGauntlet_EndRunLoss
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -1600,7 +1604,7 @@ SafariGauntletStepLimitText:
 
 SafariGauntletStepLimitFailedText:
 	text "You need at least"
-	line "four #mon to"
+	line "one #mon to"
 	cont "enter the ladder."
 
 	para "The run is marked"

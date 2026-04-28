@@ -34,6 +34,7 @@ local W = {
 
 local GROUP_BATTLE_FACTORY = 12
 local MAP_BATTLE_FACTORY_1F = 17
+local GROUP_SAFARI_ZONE = 32
 local SAFARI_GAUNTLET_STEP_DRAFT = 1
 local SAFARI_GAUNTLET_SETTINGS_NO_CARRY_F = 1
 local MON_LEVEL_OFFSET = 31
@@ -130,13 +131,19 @@ cbid = callbacks:add("frame", function()
 		state_line("tick")
 	end
 
-	if step == SAFARI_GAUNTLET_STEP_DRAFT and read8(W.party_count) > 0 then
+	if step == SAFARI_GAUNTLET_STEP_DRAFT and map_group == GROUP_SAFARI_ZONE and read8(W.party_count) > 0 then
 		local level = read8(W.party_mon1 + MON_LEVEL_OFFSET)
 		local species = read8(W.party_mon1)
 		local rare_candy_count = qty_in_pocket(W.num_items, W.items, RARE_CANDY)
 		local rare_candy_med_count = qty_in_pocket(W.num_medicine, W.medicine, RARE_CANDY)
 		local super_repel_count = qty_in_pocket(W.num_items, W.items, SUPER_REPEL)
 		local total_rare_candy = rare_candy_count + rare_candy_med_count
+		if total_rare_candy == 0 and super_repel_count == 0 then
+			keys = pulse(A, 12, 4)
+			phase_frame = phase_frame + 1
+			apply_keys(keys)
+			return
+		end
 
 		local keep_count = read8(W.keep_count)
 		local settings = read8(W.settings)
@@ -146,7 +153,7 @@ cbid = callbacks:add("frame", function()
 			expected_species = read8(W.keep_species)
 		end
 
-		local ok = level == 35 and total_rare_candy == 12 and super_repel_count == 3 and species == expected_species
+		local ok = level == 55 and total_rare_candy == 12 and super_repel_count == 3 and species == expected_species
 		if ok then
 			log(string.format(
 				"VERIFIED_TUNING level=%d species=%d expected_species=%d rare_candy=%d super_repel=%d carry_enabled=%d",

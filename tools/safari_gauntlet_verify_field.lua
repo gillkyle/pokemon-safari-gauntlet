@@ -47,6 +47,7 @@ local frame0 = emu:currentFrame()
 local phase = "boot"
 local phase_frame = 0
 local supplies_seen = false
+local verified_frame = nil
 local last_log = 0
 
 local function wram_offset(addr)
@@ -194,12 +195,17 @@ cbid = callbacks:add("frame", function()
 		write8(W.battle_menu_cursor + 1, 0)
 		write8(W.menu_cursor_buffer, 1)
 		write8(W.menu_cursor_buffer + 1, 0)
-		if read8(W.battle_type) ~= BATTLETYPE_SAFARI and read8(W.enemy_level) == 30 then
-			state_line("VERIFIED_FIELD_WILD")
-			emu:screenshot(screenshot_path)
-			log("screenshot=" .. screenshot_path)
-			callbacks:remove(cbid)
-			return
+		if read8(W.battle_type) ~= BATTLETYPE_SAFARI and read8(W.enemy_level) == 50 then
+			if not verified_frame then
+				verified_frame = frame
+				state_line("FIELD_WILD_LEVEL_SEEN")
+			elseif frame - verified_frame > 180 then
+				state_line("VERIFIED_FIELD_WILD")
+				emu:screenshot(screenshot_path)
+				log("screenshot=" .. screenshot_path)
+				callbacks:remove(cbid)
+				return
+			end
 		end
 		write16(W.enemy_hp, 0)
 		set_phase("battle")

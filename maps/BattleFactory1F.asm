@@ -50,7 +50,7 @@ BattleFactory1FRulesScript:
 		para "Start with the"
 		line "counter guide."
 
-		para "Draft Lv.30"
+		para "Draft Lv.50"
 		line "#mon in normal"
 		cont "wild battles."
 
@@ -117,6 +117,8 @@ SafariGauntletReceptionistScript:
 	special Special_SafariGauntlet_BeginRun
 	random 4
 	writemem wSafariGauntletBoss
+	random SAFARI_GAUNTLET_TM_SHOP_SET_COUNT
+	writemem wSafariGauntletTMShopSet
 	special Special_SafariGauntlet_GetDifficulty
 	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_CASUAL, .CasualSupplies
 	ifequalfwd SAFARI_GAUNTLET_DIFFICULTY_HARD, .HardSupplies
@@ -756,13 +758,36 @@ SafariGauntletTMVendorScript:
 	opentext
 .Loop
 	writetext SafariGauntletTMVendorPickText
-	loadmenu SafariGauntletTMVendorMenuData
+	readmem wSafariGauntletTMShopSet
+	ifequalfwd $1, .Set1
+	ifequalfwd $2, .Set2
+	loadmenu SafariGauntletTMVendorMenuData0
 	verticalmenu
 	closewindow
 	ifequalfwd $1, .Thunderbolt
 	ifequalfwd $2, .Flamethrower
 	ifequalfwd $3, .IceBeam
 	ifequalfwd $4, .ShadowBall
+	jumpopenedtext SafariGauntletTMVendorLaterText
+
+.Set1
+	loadmenu SafariGauntletTMVendorMenuData1
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .Earthquake
+	ifequalfwd $2, .Psychic
+	ifequalfwd $3, .GigaDrain
+	ifequalfwd $4, .AerialAce
+	jumpopenedtext SafariGauntletTMVendorLaterText
+
+.Set2
+	loadmenu SafariGauntletTMVendorMenuData2
+	verticalmenu
+	closewindow
+	ifequalfwd $1, .EnergyBall
+	ifequalfwd $2, .WillOWisp
+	ifequalfwd $3, .ShadowClaw
+	ifequalfwd $4, .ThunderWave
 	jumpopenedtext SafariGauntletTMVendorLaterText
 
 .Thunderbolt
@@ -803,6 +828,86 @@ SafariGauntletTMVendorScript:
 	gettmhmname TM_SHADOW_BALL, STRING_BUFFER_3
 	givetmhm TM_SHADOW_BALL
 	takebp 4
+	sjumpfwd .Bought
+
+.Earthquake
+	checktmhm TM_EARTHQUAKE
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_EARTHQUAKE, STRING_BUFFER_3
+	givetmhm TM_EARTHQUAKE
+	takebp 5
+	sjumpfwd .Bought
+
+.Psychic
+	checktmhm TM_PSYCHIC
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_PSYCHIC, STRING_BUFFER_3
+	givetmhm TM_PSYCHIC
+	takebp 5
+	sjumpfwd .Bought
+
+.GigaDrain
+	checktmhm TM_GIGA_DRAIN
+	iftruefwd .AlreadyOwned
+	checkbp 4
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_GIGA_DRAIN, STRING_BUFFER_3
+	givetmhm TM_GIGA_DRAIN
+	takebp 4
+	sjumpfwd .Bought
+
+.AerialAce
+	checktmhm TM_AERIAL_ACE
+	iftruefwd .AlreadyOwned
+	checkbp 3
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_AERIAL_ACE, STRING_BUFFER_3
+	givetmhm TM_AERIAL_ACE
+	takebp 3
+	sjumpfwd .Bought
+
+.EnergyBall
+	checktmhm TM_ENERGY_BALL
+	iftruefwd .AlreadyOwned
+	checkbp 4
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_ENERGY_BALL, STRING_BUFFER_3
+	givetmhm TM_ENERGY_BALL
+	takebp 4
+	sjumpfwd .Bought
+
+.WillOWisp
+	checktmhm TM_WILL_O_WISP
+	iftruefwd .AlreadyOwned
+	checkbp 4
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_WILL_O_WISP, STRING_BUFFER_3
+	givetmhm TM_WILL_O_WISP
+	takebp 4
+	sjumpfwd .Bought
+
+.ShadowClaw
+	checktmhm TM_SHADOW_CLAW
+	iftruefwd .AlreadyOwned
+	checkbp 4
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_SHADOW_CLAW, STRING_BUFFER_3
+	givetmhm TM_SHADOW_CLAW
+	takebp 4
+	sjumpfwd .Bought
+
+.ThunderWave
+	checktmhm TM_THUNDER_WAVE
+	iftruefwd .AlreadyOwned
+	checkbp 3
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname TM_THUNDER_WAVE, STRING_BUFFER_3
+	givetmhm TM_THUNDER_WAVE
+	takebp 3
 
 .Bought
 	playsound SFX_TRANSACTION
@@ -1132,7 +1237,9 @@ SafariGauntletTMVendorLaterText:
 SafariGauntletTMVendorPickText:
 	text "BP: "
 	text_decimal wBattlePoints, 2, 5
-	line "Pick a TM to buy."
+	line "Pick a TM."
+
+	para "Press B to quit."
 	done
 
 SafariGauntletTMVendorConfirmText:
@@ -1161,20 +1268,47 @@ SafariGauntletTMVendorNotEnoughBPText:
 	text "You need more BP."
 	done
 
-SafariGauntletTMVendorMenuData:
+SafariGauntletTMVendorMenuData0:
 	db MENU_BACKUP_TILES
-	menu_coords 0, 0, 19, 11
+	menu_coords 0, 0, 19, 9
 	dw .Items
 	db 1 ; default option
 
 .Items:
 	db $80 ; flags
-	db 5 ; items
+	db 4 ; items
 	db "TM24 TBOLT  5BP@"
 	db "TM35 FLAME  5BP@"
 	db "TM13 ICEBM  5BP@"
 	db "TM30 SHADOW 4BP@"
-	db "Cancel@"
+
+SafariGauntletTMVendorMenuData1:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 19, 9
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 4 ; items
+	db "TM26 EQUAKE 5BP@"
+	db "TM29 PSYCHC 5BP@"
+	db "TM19 GIGADR 4BP@"
+	db "TM40 AERIAL 3BP@"
+
+SafariGauntletTMVendorMenuData2:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 19, 9
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 4 ; items
+	db "TM53 E-BALL 4BP@"
+	db "TM61 WISP  4BP@"
+	db "TM65 SCLAW 4BP@"
+	db "TM73 TWAVE 3BP@"
 
 SafariGauntletRevealChuckText:
 	text "Boss reveal:"
@@ -1372,7 +1506,7 @@ SafariGauntletBossLossText:
 
 SafariGauntletDraftFailedText:
 	text "You need at least"
-	line "four #mon to"
+	line "one #mon to"
 	cont "enter the ladder."
 
 	para "Run marked as a"

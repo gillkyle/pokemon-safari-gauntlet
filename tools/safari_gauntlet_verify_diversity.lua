@@ -240,7 +240,7 @@ cbid = callbacks:add("frame", function()
 		local species = read8(W.enemy_species)
 		local form = read8(W.enemy_form)
 		local level = read8(W.enemy_level)
-		if level == 30 and species > 0 then
+		if level == 50 and species > 0 then
 			local key = string.format("%02x:%02x", species, form & 0x3f)
 			if not seen[key] then
 				seen[key] = true

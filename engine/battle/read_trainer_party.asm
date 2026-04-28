@@ -33,6 +33,7 @@ ReadTrainerParty:
 
 	call GetNextTrainerDataByte
 	farcall AdjustLevelForBadges
+	call SafariGauntlet_AdjustTrainerLevelForStage
 	ld [wCurPartyLevel], a
 
 ; species
@@ -285,6 +286,51 @@ ReadTrainerParty:
 	pop hl
 .no_stat_recalc
 	jmp .loop2
+
+SafariGauntlet_AdjustTrainerLevelForStage:
+	push hl
+	ld c, a
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_ROUND1
+	jr c, .use_original
+	cp SAFARI_GAUNTLET_STEP_BOSS + 1
+	jr nc, .use_original
+	sub SAFARI_GAUNTLET_STEP_ROUND1
+	add a
+	ld e, a
+	ld d, 0
+	ld hl, .LevelRanges
+	add hl, de
+	ld a, [hli]
+	ld b, a ; minimum
+	ld a, [hl]
+	sub b
+	inc a ; range size
+	ld c, a
+	ld a, [wOTPartyCount]
+
+.mod_range
+	cp c
+	jr c, .got_offset
+	sub c
+	jr .mod_range
+
+.got_offset
+	add b
+	pop hl
+	ret
+
+.use_original
+	ld a, c
+	pop hl
+	ret
+
+.LevelRanges:
+	db 50, 53
+	db 52, 55
+	db 54, 57
+	db 56, 59
+	db 58, 62
 
 SetDynamicForm:
 ; Adjust form of mon in bc dynamically based on context if no form is set.

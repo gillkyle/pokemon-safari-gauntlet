@@ -587,7 +587,7 @@ TrySafariGauntletWildEncounter:
 	ld [wCurForm], a
 
 .set_level
-	ld a, 30
+	ld a, SAFARI_GAUNTLET_DRAFT_LEVEL
 	ld [wCurPartyLevel], a
 	ld a, [wCurSpecies]
 	scf

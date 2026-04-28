@@ -16,6 +16,11 @@ local RIGHT = bit(KEY.RIGHT)
 local W = {
 	map_group = 0xdcac,
 	map_number = 0xdcad,
+	map_status = 0xd431,
+	map_event_status = 0xd432,
+	script_flags = 0xd433,
+	script_mode = 0xd436,
+	crash_code = 0xffe5,
 	y = 0xdcae,
 	x = 0xdcaf,
 	options2 = 0xcff5,
@@ -55,6 +60,7 @@ local supplies_seen = false
 local initial_steps_verified = false
 local decrement_verified = false
 local limit_forced = false
+local returned_frame = nil
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -111,12 +117,17 @@ end
 
 local function state_line(prefix)
 	log(string.format(
-		"%s map=%d/%d xy=%d,%d party=%d battle=%d step=%d steps_left=%d master=%d",
+		"%s map=%d/%d xy=%d,%d map_status=%02x map_event=%02x script_flags=%02x script_mode=%02x crash=%02x party=%d battle=%d step=%d steps_left=%d master=%d",
 		prefix,
 		read8(W.map_group),
 		read8(W.map_number),
 		read8(W.x),
 		read8(W.y),
+		read8(W.map_status),
+		read8(W.map_event_status),
+		read8(W.script_flags),
+		read8(W.script_mode),
+		read8(W.crash_code),
 		read8(W.party_count),
 		read8(W.battle_mode),
 		read8(W.step),
@@ -165,21 +176,9 @@ local function drive_field()
 	return RIGHT
 end
 
-local function clone_starter_party()
-	for i = 1, 5 do
-		local dst = W.party_mon1 + i * PARTYMON_STRUCT_LENGTH
-		for j = 0, PARTYMON_STRUCT_LENGTH - 1 do
-			write8(dst + j, read8(W.party_mon1 + j))
-		end
-		local dst_ot = W.party_mon1_ot + i * PARTYMON_NAME_LENGTH
-		local dst_name = W.party_mon1_nickname + i * PARTYMON_NAME_LENGTH
-		for j = 0, PARTYMON_NAME_LENGTH - 1 do
-			write8(dst_ot + j, read8(W.party_mon1_ot + j))
-			write8(dst_name + j, read8(W.party_mon1_nickname + j))
-		end
-	end
-	write8(W.party_count, 6)
-	write8(W.draft_attempts, 8)
+local function keep_single_starter_party()
+	write8(W.party_count, 1)
+	write8(W.draft_attempts, 0)
 end
 
 local function apply_keys(keys)
@@ -222,14 +221,33 @@ cbid = callbacks:add("frame", function()
 		keys = pulse(A, 8, 4)
 	elseif group == GROUP_BATTLE_FACTORY and map == MAP_BATTLE_FACTORY_1F then
 		if limit_forced and read8(W.step) == SAFARI_GAUNTLET_STEP_ROUND1 then
-			state_line("VERIFIED_STEPS")
-			emu:screenshot(screenshot_path)
-			log("screenshot=" .. screenshot_path)
-			callbacks:remove(cbid)
-			return
+			if read8(W.map_status) == 2 then
+				if not returned_frame then
+					returned_frame = frame
+					state_line("STEP_LIMIT_RETURN_SEEN")
+				elseif frame - returned_frame > 60 then
+					state_line("VERIFIED_STEPS")
+					emu:screenshot(screenshot_path)
+					log("screenshot=" .. screenshot_path)
+					callbacks:remove(cbid)
+					return
+				end
+			end
 		end
 		set_phase("hub")
-		keys = pulse(A, 12, 4)
+		if read8(W.map_status) == 2 then
+			if read8(W.x) < 12 then
+				keys = RIGHT
+			elseif read8(W.x) > 12 then
+				keys = LEFT
+			elseif read8(W.y) < 6 then
+				keys = DOWN
+			elseif read8(W.y) > 6 then
+				keys = UP
+			else
+				keys = pulse(A, 12, 4)
+			end
+		end
 	elseif group == GROUP_SAFARI_ZONE and map == MAP_SAFARI_ZONE_HUB and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT then
 		if not initial_steps_verified then
 			if steps_left ~= 500 then
@@ -244,15 +262,17 @@ cbid = callbacks:add("frame", function()
 		elseif not decrement_verified and steps_left < 500 then
 			decrement_verified = true
 			state_line("STEP_LIMIT_DECREMENT_OK")
-			clone_starter_party()
+			keep_single_starter_party()
 			write16(W.time_remaining, 1)
 			limit_forced = true
-			state_line("STEP_LIMIT_FORCED_TO_ONE")
+			state_line("STEP_LIMIT_FORCED_WITH_ONE_MON")
 		end
 		set_phase("field")
-		keys = drive_field()
-		if limit_forced and phase_frame % 48 < 8 then
-			keys = keys | A
+		if read8(W.map_status) == 2 then
+			keys = drive_field()
+			if limit_forced and phase_frame % 48 < 8 then
+				keys = keys | A
+			end
 		end
 	else
 		set_phase("boot")

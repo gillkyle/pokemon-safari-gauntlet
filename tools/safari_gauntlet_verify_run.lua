@@ -1,5 +1,6 @@
 local log_path = "/tmp/safari-gauntlet-run.log"
 local screenshot_path = "/tmp/safari-gauntlet-run.png"
+local post_draft_screenshot_path = "/tmp/safari-gauntlet-post-draft-return.png"
 
 local KEY = C.GB_KEY
 local function bit(key)
@@ -16,6 +17,20 @@ local DOWN = bit(KEY.DOWN)
 local W = {
 	map_group = 0xdcac,
 	map_number = 0xdcad,
+	map_status = 0xd431,
+	map_event_status = 0xd432,
+	script_flags = 0xd433,
+	script_mode = 0xd436,
+	script_running = 0xd437,
+	script_delay = 0xd460,
+	script_text_bank = 0xd461,
+	script_text_addr = 0xd462,
+	game_logic_paused = 0xcdcc,
+	bg_map_mode = 0xffbe,
+	cgb_pal_update = 0xffd4,
+	script_bank = 0xffeb,
+	script_pos = 0xffec,
+	crash_code = 0xffe5,
 	options2 = 0xcff5,
 	y = 0xdcae,
 		x = 0xdcaf,
@@ -24,6 +39,8 @@ local W = {
 	party_count = 0xdcce,
 	battle_mode = 0xd233,
 	battle_type = 0xd236,
+	enemy_level = 0xd219,
+	ot_party_mon1_level = 0xd2aa,
 	cur_battle_mon = 0xd0da,
 	cur_party_mon = 0xd10c,
 	party_menu_cursor = 0xd0de,
@@ -59,6 +76,7 @@ local W = {
 	losses_hi = 0xdb9d,
 	settings = 0xdba1,
 	keep_count = 0xdba2,
+	tm_shop_set = 0xdbc6,
 	draft_attempts = 0xd7db,
 	boss = 0xd7da,
 	step = 0xd7dc,
@@ -83,8 +101,11 @@ local STRUGGLE = 0xff
 
 local f = assert(io.open(log_path, "w"))
 local draft_seeded = false
-local draft_restored = false
 local supplies_seen = false
+local single_draft_verified = false
+local post_draft_return_seen = false
+local victory_stats_seen = false
+local trainer_level_seen = {}
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -183,56 +204,54 @@ local function keep_party_healthy()
 end
 
 local function seed_draft_party()
-	-- Test harness only: fake a 4-mon draft to satisfy the gate check, then
-	-- restore to one real mon after the draft finishes.
-	write8(W.party_count, 4)
+	-- Keep the natural one-mon draft. This verifies the ladder gate no longer
+	-- requires an arbitrary four-Pokemon team.
+	write8(W.party_count, 1)
 	local species = read8(W.party_mon1)
 	for i = 0, 5 do
 		local addr = W.party_species + i
-		if i < 4 then
+		if i < 1 then
 			write8(addr, species)
 		else
 			write8(addr, 0xff)
 		end
 	end
-end
-
-local function restore_after_draft()
-	if draft_restored then
-		return
-	end
-	write8(W.party_count, 1)
-	local species = read8(W.party_mon1)
-	write8(W.party_species, species)
-	for i = 1, 5 do
-		write8(W.party_species + i, 0xff)
-	end
-	draft_restored = true
-	log(string.format(
-		"DRAFT_SEED_RESTORED map=%d/%d step=%d party=%d",
-		read8(W.map_group),
-		read8(W.map_number),
-		read8(W.step),
-		read8(W.party_count)
-	))
+	single_draft_verified = true
 end
 
 local function state_line(prefix)
 	log(string.format(
-			"%s map=%d/%d xy=%d,%d dir=%02x gender=%d badges=%02x party=%d battle=%d step=%d attempts=%d boss=%d settings=%02x runs=%d wins=%d losses=%d keep=%d bp=%d",
+			"%s map=%d/%d xy=%d,%d dir=%02x map_status=%02x map_event=%02x script_flags=%02x script_mode=%02x script_running=%02x script_delay=%02x hscript=%02x:%04x text=%02x:%04x bgmode=%02x pal=%02x paused=%02x crash=%02x gender=%d badges=%02x party=%d battle=%d enemy_level=%d ot_level=%d step=%d attempts=%d boss=%d tmset=%d settings=%02x runs=%d wins=%d losses=%d keep=%d bp=%d",
 		prefix,
 		read8(W.map_group),
 			read8(W.map_number),
 			read8(W.x),
 			read8(W.y),
 			read8(W.player_direction),
+			read8(W.map_status),
+			read8(W.map_event_status),
+			read8(W.script_flags),
+			read8(W.script_mode),
+			read8(W.script_running),
+			read8(W.script_delay),
+			read8(W.script_bank),
+			read8(W.script_pos) + read8(W.script_pos + 1) * 256,
+			read8(W.script_text_bank),
+			read8(W.script_text_addr) + read8(W.script_text_addr + 1) * 256,
+			read8(W.bg_map_mode),
+			read8(W.cgb_pal_update),
+			read8(W.game_logic_paused),
+			read8(W.crash_code),
 			read8(W.player_gender),
 		read8(W.johto_badges),
 		read8(W.party_count),
 		read8(W.battle_mode),
+		read8(W.enemy_level),
+		read8(W.ot_party_mon1_level),
 		read8(W.step),
 		read8(W.draft_attempts),
 		read8(W.boss),
+		read8(W.tm_shop_set),
 		read8(W.settings),
 		read16(W.runs_hi),
 		read16(W.wins_hi),
@@ -240,6 +259,31 @@ local function state_line(prefix)
 		read8(W.keep_count),
 		read16(W.bp_hi)
 	))
+end
+
+local TRAINER_LEVEL_RANGES = {
+	[2] = { 50, 53 },
+	[3] = { 52, 55 },
+	[4] = { 54, 57 },
+	[5] = { 56, 59 },
+	[6] = { 58, 62 },
+}
+
+local function trainer_levels_complete()
+	for step = 2, 6 do
+		if not trainer_level_seen[step] then
+			return false
+		end
+	end
+	return true
+end
+
+local cbid
+local function stop_with_screenshot(label)
+	state_line(label)
+	emu:screenshot(screenshot_path)
+	log("screenshot=" .. screenshot_path)
+	callbacks:remove(cbid)
 end
 
 local function make_battles_fast()
@@ -323,7 +367,6 @@ local function drive_boot()
 	return pulse(A, 120, 60)
 end
 
-local cbid
 cbid = callbacks:add("frame", function()
 	local frame = emu:currentFrame()
 	local group = read8(W.map_group)
@@ -339,6 +382,21 @@ cbid = callbacks:add("frame", function()
 		make_battles_fast()
 		write8(W.options2, read8(W.options2) & 0x3f)
 	end
+	if read8(W.battle_mode) == BATTLEMODE_TRAINER then
+		local step = read8(W.step)
+		local range = TRAINER_LEVEL_RANGES[step]
+		local level = read8(W.ot_party_mon1_level)
+		if range and level > 0 then
+			if level < range[1] or level > range[2] then
+				stop_with_screenshot(string.format("FAILED_TRAINER_LEVEL step=%d level=%d expected=%d-%d", step, level, range[1], range[2]))
+				return
+			end
+			if not trainer_level_seen[step] then
+				trainer_level_seen[step] = true
+				log(string.format("TRAINER_LEVEL_VERIFIED step=%d level=%d expected=%d-%d", step, level, range[1], range[2]))
+			end
+		end
+	end
 	check_supplies()
 	if not draft_seeded
 		and supplies_seen
@@ -349,10 +407,7 @@ cbid = callbacks:add("frame", function()
 		and read8(W.party_count) > 0 then
 		seed_draft_party()
 		draft_seeded = true
-		state_line("DRAFT_TEAM_SEEDED")
-	end
-	if draft_seeded and not draft_restored and read8(W.step) ~= SAFARI_GAUNTLET_STEP_DRAFT then
-		restore_after_draft()
+		state_line("DRAFT_SINGLE_MON_VERIFIED")
 	end
 
 	if frame - last_log > 300 then
@@ -360,7 +415,14 @@ cbid = callbacks:add("frame", function()
 		state_line("tick")
 	end
 
-	if read16(W.runs_hi) >= 1 and read16(W.wins_hi) >= 1 and read8(W.keep_count) >= 1 and read16(W.bp_hi) >= 18 and (read8(W.johto_badges) & 0x80) ~= 0 and read8(W.party_count) == 1 and supplies_seen then
+	if read16(W.runs_hi) >= 1 and read16(W.wins_hi) >= 1 and read8(W.keep_count) >= 1 and read16(W.bp_hi) >= 18 and (read8(W.johto_badges) & 0x80) ~= 0 and read8(W.party_count) == 1 and supplies_seen and single_draft_verified and trainer_levels_complete() then
+		if not victory_stats_seen then
+			victory_stats_seen = true
+			state_line("VICTORY_STATS_SEEN")
+		end
+	end
+
+	if victory_stats_seen and read8(W.script_running) == 0 and read8(W.battle_mode) == 0 and read8(W.map_status) == 2 then
 		state_line("VERIFIED_RUN")
 		emu:screenshot(screenshot_path)
 		log("screenshot=" .. screenshot_path)
@@ -381,7 +443,15 @@ cbid = callbacks:add("frame", function()
 			hub_seen = true
 			state_line("HUB_REACHED")
 		end
-		if read8(W.x) < 12 then
+		if draft_seeded and not post_draft_return_seen and read8(W.step) == 2 and read8(W.map_status) == 2 then
+			post_draft_return_seen = true
+			state_line("POST_DRAFT_RETURN")
+			emu:screenshot(post_draft_screenshot_path)
+			log("post_draft_screenshot=" .. post_draft_screenshot_path)
+		end
+		if read8(W.map_status) ~= 2 then
+			keys = 0
+		elseif read8(W.x) < 12 then
 			keys = RIGHT
 		elseif read8(W.x) > 12 then
 			keys = bit(KEY.LEFT)
@@ -392,6 +462,8 @@ cbid = callbacks:add("frame", function()
 		elseif read8(W.player_direction) ~= 0x04 then
 			write8(W.player_direction, 0x04)
 			keys = 0
+		elseif phase_frame < 600 and draft_seeded and read8(W.step) == 2 then
+			keys = 0
 		elseif phase_frame < 90 then
 			keys = 0
 		else
@@ -399,7 +471,9 @@ cbid = callbacks:add("frame", function()
 		end
 	elseif group == GROUP_SAFARI_ZONE and map == MAP_SAFARI_ZONE_HUB and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT then
 		set_phase("draft_exit")
-		if read8(W.y) < 26 then
+		if read8(W.map_status) ~= 2 then
+			keys = 0
+		elseif read8(W.y) < 26 then
 			keys = DOWN
 		elseif read8(W.y) > 26 then
 			keys = UP
@@ -417,7 +491,9 @@ cbid = callbacks:add("frame", function()
 		end
 	elseif group == GROUP_SAFARI_ZONE and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT then
 		set_phase("field")
-		if phase_frame % 90 < 30 then
+		if read8(W.map_status) ~= 2 then
+			keys = 0
+		elseif phase_frame % 90 < 30 then
 			keys = DOWN
 		elseif phase_frame % 90 < 60 then
 			keys = RIGHT

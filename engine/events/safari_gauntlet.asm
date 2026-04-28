@@ -42,7 +42,7 @@ Special_SafariGauntlet_BeginRun:
 	jr .run_ready
 
 .give_starter
-	ld a, 35
+	ld a, SAFARI_GAUNTLET_START_LEVEL
 	ld [wCurPartyLevel], a
 	xor a
 	ld [wCurItem], a
@@ -421,11 +421,11 @@ SafariGauntlet_SaveGame:
 SafariGauntlet_NormalizePartyLead:
 	xor a
 	ld [wCurPartyMon], a
-	ld a, 35
+	ld a, SAFARI_GAUNTLET_START_LEVEL
 	ld [wCurPartyLevel], a
 	ld a, MON_LEVEL
 	call GetPartyParamLocationAndValue
-	ld [hl], 35
+	ld [hl], SAFARI_GAUNTLET_START_LEVEL
 	ld a, MON_SPECIES
 	call GetPartyParamLocationAndValue
 	ld [wCurSpecies], a
@@ -433,7 +433,7 @@ SafariGauntlet_NormalizePartyLead:
 	call GetPartyParamLocationAndValue
 	ld [wCurForm], a
 	call GetBaseData
-	ld d, 35
+	ld d, SAFARI_GAUNTLET_START_LEVEL
 	farcall CalcExpAtLevel
 	ld a, MON_EXP
 	call GetPartyParamLocationAndValue
@@ -465,7 +465,7 @@ SafariGauntlet_StoreSelectedRewardInPC:
 	ret
 
 SafariGauntlet_NormalizeTempReward:
-	ld a, 35
+	ld a, SAFARI_GAUNTLET_START_LEVEL
 	ld [wTempMonLevel], a
 	ld [wCurPartyLevel], a
 	ld a, [wTempMonSpecies]
@@ -473,7 +473,7 @@ SafariGauntlet_NormalizeTempReward:
 	ld a, [wTempMonForm]
 	ld [wCurForm], a
 	call GetBaseData
-	ld d, 35
+	ld d, SAFARI_GAUNTLET_START_LEVEL
 	farcall CalcExpAtLevel
 	ld hl, wTempMonExp
 	ldh a, [hMultiplicand]
@@ -703,7 +703,7 @@ SafariGauntlet_AddStarterToPC:
 	ld [wCurSpecies], a
 	ld a, PLAIN_FORM
 	ld [wCurForm], a
-	ld a, 35
+	ld a, SAFARI_GAUNTLET_START_LEVEL
 	ld [wCurPartyLevel], a
 	call SafariGauntlet_AddMonSilently
 	ld a, [wPartyCount]
@@ -752,7 +752,7 @@ SafariGauntlet_EnsureHubParty:
 	ld [wCurForm], a
 
 .give_mon
-	ld a, 35
+	ld a, SAFARI_GAUNTLET_START_LEVEL
 	ld [wCurPartyLevel], a
 	xor a
 	ld [wCurItem], a

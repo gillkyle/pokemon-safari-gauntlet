@@ -24,6 +24,7 @@ local W = {
 	script_flags = 0xd433,
 	script_mode = 0xd436,
 	party_count = 0xdcce,
+	tm_shop_set = 0xdbc6,
 	crash_code = 0xffe5,
 }
 
@@ -49,6 +50,15 @@ local function read8(addr)
 	return emu:read8(addr)
 end
 
+local function write8(addr, value)
+	local offset = wram_offset(addr)
+	if offset then
+		emu.memory.wram:write8(offset, value & 0xff)
+	else
+		emu:write8(addr, value & 0xff)
+	end
+end
+
 local function log(msg)
 	local line = string.format("%08d %s", emu:currentFrame(), msg)
 	f:write(line .. "\n")
@@ -58,7 +68,7 @@ end
 
 local function state_line(prefix)
 	log(string.format(
-		"%s map=%d/%d xy=%d,%d dir=%02x status=%02x script=%02x/%02x party=%d",
+		"%s map=%d/%d xy=%d,%d dir=%02x status=%02x script=%02x/%02x party=%d tmset=%d",
 		prefix,
 		read8(W.map_group),
 		read8(W.map_number),
@@ -68,7 +78,8 @@ local function state_line(prefix)
 		read8(W.map_status),
 		read8(W.script_flags),
 		read8(W.script_mode),
-		read8(W.party_count)
+		read8(W.party_count),
+		read8(W.tm_shop_set)
 	))
 end
 
@@ -189,6 +200,7 @@ cbid = callbacks:add("keysRead", function()
 	end
 
 	if phase == "boot" then
+		write8(W.tm_shop_set, 2)
 		set_phase("move")
 	end
 
@@ -203,7 +215,9 @@ cbid = callbacks:add("keysRead", function()
 			keys = UP
 		elseif elapsed >= 60 and elapsed < 140 then
 			keys = A
-		elseif elapsed > 260 then
+		elseif elapsed >= 260 and elapsed < 340 then
+			keys = A
+		elseif elapsed > 560 then
 			emu:screenshot(screenshot_path)
 			log("screenshot=" .. screenshot_path)
 			state_line("VERIFIED_TM_VENDOR")

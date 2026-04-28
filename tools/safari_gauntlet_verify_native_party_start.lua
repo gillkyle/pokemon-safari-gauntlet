@@ -218,7 +218,7 @@ local function start_gauntlet()
 			if read8(W.party_mon1_species) ~= BULBASAUR then
 				fail("FAILED_PARTY_LEAD_REGENERATED")
 			end
-			if read8(W.party_mon1_level) ~= 35 then
+			if read8(W.party_mon1_level) ~= 55 then
 				fail("FAILED_PARTY_LEAD_NOT_NORMALIZED")
 			end
 			state_line("VERIFIED_NATIVE_PARTY_START")

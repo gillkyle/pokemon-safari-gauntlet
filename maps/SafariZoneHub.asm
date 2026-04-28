@@ -83,6 +83,7 @@ SafariGauntletDraftExitScript:
 	waitbutton
 	closetext
 	special Special_SafariGauntlet_EndRunLoss
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -96,6 +97,7 @@ SafariGauntletDraftExitScript:
 
 .WarpBack
 	special Special_SafariGauntlet_FinishDraft
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -105,6 +107,7 @@ SafariGauntletDraftExitScript:
 	waitbutton
 	closetext
 	special Special_SafariGauntlet_EndRunLoss
+	wildoff
 	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
@@ -159,16 +162,16 @@ SafariGauntletStayInFieldText:
 
 SafariGauntletNeedMoreDraftText:
 	text "You need at least"
-	line "four #mon."
+	line "one #mon."
 
-	para "Catch more before"
+	para "Catch one before"
 	line "starting battles."
 	done
 
 SafariGauntletOutOfBallsLossText:
 	text "No Balls remain,"
 	line "and your team is"
-	cont "too small."
+	cont "empty."
 
 	para "The run is marked"
 	line "as a loss."
@@ -177,7 +180,7 @@ SafariGauntletOutOfBallsLossText:
 SafariGauntletDraftEndedLossText:
 	text "The draft ended,"
 	line "but your team is"
-	cont "too small."
+	cont "empty."
 
 	para "The run is marked"
 	line "as a loss."
