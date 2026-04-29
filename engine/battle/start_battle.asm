@@ -72,12 +72,6 @@ PlayBattleMusic:
 	call .loadfromwordarray
 	jr c, .done
 
-	; Are we in the Safari Game?
-	ld a, [wBattleType]
-	cp BATTLETYPE_SAFARI
-	ld e, MUSIC_WILD_BATTLE_GO
-	jr z, .done
-
 	ld hl, BattleMusic_RegionalWilds
 	call .getregionmusicfromarray
 	jr .done
@@ -107,7 +101,7 @@ PlayBattleMusic:
 	call .loadfromarray
 	jr c, .done
 
-	ld e, MUSIC_TRAINER_BATTLE_BW
+	ld e, MUSIC_JOHTO_TRAINER_BATTLE
 	ld a, [wInBattleTowerBattle]
 	and a
 	jr nz, .done

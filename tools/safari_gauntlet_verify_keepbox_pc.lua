@@ -154,7 +154,13 @@ cbid = callbacks:add("frame", function()
 			set_phase("close_pc")
 		end
 	elseif phase == "close_pc" then
-		if phase_frame < 88 then
+		if phase_frame < 40 then
+			keys = A
+		elseif phase_frame < 140 then
+			keys = B
+		elseif phase_frame < 220 then
+			keys = A
+		elseif phase_frame < 300 then
 			keys = B
 		else
 			set_phase("move_npc")

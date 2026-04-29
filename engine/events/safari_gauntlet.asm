@@ -136,6 +136,36 @@ Special_SafariGauntlet_ChooseKeepMon:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_ChooseLossKeepMon:
+	ld a, [wPartyCount]
+	and a
+	jr z, .fail
+	farcall SelectMonFromParty
+	jr nc, .got_mon
+	xor a
+	ld [wCurPartyMon], a
+
+.got_mon
+	ld a, [wCurPartyMon]
+	ld [wSafariGauntletRewardSpecies], a
+	call SafariGauntlet_CopyProtectedRunMonsToScratch
+	ld a, [wSafariGauntletRewardSpecies]
+	ld [wCurPartyMon], a
+	inc a
+	ld c, a
+	ld b, 1
+	farcall CopyBetweenPartyAndTemp
+	call SafariGauntlet_NormalizeTempReward
+	ld a, TRUE
+	ld [wSafariGauntletRewardPending], a
+	jr .done
+
+.fail
+	xor a
+.done
+	ldh [hScriptVar], a
+	ret
+
 Special_SafariGauntlet_EndRunWin:
 	call SafariGauntlet_RestoreRunData
 	xor a
@@ -161,6 +191,18 @@ Special_SafariGauntlet_EndRunWin:
 
 Special_SafariGauntlet_EndRunLoss:
 	call SafariGauntlet_RestoreRunData
+	ld a, [wSafariGauntletRewardPending]
+	and a
+	jr z, .no_loss_keep
+	call SafariGauntlet_RestoreLossKeepParty
+	call SafariGauntlet_StoreProtectedScratchMonsInPC
+	jr .loss_keep_done
+
+.no_loss_keep
+	xor a
+	ld [wOTPartyCount], a
+
+.loss_keep_done
 	xor a
 	ld [wSafariGauntletStep], a
 	ld hl, wSafariGauntletRuns
@@ -411,6 +453,19 @@ Special_SafariGauntlet_EnsureHubParty:
 	ldh [hScriptVar], a
 	ret
 
+Special_SafariGauntlet_EnsureStarterPC:
+	ld a, [wSafariGauntletSettings]
+	bit SAFARI_GAUNTLET_SETTINGS_STARTER_PC_SEEDED_F, a
+	jr nz, .done
+	call SafariGauntlet_EnsureStarterKeepBox
+	call SafariGauntlet_SeedStarterPC
+	call SafariGauntlet_SaveGame
+
+.done
+	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
 SafariGauntlet_SaveGame:
 	ld a, TRUE
 	ld [wSavedAtLeastOnce], a
@@ -462,6 +517,172 @@ SafariGauntlet_StoreSelectedRewardInPC:
 	ld a, b
 	ld [wTempMonBox], a
 	farcall UpdateStorageBoxMonFromTemp
+	ret
+
+SafariGauntlet_CopyProtectedRunMonsToScratch:
+	xor a
+	ld [wOTPartyCount], a
+	ld a, [wPartyCount]
+	ld b, a
+	xor a
+	ld c, a
+
+.loop
+	ld a, c
+	cp b
+	ret nc
+	ld a, [wSafariGauntletRewardSpecies]
+	cp c
+	jr z, .next
+	ld a, c
+	ld [wCurPartyMon], a
+	push bc
+	call SafariGauntlet_IsCurPartyMonProtected
+	and a
+	jr z, .skip_copy
+	call SafariGauntlet_CopyCurPartyMonToScratch
+
+.skip_copy
+	pop bc
+
+.next
+	inc c
+	jr .loop
+
+SafariGauntlet_CopyCurPartyMonToScratch:
+	ld a, [wOTPartyCount]
+	cp PARTY_LENGTH
+	ret nc
+	push af
+	ld a, [wCurPartyMon]
+	inc a
+	ld c, a
+	ld b, 1
+	farcall CopyBetweenPartyAndTemp
+	call SafariGauntlet_NormalizeTempReward
+	pop af
+	inc a
+	ld c, a
+	ld b, $80
+	farcall CopyBetweenPartyAndTemp
+	ld hl, wOTPartyCount
+	inc [hl]
+	ret
+
+SafariGauntlet_IsCurPartyMonProtected:
+	ld a, MON_SPECIES
+	call GetPartyParamLocationAndValue
+	ld b, a
+	ld a, MON_FORM
+	call GetPartyParamLocationAndValue
+	and EXTSPECIES_MASK
+	ld c, a
+	ld hl, .ProtectedSpecies
+
+.loop
+	ld a, [hli]
+	cp -1
+	jr z, .no
+	cp b
+	jr nz, .skip_ext
+	ld a, [hli]
+	cp c
+	jr z, .yes
+	jr .loop
+
+.skip_ext
+	inc hl
+	jr .loop
+
+.yes
+	ld a, TRUE
+	ret
+
+.no
+	xor a
+	ret
+
+.ProtectedSpecies:
+	db LOW(EEVEE), HIGH(EEVEE) << MON_EXTSPECIES_F
+	db LOW(VAPOREON), HIGH(VAPOREON) << MON_EXTSPECIES_F
+	db LOW(JOLTEON), HIGH(JOLTEON) << MON_EXTSPECIES_F
+	db LOW(FLAREON), HIGH(FLAREON) << MON_EXTSPECIES_F
+	db LOW(ESPEON), HIGH(ESPEON) << MON_EXTSPECIES_F
+	db LOW(UMBREON), HIGH(UMBREON) << MON_EXTSPECIES_F
+	db LOW(LEAFEON), HIGH(LEAFEON) << MON_EXTSPECIES_F
+	db LOW(GLACEON), HIGH(GLACEON) << MON_EXTSPECIES_F
+	db LOW(SYLVEON), HIGH(SYLVEON) << MON_EXTSPECIES_F
+	db LOW(BULBASAUR), HIGH(BULBASAUR) << MON_EXTSPECIES_F
+	db LOW(IVYSAUR), HIGH(IVYSAUR) << MON_EXTSPECIES_F
+	db LOW(VENUSAUR), HIGH(VENUSAUR) << MON_EXTSPECIES_F
+	db LOW(CHARMANDER), HIGH(CHARMANDER) << MON_EXTSPECIES_F
+	db LOW(CHARMELEON), HIGH(CHARMELEON) << MON_EXTSPECIES_F
+	db LOW(CHARIZARD), HIGH(CHARIZARD) << MON_EXTSPECIES_F
+	db LOW(SQUIRTLE), HIGH(SQUIRTLE) << MON_EXTSPECIES_F
+	db LOW(WARTORTLE), HIGH(WARTORTLE) << MON_EXTSPECIES_F
+	db LOW(BLASTOISE), HIGH(BLASTOISE) << MON_EXTSPECIES_F
+	db LOW(CHIKORITA), HIGH(CHIKORITA) << MON_EXTSPECIES_F
+	db LOW(BAYLEEF), HIGH(BAYLEEF) << MON_EXTSPECIES_F
+	db LOW(MEGANIUM), HIGH(MEGANIUM) << MON_EXTSPECIES_F
+	db LOW(CYNDAQUIL), HIGH(CYNDAQUIL) << MON_EXTSPECIES_F
+	db LOW(QUILAVA), HIGH(QUILAVA) << MON_EXTSPECIES_F
+	db LOW(TYPHLOSION), HIGH(TYPHLOSION) << MON_EXTSPECIES_F
+	db LOW(TOTODILE), HIGH(TOTODILE) << MON_EXTSPECIES_F
+	db LOW(CROCONAW), HIGH(CROCONAW) << MON_EXTSPECIES_F
+	db LOW(FERALIGATR), HIGH(FERALIGATR) << MON_EXTSPECIES_F
+	db -1
+
+SafariGauntlet_StoreProtectedScratchMonsInPC:
+	ld a, [wOTPartyCount]
+	ld b, a
+	xor a
+	ld c, a
+
+.loop
+	ld a, c
+	cp b
+	jr nc, .done
+	push bc
+	inc c
+	ld b, $81
+	farcall CopyBetweenPartyAndTemp
+	call SafariGauntlet_NormalizeTempReward
+	call SafariGauntlet_StoreTempMonInPC
+	pop bc
+	inc c
+	jr .loop
+
+.done
+	xor a
+	ld [wOTPartyCount], a
+	ret
+
+SafariGauntlet_StoreTempMonInPC:
+	farcall NewStorageBoxPointer
+	ret c
+	ld a, c
+	ld [wTempMonSlot], a
+	ld a, b
+	ld [wTempMonBox], a
+	farcall UpdateStorageBoxMonFromTemp
+	ret
+
+SafariGauntlet_RestoreLossKeepParty:
+	ld a, [wSafariGauntletRewardPending]
+	and a
+	ret z
+	xor a
+	ld [wSafariGauntletRewardPending], a
+	call SafariGauntlet_NormalizeTempReward
+	xor a
+	ld [wPartyCount], a
+	ld c, 1
+	ld b, 0
+	farcall CopyBetweenPartyAndTemp
+	ld a, 1
+	ld [wPartyCount], a
+	farcall HealParty
+	call SafariGauntlet_ClampPartyHP
 	ret
 
 SafariGauntlet_NormalizeTempReward:
@@ -679,15 +900,23 @@ SafariGauntlet_AddKeepSpeciesIfMissing:
 	ret
 
 SafariGauntlet_SeedStarterPC:
+	ld a, [wSafariGauntletSettings]
+	bit SAFARI_GAUNTLET_SETTINGS_STARTER_PC_SEEDED_F, a
+	ret nz
 	ld hl, .StarterPCSpecies
 .next_species
 	ld a, [hli]
 	cp -1
-	ret z
+	jr z, .mark_seeded
 	push hl
 	call SafariGauntlet_AddStarterToPC
 	pop hl
 	jr .next_species
+
+.mark_seeded
+	ld hl, wSafariGauntletSettings
+	set SAFARI_GAUNTLET_SETTINGS_STARTER_PC_SEEDED_F, [hl]
+	ret
 
 	; Two extra Eevees let players keep the starter Eevee intact and still
 	; experiment with Eeveelutions.

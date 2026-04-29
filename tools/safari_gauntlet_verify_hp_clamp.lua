@@ -9,10 +9,16 @@ end
 local A = bit(KEY.A)
 local B = bit(KEY.B)
 local START = bit(KEY.START)
+local LEFT = bit(KEY.LEFT)
+local RIGHT = bit(KEY.RIGHT)
+local UP = bit(KEY.UP)
+local DOWN = bit(KEY.DOWN)
 
 local W = {
 	map_group = 0xdcac,
 	map_number = 0xdcad,
+	y = 0xdcae,
+	x = 0xdcaf,
 	options2 = 0xcff5,
 	party_count = 0xdcce,
 	battle_mode = 0xd233,
@@ -47,6 +53,7 @@ local phase_frame = 0
 local supplies_seen = false
 local injected = false
 local wait_for_clamp = nil
+local hub_ready_frame = nil
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -218,7 +225,22 @@ cbid = callbacks:add("frame", function()
 			callbacks:remove(cbid)
 			return
 		end
-		keys = pulse(A, 10, 5)
+		if read8(W.x) < 12 then
+			keys = RIGHT
+		elseif read8(W.x) > 12 then
+			keys = LEFT
+		elseif read8(W.y) < 8 then
+			keys = DOWN
+		elseif read8(W.y) > 8 then
+			keys = UP
+		elseif not hub_ready_frame then
+			hub_ready_frame = frame
+			state_line("hub_ready")
+		elseif frame - hub_ready_frame < 30 then
+			keys = UP
+		else
+			keys = pulse(A, 10, 5)
+		end
 	elseif supplies_seen and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT then
 		if not injected and read16(W.party_mon1_max_hp) > 0 then
 			clone_starter_party()

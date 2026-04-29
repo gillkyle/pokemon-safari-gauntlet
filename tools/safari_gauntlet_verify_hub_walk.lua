@@ -203,9 +203,10 @@ cbid = callbacks:add("frame", function()
 		return
 	end
 
-	-- Normal movement scripts can briefly occupy mode 3; any persistent script
-	-- or Gauntlet state means walking accidentally opened something.
-	if read8(W.step) ~= 0 or read8(W.party_count) ~= 0 then
+	-- Normal movement scripts can briefly occupy mode 3. A starter in the party
+	-- is expected on current boots; only Gauntlet state means walking accidentally
+	-- opened something.
+	if read8(W.step) ~= 0 then
 		state_line("FAILED_STARTED_RUN")
 		emu:screenshot(screenshot_path)
 		log("screenshot=" .. screenshot_path)
@@ -229,7 +230,7 @@ cbid = callbacks:add("frame", function()
 			and read8(W.player_direction) == 0x00
 			and read8(W.script_flags) == 0
 			and read8(W.script_mode) == 0
-			and read8(W.party_count) == 0
+			and read8(W.party_count) > 0
 			and read8(W.step) == 0 then
 			idle_verified = true
 			state_line("idle_verified")

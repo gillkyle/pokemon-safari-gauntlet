@@ -9,6 +9,8 @@ end
 local A = bit(KEY.A)
 local B = bit(KEY.B)
 local START = bit(KEY.START)
+local LEFT = bit(KEY.LEFT)
+local RIGHT = bit(KEY.RIGHT)
 local UP = bit(KEY.UP)
 local DOWN = bit(KEY.DOWN)
 
@@ -211,11 +213,18 @@ cbid = callbacks:add("frame", function()
 		return
 	elseif group == GROUP_BATTLE_FACTORY and map == MAP_BATTLE_FACTORY_1F and read8(W.map_scripts_bank) ~= 0 then
 		set_phase("manual_counter")
-		if not hub_ready_frame and read8(W.x) == 12 and read8(W.y) == 8 then
+		if read8(W.x) < 12 then
+			keys = RIGHT
+		elseif read8(W.x) > 12 then
+			keys = LEFT
+		elseif read8(W.y) < 8 then
+			keys = DOWN
+		elseif read8(W.y) > 8 then
+			keys = UP
+		elseif not hub_ready_frame then
 			hub_ready_frame = frame
 			state_line("hub_ready")
-		end
-		if not hub_ready_frame or frame - hub_ready_frame < 30 then
+		elseif frame - hub_ready_frame < 30 then
 			keys = 0
 		elseif frame - hub_ready_frame < 150 then
 			keys = UP

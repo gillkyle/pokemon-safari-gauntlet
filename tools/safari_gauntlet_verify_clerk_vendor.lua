@@ -154,7 +154,13 @@ cbid = callbacks:add("frame", function()
 			set_phase("close_red")
 		end
 	elseif phase == "close_red" then
-		if phase_frame < 72 then
+		if phase_frame < 50 then
+			keys = A
+		elseif phase_frame < 130 then
+			keys = bit(KEY.B)
+		elseif phase_frame < 210 then
+			keys = A
+		elseif phase_frame < 290 then
 			keys = bit(KEY.B)
 		else
 			set_phase("move_green")
@@ -175,7 +181,13 @@ cbid = callbacks:add("frame", function()
 			set_phase("close_green")
 		end
 	elseif phase == "close_green" then
-		if phase_frame < 72 then
+		if phase_frame < 50 then
+			keys = A
+		elseif phase_frame < 130 then
+			keys = bit(KEY.B)
+		elseif phase_frame < 210 then
+			keys = A
+		elseif phase_frame < 290 then
 			keys = bit(KEY.B)
 		else
 			set_phase("move_blue")

@@ -2842,19 +2842,9 @@ FinalPkmnMusicAndAnimation:
 	ld c, 20
 	call DelayFrames
 	call SlideEnemyPicOut
-	; ...play the final Pokémon music...
+	; ...mark the final Pokémon condition...
 	ld a, COND_FINAL_MON
 	call SetVariableBattleMusicCondition
-	call IsJohtoGymLeader
-	jr nc, .no_music
-	push de
-	ld e, MUSIC_NONE
-	call PlayMusic
-	call DelayFrame
-	ld e, MUSIC_FINAL_POKEMON_BW
-	call PlayMusic
-	pop de
-.no_music
 	; ...show their sprite and final dialog...
 	ld a, [wTempEnemyMonSpecies]
 	push af

@@ -181,6 +181,7 @@ SpecialsPointers::
 	add_special Special_SafariGauntlet_BeginRun
 	add_special Special_SafariGauntlet_CheckMinParty
 	add_special Special_SafariGauntlet_ChooseKeepMon
+	add_special Special_SafariGauntlet_ChooseLossKeepMon
 	add_special Special_SafariGauntlet_EndRunWin
 	add_special Special_SafariGauntlet_EndRunLoss
 	add_special Special_SafariGauntlet_ToggleDexMode
@@ -199,6 +200,7 @@ SpecialsPointers::
 	add_special Special_SafariGauntlet_SelectCarryMon
 	add_special Special_SafariGauntlet_ClampPartyHP
 	add_special Special_SafariGauntlet_EnsureHubParty
+	add_special Special_SafariGauntlet_EnsureStarterPC
 	add_special Special_SafariGauntlet_HasUsableBalls
 	add_special Special_SafariGauntlet_CheckDraftComplete
 	add_special Special_SafariGauntlet_FinishDraft

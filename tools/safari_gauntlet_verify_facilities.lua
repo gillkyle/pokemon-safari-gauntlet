@@ -173,13 +173,19 @@ cbid = callbacks:add("frame", function()
 		elseif phase_frame == 72 then
 			emu:screenshot(keepbox_screenshot)
 			log("keepbox_screenshot=" .. keepbox_screenshot)
-		elseif phase_frame < 240 then
+		elseif phase_frame < 120 then
+			keys = A
+		elseif phase_frame < 220 then
+			keys = B
+		elseif phase_frame < 320 then
+			keys = A
+		elseif phase_frame < 400 then
 			keys = B
 		elseif phase_frame > 260 then
 			set_phase("move_tutor")
 		end
 	elseif phase == "move_tutor" then
-		keys = move_toward(15, 9, true)
+		keys = move_toward(16, 11, true)
 		if keys == 0 then
 			set_phase("talk_tutor")
 		end
@@ -197,7 +203,7 @@ cbid = callbacks:add("frame", function()
 			set_phase("move_tm")
 		end
 	elseif phase == "move_tm" then
-		keys = move_toward(24, 9, true)
+		keys = move_toward(24, 11, true)
 		if keys == 0 then
 			set_phase("talk_tm")
 		end
@@ -221,7 +227,7 @@ cbid = callbacks:add("frame", function()
 			set_phase("move_clerk")
 		end
 	elseif phase == "move_clerk" then
-		keys = move_toward(18, 7, true)
+		keys = move_toward(18, 9, true)
 		if keys == 0 then
 			set_phase("talk_clerk")
 		end

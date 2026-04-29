@@ -54,6 +54,13 @@ BattleFactory1FRulesScript:
 		line "#mon in normal"
 		cont "wild battles."
 
+		para "Supplies include"
+		line "Balls, healing,"
+		cont "12 Candies,"
+		cont "3 Repels,"
+		cont "Eevee stones,"
+		cont "and a Super Rod."
+
 		para "You may catch up"
 		line "to six #mon."
 
@@ -72,6 +79,9 @@ BattleFactory1FRulesScript:
 		para "Win to keep one"
 		line "#mon in the"
 		cont "Keep Box."
+
+		para "Lose to keep one"
+		line "#mon with you."
 		done
 
 BattleFactory1FStreakText:
@@ -91,7 +101,20 @@ SafariGauntletCounterStartScript:
 
 SafariGauntletNurseScript:
 	special Special_SafariGauntlet_EnsureHubParty
-	jumpstd pokecenternurse
+	showtextfaceplayer SafariGauntletNurseText
+	special Special_FadeBlackQuickly
+	special Special_ReloadSpritesNoPalettes
+	playmusic MUSIC_HEAL
+	special HealParty
+	special Special_SafariGauntlet_ClampPartyHP
+	pause 60
+	special Special_FadeInQuickly
+	special RestartMapMusic
+	jumpthistext
+
+	text "Your #mon are"
+	line "ready to go."
+	done
 
 SafariGauntletHubLoadCallback:
 	special Special_SafariGauntlet_EnsureHubParty
@@ -375,11 +398,8 @@ SafariGauntletRound1:
 	setval FALSE
 	end
 
-.Lost
-	special Special_SafariGauntlet_EndRunLoss
-	reloadmapafterbattle
-	setval TRUE
-	end
+	.Lost
+	sjump SafariGauntletBattleLoss
 
 SafariGauntletRound2:
 	showtext SafariGauntletRound2Text
@@ -473,11 +493,8 @@ SafariGauntletRound2:
 	setval FALSE
 	end
 
-.Lost
-	special Special_SafariGauntlet_EndRunLoss
-	reloadmapafterbattle
-	setval TRUE
-	end
+	.Lost
+	sjump SafariGauntletBattleLoss
 
 SafariGauntletRound3:
 	showtext SafariGauntletRound3Text
@@ -571,72 +588,89 @@ SafariGauntletRound3:
 	setval FALSE
 	end
 
-.Lost
-	special Special_SafariGauntlet_EndRunLoss
-	reloadmapafterbattle
-	setval TRUE
-	end
+	.Lost
+	sjumpfwd SafariGauntletBattleLoss
 
 SafariGauntletRound4:
 	showtext SafariGauntletRound4Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 12
-	ifequalfwd 0, .Falkner
-	ifequalfwd 1, .Bugsy
-	ifequalfwd 2, .Whitney
-	ifequalfwd 3, .Morty
-	ifequalfwd 4, .Chuck
-	ifequalfwd 5, .Jasmine
-	ifequalfwd 6, .Pryce
-	ifequalfwd 7, .Clair
-	ifequalfwd 8, .Brock
-	ifequalfwd 9, .Misty
-	ifequalfwd 10, .Surge
-	loadtrainer ERIKA, 1
+	random 16
+	ifequalfwd 0, .Todd5
+	ifequalfwd 1, .Gina4
+	ifequalfwd 2, .Tiffany3
+	ifequalfwd 3, .Anthony4
+	ifequalfwd 4, .Parry2
+	ifequalfwd 5, .Vance2
+	ifequalfwd 6, .Gilbert
+	ifequalfwd 7, .Nozomi
+	ifequalfwd 8, .Kevin
+	ifequalfwd 9, .Reena1
+	ifequalfwd 10, .Huey3
+	ifequalfwd 11, .Natalie
+	ifequalfwd 12, .Dennett
+	ifequalfwd 13, .Margaret
+	ifequalfwd 14, .Winston
+	loadtrainer BUG_MANIAC, LOU
 	sjumpfwd .Battle
 
-.Falkner
-	loadtrainer FALKNER, 1
+.Todd5
+	loadtrainer CAMPER, TODD5
 	sjumpfwd .Battle
 
-.Bugsy
-	loadtrainer BUGSY, 1
+.Gina4
+	loadtrainer PICNICKER, GINA4
 	sjumpfwd .Battle
 
-.Whitney
-	loadtrainer WHITNEY, 1
+.Tiffany3
+	loadtrainer PICNICKER, TIFFANY3
 	sjumpfwd .Battle
 
-.Morty
-	loadtrainer MORTY, 1
+.Anthony4
+	loadtrainer HIKER, ANTHONY4
 	sjumpfwd .Battle
 
-.Chuck
-	loadtrainer CHUCK, 1
+.Parry2
+	loadtrainer HIKER, PARRY2
 	sjumpfwd .Battle
 
-.Jasmine
-	loadtrainer JASMINE, 1
+.Vance2
+	loadtrainer BIRD_KEEPER, VANCE2
 	sjumpfwd .Battle
 
-.Pryce
-	loadtrainer PRYCE, 1
+.Gilbert
+	loadtrainer PSYCHIC_T, GILBERT
 	sjumpfwd .Battle
 
-.Clair
-	loadtrainer CLAIR, 1
+.Nozomi
+	loadtrainer BATTLE_GIRL, NOZOMI
 	sjumpfwd .Battle
 
-.Brock
-	loadtrainer BROCK, 1
+.Kevin
+	loadtrainer COOLTRAINERM, KEVIN
 	sjumpfwd .Battle
 
-.Misty
-	loadtrainer MISTY, 1
+.Reena1
+	loadtrainer COOLTRAINERF, REENA1
 	sjumpfwd .Battle
 
-.Surge
-	loadtrainer LT_SURGE, 1
+.Huey3
+	loadtrainer SAILOR, HUEY3
+	sjumpfwd .Battle
+
+.Natalie
+	loadtrainer HEX_MANIAC, NATALIE
+	sjumpfwd .Battle
+
+.Dennett
+	loadtrainer SCIENTIST, DENNETT
+	sjumpfwd .Battle
+
+.Margaret
+	loadtrainer BAKER, MARGARET
+	sjumpfwd .Battle
+
+.Winston
+	loadtrainer RICH_BOY, WINSTON
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE
@@ -649,9 +683,22 @@ SafariGauntletRound4:
 	setval FALSE
 	end
 
-.Lost
+	.Lost
+	sjumpfwd SafariGauntletBattleLoss
+
+SafariGauntletBattleLoss:
+	reloadmap
+	opentext
+	writetext SafariGauntletLossKeepPromptText
+	waitbutton
+	special Special_SafariGauntlet_ChooseLossKeepMon
+	iffalsefwd .NoKeep
+	writetext SafariGauntletLossKeepStoredText
+	waitbutton
+
+.NoKeep
+	closetext
 	special Special_SafariGauntlet_EndRunLoss
-	reloadmapafterbattle
 	setval TRUE
 	end
 
@@ -889,11 +936,8 @@ SafariGauntletBossBattle:
 	setval FALSE
 	end
 
-.Lost
-	special Special_SafariGauntlet_EndRunLoss
-	reloadmapafterbattle
-	setval TRUE
-	end
+	.Lost
+	sjump SafariGauntletBattleLoss
 
 SafariGauntletDraftFailed:
 	special Special_SafariGauntlet_EndRunLoss
@@ -1109,12 +1153,14 @@ SafariGauntletTMVendorScript:
 	waitbutton
 	sjump .Loop
 
-SafariGauntletKeepBoxNPCScript:
-	faceplayer
-	sjumpfwd SafariGauntletKeepBoxScript
-
 SafariGauntletKeepBoxScript:
 	special Special_SafariGauntlet_EnsureHubParty
+	readmem wSafariGauntletStep
+	ifequalfwd SAFARI_GAUNTLET_STEP_IDLE, .OpenPC
+	jumptext SafariGauntletPCBlockedDuringRunText
+
+.OpenPC
+	special Special_SafariGauntlet_EnsureStarterPC
 	jumpstd pcscript
 
 SafariGauntletSettingsScript:
@@ -1310,6 +1356,21 @@ SafariGauntletKeepBoxOpenPCText:
 	cont "and boxes?"
 	done
 
+SafariGauntletNurseText:
+	text "Need a quick rest?"
+
+	para "I'll heal your"
+	line "#mon now."
+	done
+
+SafariGauntletPCBlockedDuringRunText:
+	text "The PC is locked"
+	line "during a run."
+
+	para "Finish or lose the"
+	line "Gauntlet first."
+	done
+
 SafariGauntletExitBlockedText:
 	text "The Safari"
 	line "Gauntlet is"
@@ -1342,47 +1403,16 @@ SafariGauntletNeedOnePokemonText:
 SafariGauntletStandardSuppliesText:
 	text "Run supplies are"
 	line "loaded."
-
-	para "You have a Master"
-	line "Ball, plenty of"
-	cont "other Balls,"
-	cont "healing items,"
-	cont "12 Candies,"
-	cont "3 Super"
-	cont "Repels,"
-	cont "Eevee stones"
-	cont "(Sun/Moon too),"
-	cont "and a Super Rod."
 	prompt
 
 SafariGauntletCasualSuppliesText:
 	text "Casual supplies"
 	line "are loaded."
-
-	para "You have a Master"
-	line "Ball, extra"
-	cont "Balls and healing,"
-	cont "12 Candies,"
-	cont "3 Super"
-	cont "Repels,"
-	cont "Eevee stones"
-	cont "(Sun/Moon too),"
-	cont "and a Super Rod."
 	prompt
 
 SafariGauntletHardSuppliesText:
 	text "Hard supplies are"
 	line "loaded."
-
-	para "You still get one"
-	line "Master Ball, but"
-	cont "fewer supplies"
-	cont "12 Candies,"
-	cont "3 Super"
-	cont "Repels,"
-	cont "Eevee stones"
-	cont "(Sun/Moon too),"
-	cont "and a Super Rod."
 	prompt
 
 SafariGauntletMoveReminderIntroText:
@@ -1688,6 +1718,19 @@ SafariGauntletDefeatText:
 	para "Your party and bag"
 	line "were restored."
 	done
+
+SafariGauntletLossKeepPromptText:
+	text "Choose one #mon"
+	line "from this team to"
+	cont "keep with you."
+	prompt
+
+SafariGauntletLossKeepStoredText:
+	text "Protected starter"
+	line "families and Eevee"
+	cont "families were sent"
+	cont "to your PC."
+	prompt
 
 SafariGauntletVictoryText:
 	text "Safari Gauntlet"

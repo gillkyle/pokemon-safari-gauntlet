@@ -186,7 +186,7 @@ cbid = callbacks:add("frame", function()
 			set_phase("move_nurse")
 		end
 	elseif phase == "move_nurse" then
-		keys = move_toward(2, 7)
+		keys = move_toward(6, 8)
 		if keys == 0 then
 			set_phase("talk_nurse")
 		end
@@ -204,7 +204,7 @@ cbid = callbacks:add("frame", function()
 			set_phase("move_pc")
 		end
 	elseif phase == "move_pc" then
-		keys = move_toward(4, 8)
+		keys = move_toward(5, 8)
 		if keys == 0 then
 			set_phase("talk_pc")
 		end

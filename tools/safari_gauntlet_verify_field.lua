@@ -10,6 +10,7 @@ local A = bit(KEY.A)
 local B = bit(KEY.B)
 local START = bit(KEY.START)
 local UP = bit(KEY.UP)
+local DOWN = bit(KEY.DOWN)
 local LEFT = bit(KEY.LEFT)
 local RIGHT = bit(KEY.RIGHT)
 
@@ -49,6 +50,7 @@ local phase_frame = 0
 local supplies_seen = false
 local verified_frame = nil
 local last_log = 0
+local hub_ready_frame = nil
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -212,7 +214,22 @@ cbid = callbacks:add("frame", function()
 		keys = pulse(A, 8, 4)
 	elseif group == GROUP_BATTLE_FACTORY and map == MAP_BATTLE_FACTORY_1F then
 		set_phase("hub")
-		keys = pulse(A, 12, 4)
+		if read8(W.x) < 12 then
+			keys = RIGHT
+		elseif read8(W.x) > 12 then
+			keys = LEFT
+		elseif read8(W.y) < 8 then
+			keys = DOWN
+		elseif read8(W.y) > 8 then
+			keys = UP
+		elseif not hub_ready_frame then
+			hub_ready_frame = frame
+			state_line("hub_ready")
+		elseif frame - hub_ready_frame < 30 then
+			keys = UP
+		else
+			keys = pulse(A, 12, 4)
+		end
 	elseif group == GROUP_SAFARI_ZONE and map == MAP_SAFARI_ZONE_HUB and read8(W.step) == SAFARI_GAUNTLET_STEP_DRAFT then
 		set_phase("field")
 		keys = drive_field()
