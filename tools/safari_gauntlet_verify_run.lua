@@ -31,6 +31,7 @@ local W = {
 	script_bank = 0xffeb,
 	script_pos = 0xffec,
 	crash_code = 0xffe5,
+	tilemap = 0xc440,
 	options2 = 0xcff5,
 	y = 0xdcae,
 		x = 0xdcaf,
@@ -41,6 +42,10 @@ local W = {
 	battle_type = 0xd236,
 	enemy_level = 0xd219,
 	ot_party_mon1_level = 0xd2aa,
+	ot_party_count = 0xd283,
+	ot_party_nicknames = 0xd3ed,
+	other_trainer_class = 0xd235,
+	other_trainer_id = 0xd237,
 	cur_battle_mon = 0xd0da,
 	cur_party_mon = 0xd10c,
 	party_menu_cursor = 0xd0de,
@@ -93,6 +98,8 @@ local BATTLEMODE_TRAINER = 2
 local PARTYMON_HP_OFFSET = 0x22
 local PARTYMON_MAX_HP_OFFSET = 0x24
 local PARTYMON_PP_OFFSET = 0x16
+local MON_NAME_LENGTH = 11
+local TEXT_END = 0x53
 local POKE_BALL = 1
 local GREAT_BALL = 2
 local ULTRA_BALL = 3
@@ -106,6 +113,9 @@ local single_draft_verified = false
 local post_draft_return_seen = false
 local victory_stats_seen = false
 local trainer_level_seen = {}
+local trainer_party_seen = {}
+local trainer_seen = {}
+local current_trainer_key = nil
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -261,12 +271,41 @@ local function state_line(prefix)
 	))
 end
 
+local function tile_sequence_seen(sequence)
+	for y = 0, 17 do
+		for x = 0, 20 - #sequence do
+			local matched = true
+			for i, tile in ipairs(sequence) do
+				if read8(W.tilemap + y * 20 + x + i - 1) ~= tile then
+					matched = false
+					break
+				end
+			end
+			if matched then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function bsod_seen()
+	return tile_sequence_seen({ 0x84, 0x91, 0x91, 0x8e, 0x91 }) -- ERROR
+end
+
 local TRAINER_LEVEL_RANGES = {
 	[2] = { 50, 53 },
 	[3] = { 52, 55 },
 	[4] = { 54, 57 },
 	[5] = { 56, 59 },
-	[6] = { 58, 62 },
+	[6] = { 57, 60 },
+}
+
+local TRAINER_PARTY_MINIMUMS = {
+	[2] = 3,
+	[3] = 4,
+	[4] = 5,
+	[5] = 5,
 }
 
 local function trainer_levels_complete()
@@ -278,8 +317,43 @@ local function trainer_levels_complete()
 	return true
 end
 
+local function trainer_name_addr(index)
+	return W.ot_party_nicknames + index * MON_NAME_LENGTH
+end
+
+local function trainer_name_hex(index)
+	local addr = trainer_name_addr(index)
+	local parts = {}
+	for i = 0, MON_NAME_LENGTH - 1 do
+		parts[#parts + 1] = string.format("%02x", read8(addr + i))
+	end
+	return table.concat(parts, "")
+end
+
+local function trainer_name_has_terminator(index)
+	local addr = trainer_name_addr(index)
+	for i = 0, MON_NAME_LENGTH - 1 do
+		if read8(addr + i) == TEXT_END then
+			return true
+		end
+	end
+	return false
+end
+
+local stop_with_screenshot
+
+local function verify_trainer_nicknames(step, party_count)
+	for i = 0, party_count - 1 do
+		if read8(trainer_name_addr(i)) == 0 or not trainer_name_has_terminator(i) then
+			stop_with_screenshot(string.format("FAILED_TRAINER_NICKNAME step=%d slot=%d name=%s", step, i + 1, trainer_name_hex(i)))
+			return false
+		end
+	end
+	return true
+end
+
 local cbid
-local function stop_with_screenshot(label)
+function stop_with_screenshot(label)
 	state_line(label)
 	emu:screenshot(screenshot_path)
 	log("screenshot=" .. screenshot_path)
@@ -382,20 +456,53 @@ cbid = callbacks:add("frame", function()
 		make_battles_fast()
 		write8(W.options2, read8(W.options2) & 0x3f)
 	end
+	if read8(W.crash_code) ~= 0 or bsod_seen() then
+		stop_with_screenshot("FAILED_CRASH")
+		return
+	end
 	if read8(W.battle_mode) == BATTLEMODE_TRAINER then
 		local step = read8(W.step)
 		local range = TRAINER_LEVEL_RANGES[step]
 		local level = read8(W.ot_party_mon1_level)
+		local party_min = TRAINER_PARTY_MINIMUMS[step]
+		local party_count = read8(W.ot_party_count)
+		local trainer_key = string.format("%02x:%02x", read8(W.other_trainer_class), read8(W.other_trainer_id))
 		if range and level > 0 then
 			if level < range[1] or level > range[2] then
 				stop_with_screenshot(string.format("FAILED_TRAINER_LEVEL step=%d level=%d expected=%d-%d", step, level, range[1], range[2]))
 				return
+			end
+			if current_trainer_key ~= trainer_key then
+				current_trainer_key = trainer_key
+				if not trainer_seen[trainer_key] then
+					trainer_seen[trainer_key] = true
+					log(string.format("TRAINER_UNIQUE class_id=%s step=%d", trainer_key, step))
+				else
+					stop_with_screenshot(string.format("FAILED_REPEAT_TRAINER class_id=%s step=%d", trainer_key, step))
+					return
+				end
 			end
 			if not trainer_level_seen[step] then
 				trainer_level_seen[step] = true
 				log(string.format("TRAINER_LEVEL_VERIFIED step=%d level=%d expected=%d-%d", step, level, range[1], range[2]))
 			end
 		end
+		if party_min and party_count > 0 then
+			if party_count < party_min then
+				stop_with_screenshot(string.format("FAILED_TRAINER_PARTY_SIZE step=%d count=%d expected_min=%d", step, party_count, party_min))
+				return
+			end
+			if not verify_trainer_nicknames(step, party_count) then
+				return
+			end
+			if not trainer_party_seen[step] then
+				trainer_party_seen[step] = true
+				log(string.format("TRAINER_PARTY_SIZE_VERIFIED step=%d count=%d expected_min=%d", step, party_count, party_min))
+				log(string.format("TRAINER_NICKNAMES_VERIFIED step=%d count=%d", step, party_count))
+			end
+		end
+	else
+		current_trainer_key = nil
 	end
 	check_supplies()
 	if not draft_seeded

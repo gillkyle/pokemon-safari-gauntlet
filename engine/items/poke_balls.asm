@@ -44,9 +44,12 @@ GetModifiedCaptureRate:
 	ldh [hMultiplicand], a
 
 	; * ball bonus
+	call SafariGauntlet_DraftBallMultiplier
+	jr c, .ball_bonus_done
 	ld a, [wCurItem]
 	ld hl, BallMultiplierFunctionTable
 	call BattleJumptable
+.ball_bonus_done
 
 	; * base capture rate (might have been modified by Heavy Ball)
 	ld a, [wEnemyMonCatchRate]
@@ -227,6 +230,46 @@ ParkBallMultiplier:
 ; multiply catch rate by 1.5
 	ln a, 3, 2 ; x1.5
 	jmp MultiplyAndDivide
+
+SafariGauntlet_DraftBallMultiplier:
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_DRAFT
+	jr nz, .no_bonus
+	ld a, [wMapGroup]
+	cp GROUP_SAFARI_ZONE_HUB
+	jr nz, .no_bonus
+	ld a, [wMapNumber]
+	cp MAP_SAFARI_ZONE_WEST + 1
+	jr nc, .no_bonus
+	ld a, [wCurItem]
+	cp POKE_BALL
+	jr z, .poke_ball
+	cp GREAT_BALL
+	jr z, .great_ball
+	cp ULTRA_BALL
+	jr z, .ultra_ball
+	cp SAFARI_BALL
+	jr z, .ultra_ball
+
+.no_bonus
+	and a
+	ret
+
+.poke_ball
+	ln a, SAFARI_GAUNTLET_DRAFT_POKE_BALL_BONUS, 1
+	jr .apply
+
+.great_ball
+	ln a, SAFARI_GAUNTLET_DRAFT_GREAT_BALL_BONUS, 1
+	jr .apply
+
+.ultra_ball
+	ln a, SAFARI_GAUNTLET_DRAFT_ULTRA_BALL_BONUS, 1
+
+.apply
+	call MultiplyAndDivide
+	scf
+	ret
 
 GetSpeciesWeight::
 ; input: bc = species+form

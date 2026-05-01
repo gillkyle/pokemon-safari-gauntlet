@@ -110,6 +110,14 @@ SafariGauntlet_InitStandalonePlayer:
 	rawchar "TRAINER@", 0, 0, 0
 
 SafariGauntlet_FixContinuePosition:
+	push bc
+	ldh a, [rWBK]
+	ld b, a
+	ld a, BANK(wMapGroup)
+	ldh [rWBK], a
+	ld a, [wMapGroup]
+	cp GROUP_SAFARI_ZONE_HUB
+	jr z, .check_safari_zone
 	ld a, [wMapGroup]
 	cp GROUP_BATTLE_FACTORY_1F
 	jr nz, .no_fix
@@ -117,34 +125,56 @@ SafariGauntlet_FixContinuePosition:
 	cp MAP_BATTLE_FACTORY_1F
 	jr nz, .no_fix
 	ld a, [wXCoord]
-	cp 12
-	jr z, .check_y
-	cp 13
-	jr nz, .no_fix
+	cp 11
+	jr c, .no_fix
+	cp 15
+	jr nc, .no_fix
 
 .check_y
 	ld a, [wYCoord]
 	cp 6
-	jr z, .fix
-	cp 7
-	jr z, .fix
-	cp 8
-	jr z, .fix
-	cp 9
-	jr nz, .no_fix
+	jr c, .no_fix
+	cp 10
+	jr nc, .no_fix
 
 .fix
-	ld a, 11
+	ld a, 12
 	ld [wXCoord], a
 	ld a, 8
 	ld [wYCoord], a
-	ld a, OW_DOWN
+	ld a, OW_UP
 	ld [wPlayerDirection], a
+	ld a, [wPlayerSpriteSetupFlags]
+	and %11111100
+	or UP
+	set PLAYERSPRITESETUP_CUSTOM_FACING_F, a
+	ld [wPlayerSpriteSetupFlags], a
+	ld a, -1
+	ld [wDefaultSpawnpoint], a
 	scf
-	ret
+	jr .done
+
+.check_safari_zone
+	ld a, [wMapNumber]
+	cp MAP_SAFARI_ZONE_HUB
+	jr c, .no_fix
+	cp MAP_SAFARI_ZONE_WEST + 1
+	jr nc, .no_fix
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_DRAFT
+	jr z, .no_fix
+	ld a, GROUP_BATTLE_FACTORY_1F
+	ld [wMapGroup], a
+	ld a, MAP_BATTLE_FACTORY_1F
+	ld [wMapNumber], a
+	jr .fix
 
 .no_fix
 	and a
+.done
+	ld a, b
+	ldh [rWBK], a
+	pop bc
 	ret
 
 ResetWRAM_NotPlus:

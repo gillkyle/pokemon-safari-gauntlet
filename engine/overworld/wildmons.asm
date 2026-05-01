@@ -247,11 +247,24 @@ endr
 	ret
 
 DEF SAFARI_GAUNTLET_JOHTO_POOL_COUNT EQU 251
-DEF SAFARI_GAUNTLET_JOHTO_COMMON_END EQU 170
-DEF SAFARI_GAUNTLET_JOHTO_UNCOMMON_END EQU 230
 DEF SAFARI_GAUNTLET_NATIONAL_POOL_COUNT EQU NUM_POKEMON
-DEF SAFARI_GAUNTLET_NATIONAL_COMMON_END EQU 190
-DEF SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END EQU 260
+DEF SAFARI_GAUNTLET_COMMON_CATCH_RATE EQU 120
+DEF SAFARI_GAUNTLET_UNCOMMON_CATCH_RATE EQU 60
+DEF SAFARI_GAUNTLET_RARITY_ATTEMPTS EQU 64
+DEF SAFARI_GAUNTLET_LEGENDARY_POOL_COUNT EQU 11
+DEF SAFARI_GAUNTLET_RARITY_COMMON EQU 0
+DEF SAFARI_GAUNTLET_RARITY_UNCOMMON EQU 1
+DEF SAFARI_GAUNTLET_RARITY_RARE EQU 2
+DEF SAFARI_GAUNTLET_RARITY_LEGENDARY EQU 3
+DEF SAFARI_GAUNTLET_HUB_COMMON_END EQU 82
+DEF SAFARI_GAUNTLET_HUB_UNCOMMON_END EQU 96
+DEF SAFARI_GAUNTLET_HUB_RARE_END EQU 99
+DEF SAFARI_GAUNTLET_MID_COMMON_END EQU 68
+DEF SAFARI_GAUNTLET_MID_UNCOMMON_END EQU 90
+DEF SAFARI_GAUNTLET_MID_RARE_END EQU 99
+DEF SAFARI_GAUNTLET_NORTH_COMMON_END EQU 55
+DEF SAFARI_GAUNTLET_NORTH_UNCOMMON_END EQU 85
+DEF SAFARI_GAUNTLET_NORTH_RARE_END EQU 99
 
 ChooseWildEncounter:
 	ld c, $ff
@@ -458,13 +471,13 @@ _ChooseWildEncounter:
 TrySafariGauntletWildEncounter:
 	ld a, [wSafariGauntletStep]
 	cp SAFARI_GAUNTLET_STEP_DRAFT
-	jp nz, .no_override
+	jp nz, SafariGauntlet_NoWildOverride
 	ld a, [wMapGroup]
 	cp GROUP_SAFARI_ZONE_HUB
-	jp nz, .no_override
+	jp nz, SafariGauntlet_NoWildOverride
 	ld a, [wMapNumber]
 	cp MAP_SAFARI_ZONE_WEST + 1
-	jp nc, .no_override
+	jp nc, SafariGauntlet_NoWildOverride
 
 	ld a, 100
 	call RandomRange
@@ -477,83 +490,93 @@ TrySafariGauntletWildEncounter:
 	cp MAP_SAFARI_ZONE_WEST
 	jr z, .mid_depth
 
-	; Hub: mostly common encounters, with very rare spawns occasionally appearing.
-	ld d, 0
+	; Hub: 82% common, 14% uncommon, 3% rare, 1% legendary.
+	ld d, SAFARI_GAUNTLET_RARITY_COMMON
 	ld a, e
-	cp 80
+	cp SAFARI_GAUNTLET_HUB_COMMON_END
 	jr c, .pick_bucket
 	inc d
-	cp 97
+	cp SAFARI_GAUNTLET_HUB_UNCOMMON_END
+	jr c, .pick_bucket
+	inc d
+	cp SAFARI_GAUNTLET_HUB_RARE_END
 	jr c, .pick_bucket
 	inc d
 	jr .pick_bucket
 
 .mid_depth
-	ld d, 0
+	; East/West: 68% common, 22% uncommon, 9% rare, 1% legendary.
+	ld d, SAFARI_GAUNTLET_RARITY_COMMON
 	ld a, e
-	cp 58
+	cp SAFARI_GAUNTLET_MID_COMMON_END
 	jr c, .pick_bucket
 	inc d
-	cp 90
+	cp SAFARI_GAUNTLET_MID_UNCOMMON_END
+	jr c, .pick_bucket
+	inc d
+	cp SAFARI_GAUNTLET_MID_RARE_END
 	jr c, .pick_bucket
 	inc d
 	jr .pick_bucket
 
 .north_depth
-	ld d, 0
+	; North: 55% common, 30% uncommon, 14% rare, 1% legendary.
+	ld d, SAFARI_GAUNTLET_RARITY_COMMON
 	ld a, e
-	cp 35
+	cp SAFARI_GAUNTLET_NORTH_COMMON_END
 	jr c, .pick_bucket
 	inc d
-	cp 72
+	cp SAFARI_GAUNTLET_NORTH_UNCOMMON_END
+	jr c, .pick_bucket
+	inc d
+	cp SAFARI_GAUNTLET_NORTH_RARE_END
 	jr c, .pick_bucket
 	inc d
 
 .pick_bucket
+	ld a, d
+	cp SAFARI_GAUNTLET_RARITY_LEGENDARY
+	jr z, .roll_legendary
+	ld e, SAFARI_GAUNTLET_RARITY_ATTEMPTS
+
+.roll_candidate_loop
+	push de
+	call SafariGauntlet_RollWildCandidateForCurrentMode
+	call SafariGauntlet_CurrentCandidateMatchesTargetRarity
+	pop de
+	jp c, SafariGauntlet_SetDraftWildCandidateLevel
+	dec e
+	jr nz, .roll_candidate_loop
+	jp SafariGauntlet_SetDraftWildCandidateLevel
+
+.roll_legendary
+	ld a, SAFARI_GAUNTLET_LEGENDARY_POOL_COUNT
+	call RandomRange
+	add a
+	ld e, a
+	ld d, 0
+	ld hl, LegendaryMons
+	add hl, de
+	ld a, [hli]
+	ld [wCurSpecies], a
+	ld a, [hl]
+	ld [wCurForm], a
+	jp SafariGauntlet_SetDraftWildCandidateLevel
+
+SafariGauntlet_RollWildCandidateForCurrentMode:
 	ld a, [wSafariGauntletSettings]
 	bit SAFARI_GAUNTLET_SETTINGS_NATIONAL_F, a
 	jr z, .johto_pool
 
 .national_pool
-	ld a, d
-	and a
-	jr z, .national_common
-	dec a
-	jr z, .national_uncommon
-	ld hl, SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END
-	ld bc, SAFARI_GAUNTLET_NATIONAL_POOL_COUNT - SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END
-	jr .roll_index
-
-.national_common
-	ld hl, 0
-	ld bc, SAFARI_GAUNTLET_NATIONAL_COMMON_END
-	jr .roll_index
-
-.national_uncommon
-	ld hl, SAFARI_GAUNTLET_NATIONAL_COMMON_END
-	ld bc, SAFARI_GAUNTLET_NATIONAL_UNCOMMON_END - SAFARI_GAUNTLET_NATIONAL_COMMON_END
+	ld bc, SAFARI_GAUNTLET_NATIONAL_POOL_COUNT
 	jr .roll_index
 
 .johto_pool
-	ld a, d
-	and a
-	jr z, .johto_common
-	dec a
-	jr z, .johto_uncommon
-	ld hl, SAFARI_GAUNTLET_JOHTO_UNCOMMON_END
-	ld bc, SAFARI_GAUNTLET_JOHTO_POOL_COUNT - SAFARI_GAUNTLET_JOHTO_UNCOMMON_END
-	jr .roll_index
-
-.johto_common
-	ld hl, 0
-	ld bc, SAFARI_GAUNTLET_JOHTO_COMMON_END
-	jr .roll_index
-
-.johto_uncommon
-	ld hl, SAFARI_GAUNTLET_JOHTO_COMMON_END
-	ld bc, SAFARI_GAUNTLET_JOHTO_UNCOMMON_END - SAFARI_GAUNTLET_JOHTO_COMMON_END
+	ld bc, SAFARI_GAUNTLET_JOHTO_POOL_COUNT
 
 .roll_index
+	ld hl, 0
 	push hl
 	call RandomRange16
 	pop hl
@@ -571,7 +594,7 @@ TrySafariGauntletWildEncounter:
 	ld [wCurSpecies], a
 	ld a, 1 << MON_EXTSPECIES_F
 	ld [wCurForm], a
-	jr .set_level
+	ret
 
 .extended_species_block
 	ld a, c
@@ -579,21 +602,88 @@ TrySafariGauntletWildEncounter:
 	ld [wCurSpecies], a
 	ld a, 1 << MON_EXTSPECIES_F
 	ld [wCurForm], a
-	jr .set_level
+	ret
 
 .plain_species
 	ld [wCurSpecies], a
 	xor a
 	ld [wCurForm], a
+	ret
 
-.set_level
+SafariGauntlet_CurrentCandidateMatchesTargetRarity:
+	push de
+	ld a, [wCurSpecies]
+	cp UNOWN
+	jr nz, .check_rarity
+	ld a, [wCurForm]
+	bit MON_EXTSPECIES_F, a
+	jr nz, .check_rarity
+	ld a, [wUnlockedUnowns]
+	and a
+	jr z, .reject
+
+.check_rarity
+	call SafariGauntlet_GetCurrentCandidateRarity
+	pop de
+	cp d
+	jr z, .match
+
+.no_match
+	and a
+	ret
+
+.reject
+	pop de
+	and a
+	ret
+
+.match
+	scf
+	ret
+
+SafariGauntlet_GetCurrentCandidateRarity:
+	push bc
+	push hl
+	ld a, [wCurSpecies]
+	ld c, a
+	ld a, [wCurForm]
+	ld b, a
+	ld hl, LegendaryMons
+	call GetSpeciesAndFormIndexFromHL
+	jr c, .legendary
+	call GetBaseData
+	ld a, [wBaseCatchRate]
+	cp SAFARI_GAUNTLET_COMMON_CATCH_RATE
+	jr nc, .common
+	cp SAFARI_GAUNTLET_UNCOMMON_CATCH_RATE
+	jr nc, .uncommon
+	ld a, SAFARI_GAUNTLET_RARITY_RARE
+	jr .done
+
+.common
+	ld a, SAFARI_GAUNTLET_RARITY_COMMON
+	jr .done
+
+.uncommon
+	ld a, SAFARI_GAUNTLET_RARITY_UNCOMMON
+	jr .done
+
+.legendary
+	ld a, SAFARI_GAUNTLET_RARITY_LEGENDARY
+
+.done
+	pop hl
+	pop bc
+	ret
+
+SafariGauntlet_SetDraftWildCandidateLevel:
 	ld a, SAFARI_GAUNTLET_DRAFT_LEVEL
 	ld [wCurPartyLevel], a
 	ld a, [wCurSpecies]
 	scf
 	ret
 
-.no_override
+SafariGauntlet_NoWildOverride:
 	and a
 	ret
 

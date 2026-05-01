@@ -12,9 +12,13 @@ OpenMartDialog::
 	ld hl, Marts
 	add hl, de
 	add hl, de
-	ld a, [hli]
-	ld d, [hl]
+	ld a, BANK(Marts)
+	call GetFarByte
+	inc hl
 	ld e, a
+	ld a, BANK(Marts)
+	call GetFarByte
+	ld d, a
 	ld b, BANK(Marts)
 	call LoadMartPointer
 	ld a, [wMartType]

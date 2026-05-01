@@ -96,8 +96,8 @@ BSODMessage:
 	next1 "------------------"
 	next  "Please report this"
 	next1 "crash to the deve-"
-	next1 "loper, Rangi42, at"
-	next1 "tinyurl.com/pkpc3."
+	next1 "loper: gillkyle at"
+	next1 "kylegill.com/hi"
 	next  "Error:"
 	done
 

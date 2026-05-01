@@ -28,7 +28,7 @@ ReadTrainerParty:
 	pop bc
 	ld a, l
 	sub b
-	ret z
+	jp z, .done
 	push bc
 
 	call GetNextTrainerDataByte
@@ -287,6 +287,10 @@ ReadTrainerParty:
 .no_stat_recalc
 	jmp .loop2
 
+.done
+	call SafariGauntlet_PadTrainerPartyForStage
+	ret
+
 SafariGauntlet_AdjustTrainerLevelForStage:
 	push hl
 	ld c, a
@@ -330,7 +334,94 @@ SafariGauntlet_AdjustTrainerLevelForStage:
 	db 52, 55
 	db 54, 57
 	db 56, 59
-	db 58, 62
+	db 57, 60
+
+SafariGauntlet_PadTrainerPartyForStage:
+	ld a, [wSafariGauntletStep]
+	cp SAFARI_GAUNTLET_STEP_ROUND1
+	ret c
+	cp SAFARI_GAUNTLET_STEP_BOSS
+	ret nc
+	sub SAFARI_GAUNTLET_STEP_ROUND1
+	ld e, a
+	ld d, 0
+	ld hl, .Minimums
+	add hl, de
+	ld d, [hl]
+
+.pad_loop
+	ld a, [wOTPartyCount]
+	cp d
+	ret nc
+	and a
+	ret z
+	cp PARTY_LENGTH
+	ret nc
+	push de
+	call SafariGauntlet_CopyLastTrainerMon
+	pop de
+	jr .pad_loop
+
+.Minimums:
+	db 3, 4, 5, 5
+
+SafariGauntlet_CopyLastTrainerMon:
+	ld a, [wOTPartyCount]
+	and a
+	ret z
+	cp PARTY_LENGTH
+	ret nc
+	dec a
+	ld hl, wOTPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
+	rst AddNTimes
+	push hl
+	ld a, [wOTPartyCount]
+	ld hl, wOTPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
+	rst AddNTimes
+	ld d, h
+	ld e, l
+	pop hl
+	ld bc, PARTYMON_STRUCT_LENGTH
+	rst CopyBytes
+	call SafariGauntlet_CopyLastTrainerMonOT
+	call SafariGauntlet_CopyLastTrainerMonNickname
+	ld hl, wOTPartyCount
+	inc [hl]
+	ret
+
+SafariGauntlet_CopyLastTrainerMonOT:
+	ld a, [wOTPartyCount]
+	dec a
+	ld hl, wOTPartyMonOTs
+	call SkipNames
+	push hl
+	ld a, [wOTPartyCount]
+	ld hl, wOTPartyMonOTs
+	call SkipNames
+	ld d, h
+	ld e, l
+	pop hl
+	ld bc, NAME_LENGTH
+	rst CopyBytes
+	ret
+
+SafariGauntlet_CopyLastTrainerMonNickname:
+	ld a, [wOTPartyCount]
+	dec a
+	ld hl, wOTPartyMonNicknames
+	call SkipNames
+	push hl
+	ld a, [wOTPartyCount]
+	ld hl, wOTPartyMonNicknames
+	call SkipNames
+	ld d, h
+	ld e, l
+	pop hl
+	ld bc, MON_NAME_LENGTH
+	rst CopyBytes
+	ret
 
 SetDynamicForm:
 ; Adjust form of mon in bc dynamically based on context if no form is set.

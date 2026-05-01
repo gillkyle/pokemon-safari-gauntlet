@@ -36,8 +36,9 @@ BattleFactory1F_MapScriptHeader:
 	object_event 11, 11, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_RED, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 14, 11, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_UP, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, jumptextfaceplayer, SafariGauntletExitBlockedText, -1
 	object_event 18,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_RED, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_1, -1
-	object_event 20,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_2, -1
-	object_event 22,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_3, -1
+	object_event 20,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_GREEN, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_4, -1
+	object_event 22,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BLUE, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_5, -1
+	object_event 24,  6, SPRITE_CLERK, SPRITEMOVEDATA_STANDING_DOWN, 0, 0, -1, PAL_NPC_BROWN, OBJECTTYPE_COMMAND, pokemart, MARTTYPE_BP, MART_BATTLEFACTORY_2, -1
 
 	object_const_def
 	const BATTLEFACTORY1F_RECEPTIONIST
@@ -309,7 +310,7 @@ SafariGauntletReceptionistScript:
 SafariGauntletRound1:
 	showtext SafariGauntletRound1Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 16
+	special Special_SafariGauntlet_RollTrainerFamily
 	ifequalfwd 0, .Joey1
 	ifequalfwd 1, .Todd1
 	ifequalfwd 2, .Gina1
@@ -404,23 +405,23 @@ SafariGauntletRound1:
 SafariGauntletRound2:
 	showtext SafariGauntletRound2Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 16
+	special Special_SafariGauntlet_RollTrainerFamily
 	ifequalfwd 0, .Joey3
 	ifequalfwd 1, .Todd3
 	ifequalfwd 2, .Gina3
 	ifequalfwd 3, .Liz3
 	ifequalfwd 4, .Alan3
-	ifequalfwd 5, .Vance1
-	ifequalfwd 6, .Anthony3
-	ifequalfwd 7, .Parry1
-	ifequalfwd 8, .Phil
-	ifequalfwd 9, .Huey2
-	ifequalfwd 10, .Eric
+	ifequalfwd 5, .Wade3
+	ifequalfwd 6, .Vance1
+	ifequalfwd 7, .Anthony3
+	ifequalfwd 8, .Huey2
+	ifequalfwd 9, .Eric
+	ifequalfwd 10, .Brent3
 	ifequalfwd 11, .Dennett
-	ifequalfwd 12, .Yoshi
-	ifequalfwd 13, .Subaru
+	ifequalfwd 12, .Derek3
+	ifequalfwd 13, .Phil
 	ifequalfwd 14, .Ned
-	loadtrainer BOARDER, RONALD
+	loadtrainer BLACKBELT_T, YOSHI
 	sjumpfwd .Battle
 
 .Joey3
@@ -443,20 +444,16 @@ SafariGauntletRound2:
 	loadtrainer SCHOOLBOY, ALAN3
 	sjumpfwd .Battle
 
-.Anthony3
-	loadtrainer HIKER, ANTHONY3
-	sjumpfwd .Battle
-
-.Parry1
-	loadtrainer HIKER, PARRY1
+.Wade3
+	loadtrainer BUG_CATCHER, WADE3
 	sjumpfwd .Battle
 
 .Vance1
 	loadtrainer BIRD_KEEPER, VANCE1
 	sjumpfwd .Battle
 
-.Phil
-	loadtrainer PSYCHIC_T, PHIL
+.Anthony3
+	loadtrainer HIKER, ANTHONY3
 	sjumpfwd .Battle
 
 .Huey2
@@ -467,16 +464,20 @@ SafariGauntletRound2:
 	loadtrainer SUPER_NERD, ERIC
 	sjumpfwd .Battle
 
+.Brent3
+	loadtrainer POKEMANIAC, BRENT3
+	sjumpfwd .Battle
+
 .Dennett
 	loadtrainer SCIENTIST, DENNETT
 	sjumpfwd .Battle
 
-.Yoshi
-	loadtrainer BLACKBELT_T, YOSHI
+.Derek3
+	loadtrainer POKEFANM, DEREK3
 	sjumpfwd .Battle
 
-.Subaru
-	loadtrainer BATTLE_GIRL, SUBARU
+.Phil
+	loadtrainer PSYCHIC_T, PHIL
 	sjumpfwd .Battle
 
 .Ned
@@ -499,67 +500,67 @@ SafariGauntletRound2:
 SafariGauntletRound3:
 	showtext SafariGauntletRound3Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 16
-	ifequalfwd 0, .Todd5
-	ifequalfwd 1, .Gina4
-	ifequalfwd 2, .Tiffany3
-	ifequalfwd 3, .Anthony4
-	ifequalfwd 4, .Parry2
-	ifequalfwd 5, .Vance2
-	ifequalfwd 6, .Gilbert
-	ifequalfwd 7, .Nozomi
-	ifequalfwd 8, .Kevin
-	ifequalfwd 9, .Reena1
-	ifequalfwd 10, .Huey3
-	ifequalfwd 11, .Natalie
-	ifequalfwd 12, .Dennett
+	special Special_SafariGauntlet_RollTrainerFamily
+	ifequalfwd 0, .Joey5
+	ifequalfwd 1, .Todd5
+	ifequalfwd 2, .Gina5
+	ifequalfwd 3, .Tiffany3
+	ifequalfwd 4, .Alan5
+	ifequalfwd 5, .Wade5
+	ifequalfwd 6, .Vance3
+	ifequalfwd 7, .Anthony5
+	ifequalfwd 8, .Huey4
+	ifequalfwd 9, .Gilbert
+	ifequalfwd 10, .Reena1
+	ifequalfwd 11, .Dennett
+	ifequalfwd 12, .Natalie
 	ifequalfwd 13, .Margaret
 	ifequalfwd 14, .Winston
-	loadtrainer BUG_MANIAC, LOU
+	loadtrainer BATTLE_GIRL, NOZOMI
+	sjumpfwd .Battle
+
+.Joey5
+	loadtrainer YOUNGSTER, JOEY5
 	sjumpfwd .Battle
 
 .Todd5
 	loadtrainer CAMPER, TODD5
 	sjumpfwd .Battle
 
-.Gina4
-	loadtrainer PICNICKER, GINA4
+.Gina5
+	loadtrainer PICNICKER, GINA5
 	sjumpfwd .Battle
 
 .Tiffany3
 	loadtrainer PICNICKER, TIFFANY3
 	sjumpfwd .Battle
 
-.Anthony4
-	loadtrainer HIKER, ANTHONY4
+.Alan5
+	loadtrainer SCHOOLBOY, ALAN5
 	sjumpfwd .Battle
 
-.Parry2
-	loadtrainer HIKER, PARRY2
+.Wade5
+	loadtrainer BUG_CATCHER, WADE5
 	sjumpfwd .Battle
 
-.Vance2
-	loadtrainer BIRD_KEEPER, VANCE2
+.Vance3
+	loadtrainer BIRD_KEEPER, VANCE3
+	sjumpfwd .Battle
+
+.Anthony5
+	loadtrainer HIKER, ANTHONY5
+	sjumpfwd .Battle
+
+.Huey4
+	loadtrainer SAILOR, HUEY4
 	sjumpfwd .Battle
 
 .Gilbert
 	loadtrainer PSYCHIC_T, GILBERT
 	sjumpfwd .Battle
 
-.Nozomi
-	loadtrainer BATTLE_GIRL, NOZOMI
-	sjumpfwd .Battle
-
-.Kevin
-	loadtrainer COOLTRAINERM, KEVIN
-	sjumpfwd .Battle
-
 .Reena1
 	loadtrainer COOLTRAINERF, REENA1
-	sjumpfwd .Battle
-
-.Huey3
-	loadtrainer SAILOR, HUEY3
 	sjumpfwd .Battle
 
 .Natalie
@@ -594,67 +595,67 @@ SafariGauntletRound3:
 SafariGauntletRound4:
 	showtext SafariGauntletRound4Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
-	random 16
-	ifequalfwd 0, .Todd5
-	ifequalfwd 1, .Gina4
-	ifequalfwd 2, .Tiffany3
-	ifequalfwd 3, .Anthony4
-	ifequalfwd 4, .Parry2
-	ifequalfwd 5, .Vance2
-	ifequalfwd 6, .Gilbert
-	ifequalfwd 7, .Nozomi
-	ifequalfwd 8, .Kevin
-	ifequalfwd 9, .Reena1
-	ifequalfwd 10, .Huey3
-	ifequalfwd 11, .Natalie
-	ifequalfwd 12, .Dennett
+	special Special_SafariGauntlet_RollTrainerFamily
+	ifequalfwd 0, .Joey5
+	ifequalfwd 1, .Todd5
+	ifequalfwd 2, .Gina5
+	ifequalfwd 3, .Tiffany3
+	ifequalfwd 4, .Alan5
+	ifequalfwd 5, .Wade5
+	ifequalfwd 6, .Vance3
+	ifequalfwd 7, .Anthony5
+	ifequalfwd 8, .Huey4
+	ifequalfwd 9, .Gilbert
+	ifequalfwd 10, .Reena1
+	ifequalfwd 11, .Dennett
+	ifequalfwd 12, .Natalie
 	ifequalfwd 13, .Margaret
 	ifequalfwd 14, .Winston
-	loadtrainer BUG_MANIAC, LOU
+	loadtrainer BATTLE_GIRL, NOZOMI
+	sjumpfwd .Battle
+
+.Joey5
+	loadtrainer YOUNGSTER, JOEY5
 	sjumpfwd .Battle
 
 .Todd5
 	loadtrainer CAMPER, TODD5
 	sjumpfwd .Battle
 
-.Gina4
-	loadtrainer PICNICKER, GINA4
+.Gina5
+	loadtrainer PICNICKER, GINA5
 	sjumpfwd .Battle
 
 .Tiffany3
 	loadtrainer PICNICKER, TIFFANY3
 	sjumpfwd .Battle
 
-.Anthony4
-	loadtrainer HIKER, ANTHONY4
+.Alan5
+	loadtrainer SCHOOLBOY, ALAN5
 	sjumpfwd .Battle
 
-.Parry2
-	loadtrainer HIKER, PARRY2
+.Wade5
+	loadtrainer BUG_CATCHER, WADE5
 	sjumpfwd .Battle
 
-.Vance2
-	loadtrainer BIRD_KEEPER, VANCE2
+.Vance3
+	loadtrainer BIRD_KEEPER, VANCE3
+	sjumpfwd .Battle
+
+.Anthony5
+	loadtrainer HIKER, ANTHONY5
+	sjumpfwd .Battle
+
+.Huey4
+	loadtrainer SAILOR, HUEY4
 	sjumpfwd .Battle
 
 .Gilbert
 	loadtrainer PSYCHIC_T, GILBERT
 	sjumpfwd .Battle
 
-.Nozomi
-	loadtrainer BATTLE_GIRL, NOZOMI
-	sjumpfwd .Battle
-
-.Kevin
-	loadtrainer COOLTRAINERM, KEVIN
-	sjumpfwd .Battle
-
 .Reena1
 	loadtrainer COOLTRAINERF, REENA1
-	sjumpfwd .Battle
-
-.Huey3
-	loadtrainer SAILOR, HUEY3
 	sjumpfwd .Battle
 
 .Natalie
@@ -996,6 +997,7 @@ SafariGauntletTMVendorScript:
 	ifequalfwd $2, .Flamethrower
 	ifequalfwd $3, .IceBeam
 	ifequalfwd $4, .ShadowBall
+	ifequalfwd $5, .HMs
 	jumpopenedtext SafariGauntletTMVendorLaterText
 
 .Set1
@@ -1006,6 +1008,7 @@ SafariGauntletTMVendorScript:
 	ifequalfwd $2, .Psychic
 	ifequalfwd $3, .GigaDrain
 	ifequalfwd $4, .AerialAce
+	ifequalfwd $5, .HMs
 	jumpopenedtext SafariGauntletTMVendorLaterText
 
 .Set2
@@ -1014,65 +1017,78 @@ SafariGauntletTMVendorScript:
 	closewindow
 	ifequalfwd $1, .EnergyBall
 	ifequalfwd $2, .WillOWisp
-	ifequalfwd $3, .ShadowClaw
-	ifequalfwd $4, .ThunderWave
+	ifequal $3, .ShadowClaw
+	ifequal $4, .ThunderWave
+	ifequalfwd $5, .HMs
+	jumpopenedtext SafariGauntletTMVendorLaterText
+
+.HMs
+	loadmenu SafariGauntletHMVendorMenuData
+	verticalmenu
+	closewindow
+	ifequal $1, .Cut
+	ifequal $2, .Fly
+	ifequal $3, .Surf
+	ifequal $4, .Strength
+	ifequal $5, .Whirlpool
+	ifequal $6, .Waterfall
 	jumpopenedtext SafariGauntletTMVendorLaterText
 
 .Thunderbolt
 	checktmhm TM_THUNDERBOLT
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 5
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_THUNDERBOLT, STRING_BUFFER_3
 	givetmhm TM_THUNDERBOLT
 	takebp 5
-	sjumpfwd .Bought
+	sjump .Bought
 
 .Flamethrower
 	checktmhm TM_FLAMETHROWER
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 5
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_FLAMETHROWER, STRING_BUFFER_3
 	givetmhm TM_FLAMETHROWER
 	takebp 5
-	sjumpfwd .Bought
+	sjump .Bought
 
 .IceBeam
 	checktmhm TM_ICE_BEAM
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 5
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_ICE_BEAM, STRING_BUFFER_3
 	givetmhm TM_ICE_BEAM
 	takebp 5
-	sjumpfwd .Bought
+	sjump .Bought
 
 .ShadowBall
 	checktmhm TM_SHADOW_BALL
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 4
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_SHADOW_BALL, STRING_BUFFER_3
 	givetmhm TM_SHADOW_BALL
 	takebp 4
-	sjumpfwd .Bought
+	sjump .Bought
 
 .Earthquake
 	checktmhm TM_EARTHQUAKE
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 5
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_EARTHQUAKE, STRING_BUFFER_3
 	givetmhm TM_EARTHQUAKE
 	takebp 5
-	sjumpfwd .Bought
+	sjump .Bought
 
 .Psychic
 	checktmhm TM_PSYCHIC
-	iftruefwd .AlreadyOwned
+	iftrue .AlreadyOwned
 	checkbp 5
-	ifequalfwd HAVE_LESS, .NotEnoughBP
+	ifequal HAVE_LESS, .NotEnoughBP
 	gettmhmname TM_PSYCHIC, STRING_BUFFER_3
 	givetmhm TM_PSYCHIC
 	takebp 5
@@ -1136,6 +1152,66 @@ SafariGauntletTMVendorScript:
 	gettmhmname TM_THUNDER_WAVE, STRING_BUFFER_3
 	givetmhm TM_THUNDER_WAVE
 	takebp 3
+	sjumpfwd .Bought
+
+.Cut
+	checktmhm HM_CUT
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_CUT, STRING_BUFFER_3
+	givetmhm HM_CUT
+	takebp 5
+	sjumpfwd .Bought
+
+.Fly
+	checktmhm HM_FLY
+	iftruefwd .AlreadyOwned
+	checkbp 6
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_FLY, STRING_BUFFER_3
+	givetmhm HM_FLY
+	takebp 6
+	sjumpfwd .Bought
+
+.Surf
+	checktmhm HM_SURF
+	iftruefwd .AlreadyOwned
+	checkbp 6
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_SURF, STRING_BUFFER_3
+	givetmhm HM_SURF
+	takebp 6
+	sjumpfwd .Bought
+
+.Strength
+	checktmhm HM_STRENGTH
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_STRENGTH, STRING_BUFFER_3
+	givetmhm HM_STRENGTH
+	takebp 5
+	sjumpfwd .Bought
+
+.Whirlpool
+	checktmhm HM_WHIRLPOOL
+	iftruefwd .AlreadyOwned
+	checkbp 5
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_WHIRLPOOL, STRING_BUFFER_3
+	givetmhm HM_WHIRLPOOL
+	takebp 5
+	sjumpfwd .Bought
+
+.Waterfall
+	checktmhm HM_WATERFALL
+	iftruefwd .AlreadyOwned
+	checkbp 6
+	ifequalfwd HAVE_LESS, .NotEnoughBP
+	gettmhmname HM_WATERFALL, STRING_BUFFER_3
+	givetmhm HM_WATERFALL
+	takebp 6
 
 .Bought
 	playsound SFX_TRANSACTION
@@ -1451,7 +1527,7 @@ SafariGauntletTMVendorLaterText:
 SafariGauntletTMVendorPickText:
 	text "BP: "
 	text_decimal wBattlePoints, 2, 5
-	line "Pick a TM."
+	line "Pick a TM/HM."
 
 	para "Press B to quit."
 	done
@@ -1475,7 +1551,7 @@ SafariGauntletTMVendorThanksText:
 
 SafariGauntletTMVendorAlreadyOwnedText:
 	text "You already have"
-	line "that TM."
+	line "that move."
 	done
 
 SafariGauntletTMVendorNotEnoughBPText:
@@ -1484,45 +1560,64 @@ SafariGauntletTMVendorNotEnoughBPText:
 
 SafariGauntletTMVendorMenuData0:
 	db MENU_BACKUP_TILES
-	menu_coords 0, 0, 19, 9
+	menu_coords 0, 0, 19, 11
 	dw .Items
 	db 1 ; default option
 
 .Items:
 	db $80 ; flags
-	db 4 ; items
+	db 5 ; items
 	db "TM24 TBOLT  5BP@"
 	db "TM35 FLAME  5BP@"
 	db "TM13 ICEBM  5BP@"
 	db "TM30 SHADOW 4BP@"
+	db "HMs       5-6BP@"
 
 SafariGauntletTMVendorMenuData1:
 	db MENU_BACKUP_TILES
-	menu_coords 0, 0, 19, 9
+	menu_coords 0, 0, 19, 11
 	dw .Items
 	db 1 ; default option
 
 .Items:
 	db $80 ; flags
-	db 4 ; items
+	db 5 ; items
 	db "TM26 EQUAKE 5BP@"
 	db "TM29 PSYCHC 5BP@"
 	db "TM19 GIGADR 4BP@"
 	db "TM40 AERIAL 3BP@"
+	db "HMs       5-6BP@"
 
 SafariGauntletTMVendorMenuData2:
 	db MENU_BACKUP_TILES
-	menu_coords 0, 0, 19, 9
+	menu_coords 0, 0, 19, 11
 	dw .Items
 	db 1 ; default option
 
 .Items:
 	db $80 ; flags
-	db 4 ; items
+	db 5 ; items
 	db "TM53 E-BALL 4BP@"
 	db "TM61 WISP  4BP@"
 	db "TM65 SCLAW 4BP@"
 	db "TM73 TWAVE 3BP@"
+	db "HMs       5-6BP@"
+
+SafariGauntletHMVendorMenuData:
+	db MENU_BACKUP_TILES
+	menu_coords 0, 0, 19, 13
+	dw .Items
+	db 1 ; default option
+
+.Items:
+	db $80 ; flags
+	db 6 ; items
+	db "HM01 CUT    5BP@"
+	db "HM02 FLY    6BP@"
+	db "HM03 SURF   6BP@"
+	db "HM04 STR    5BP@"
+	db "HM05 WHIRL  5BP@"
+	db "HM06 FALL   6BP@"
 
 SafariGauntletRevealBossText:
 	text "Boss reveal:"

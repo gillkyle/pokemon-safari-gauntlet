@@ -60,7 +60,7 @@ Script_BeatenAllFactoryTrainers:
 	special Special_BattleTower_SetChallengeState
 	; fallthrough
 Script_ReturnToBattleFactoryLobby:
-	warpfacing UP, BATTLE_FACTORY_1F, 12, 6
+	warpfacing UP, BATTLE_FACTORY_1F, 12, 8
 	end
 
 MovementData_BattleFactoryBattleRoomPlayerWalksIn:

@@ -44,6 +44,8 @@ Marts:
 	dw BattleFactoryMart1
 	dw BattleFactoryMart2
 	dw BattleFactoryMart3
+	dw BattleFactoryMart4
+	dw BattleFactoryMart5
 	assert_table_length NUM_MARTS
 
 CherrygroveMart:
@@ -491,7 +493,7 @@ BattleTowerMart1:
 
 BattleTowerMart2:
 	db 9 ; # items
-	db RARE_CANDY,   16
+	db RARE_CANDY,   36
 	db PP_MAX,       64
 	db ABILITY_CAP,  32
 	db WEAK_POLICY,  48
@@ -514,38 +516,70 @@ BattleTowerMart3:
 	db -1
 
 BattleFactoryMart1:
-	db 9 ; # items
-	db FOCUS_BAND,   16
-	db FOCUS_SASH,   48
-	db ASSAULT_VEST, 48
-	db PROTECT_PADS, 16
-	db ROCKY_HELMET, 48
-	db SAFE_GOGGLES, 32
-	db HEAVY_BOOTS,  48
-	db PUNCHINGLOVE, 16
-	db COVERT_CLOAK, 16
+	db 10 ; # items
+	db LEAF_STONE,   12
+	db FIRE_STONE,   12
+	db WATER_STONE,  12
+	db THUNDERSTONE, 12
+	db ICE_STONE,    12
+	db MOON_STONE,   12
+	db SUN_STONE,    12
+	db DUSK_STONE,   12
+	db SHINY_STONE,  12
+	db ODD_SOUVENIR, 12
+	db -1
+
+BattleFactoryMart4:
+	db 12 ; # items
+	db LINKING_CORD, 12
+	db KINGS_ROCK,   12
+	db METAL_COAT,   12
+	db DRAGON_SCALE, 12
+	db UPGRADE,      12
+	db DUBIOUS_DISC, 12
+	db PROTECTOR,    12
+	db ELECTIRIZER,  12
+	db MAGMARIZER,   12
+	db RAZOR_FANG,   12
+	db RAZOR_CLAW,   12
+	db OVAL_STONE,   12
+	db -1
+
+BattleFactoryMart5:
+	db 3 ; # items
+	db HARD_STONE,   12
+	db CHARCOAL,     12
+	db RARE_CANDY,   36
 	db -1
 
 BattleFactoryMart2:
-	db 8 ; # items
-	db EJECT_BUTTON, 32
-	db EJECT_PACK,   32
-	db RED_CARD,     24
-	db IRON_BALL,    32
-	db LAGGING_TAIL, 24
-	db FLAME_ORB,    32
-	db TOXIC_ORB,    32
-	db BLACK_SLUDGE, 32
+	db 12 ; # items
+	db CHOICE_BAND,  48
+	db CHOICE_SCARF, 48
+	db CHOICE_SPECS, 48
+	db LIFE_ORB,     48
+	db FOCUS_SASH,   48
+	db LEFTOVERS,    48
+	db EXPERT_BELT,  32
+	db ASSAULT_VEST, 48
+	db MUSCLE_BAND,  32
+	db WISE_GLASSES, 32
+	db EVIOLITE,     32
+	db WEAK_POLICY,  48
 	db -1
 
 BattleFactoryMart3:
-	db 8 ; # items
+	db 12 ; # items
 	db CLEAR_AMULET, 16
-	db BINDING_BAND, 32
-	db GRIP_CLAW,    32
+	db SCOPE_LENS,   16
+	db WIDE_LENS,    16
+	db ZOOM_LENS,    16
+	db ROCKY_HELMET, 32
+	db AIR_BALLOON,  32
 	db LOADED_DICE,  16
 	db THROAT_SPRAY, 24
-	db ROOM_SERVICE, 24
-	db LIFE_ORB,     48
-	db MINT_LEAF,    32
+	db EJECT_BUTTON, 32
+	db EJECT_PACK,   32
+	db FLAME_ORB,    32
+	db TOXIC_ORB,    32
 	db -1

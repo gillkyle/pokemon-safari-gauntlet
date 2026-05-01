@@ -2,6 +2,8 @@ Special_SafariGauntlet_BeginRun:
 	call SafariGauntlet_SaveGame
 	xor a
 	ld [wSafariGauntletDraftAttempts], a
+	ld [wSafariGauntletTrainerMaskLo], a
+	ld [wSafariGauntletTrainerMaskHi], a
 	dec a
 	ld [wJohtoBadges], a
 	ld [wKantoBadges], a
@@ -92,6 +94,42 @@ Special_SafariGauntlet_FinishDraft:
 	farcall HealParty
 	call SafariGauntlet_ClampPartyHP
 	ld a, TRUE
+	ldh [hScriptVar], a
+	ret
+
+Special_SafariGauntlet_RollTrainerFamily:
+	ld d, 16
+
+.random_loop
+	ld a, 16
+	call RandomRange
+	ld c, a
+	call SafariGauntlet_GetTrainerFamilyFlag
+	ld a, [hl]
+	and b
+	jr z, .mark
+	dec d
+	jr nz, .random_loop
+	ld c, 0
+
+.scan_loop
+	call SafariGauntlet_GetTrainerFamilyFlag
+	ld a, [hl]
+	and b
+	jr z, .mark
+	inc c
+	ld a, c
+	cp 16
+	jr c, .scan_loop
+	xor a
+	ldh [hScriptVar], a
+	ret
+
+.mark
+	ld a, [hl]
+	or b
+	ld [hl], a
+	ld a, c
 	ldh [hScriptVar], a
 	ret
 
@@ -796,6 +834,28 @@ SafariGauntlet_GetKeepExtFlag:
 	and 7
 	ld b, 1
 	ret z
+.mask_loop
+	sla b
+	dec a
+	jr nz, .mask_loop
+	ret
+
+SafariGauntlet_GetTrainerFamilyFlag:
+	ld a, c
+	cp 8
+	jr c, .low
+	sub 8
+	ld hl, wSafariGauntletTrainerMaskHi
+	jr .got_byte
+
+.low
+	ld hl, wSafariGauntletTrainerMaskLo
+
+.got_byte
+	ld b, 1
+	and a
+	ret z
+
 .mask_loop
 	sla b
 	dec a

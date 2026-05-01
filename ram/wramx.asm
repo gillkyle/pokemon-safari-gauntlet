@@ -994,7 +994,8 @@ wReceiveCallDelay_StartTime:: ds 3
 wBugContestMinsRemaining:: db
 wBugContestSecsRemaining:: db
 
-	ds 2 ; unused
+wSafariGauntletTrainerMaskLo:: db ; used trainer families 0-7 for current run
+wSafariGauntletTrainerMaskHi:: db ; used trainer families 8-15 for current run
 
 wMapStatusEnd::
 

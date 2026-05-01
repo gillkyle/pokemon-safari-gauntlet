@@ -100,6 +100,7 @@ local W = {
 	script_mode = S.wScriptMode,
 	player_direction = S.wPlayerDirection,
 	crash_code = S.hCrashCode,
+	tilemap = 0xc440,
 	options2 = S.wOptions2 or 0xcff5,
 	party_count = S.wPartyCount,
 	party_mon1_level = S.wPartyMon1Level,
@@ -197,6 +198,28 @@ local function write16(hi, value)
 	write8(hi + 1, value % 256)
 end
 
+local function tile_sequence_seen(sequence)
+	for y = 0, 17 do
+		for x = 0, 20 - #sequence do
+			local matched = true
+			for i, tile in ipairs(sequence) do
+				if read8(W.tilemap + y * 20 + x + i - 1) ~= tile then
+					matched = false
+					break
+				end
+			end
+			if matched then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function bsod_seen()
+	return tile_sequence_seen({ 0x84, 0x91, 0x91, 0x8e, 0x91 }) -- ERROR
+end
+
 local function parse_trainer_classes()
 	local classes = {}
 	local value = 0
@@ -254,7 +277,7 @@ local function static_verify()
 	assert_true(constants_text:find("DEF SAFARI_GAUNTLET_BOSS_COUNT EQU const_value", 1, true), "FAILED_BOSS_COUNT_DEF")
 	assert_true(boss_constants.SAFARI_GAUNTLET_BOSS_COUNT == #expected, "FAILED_BOSS_COUNT_" .. tostring(boss_constants.SAFARI_GAUNTLET_BOSS_COUNT))
 	assert_true(map_text:find("random SAFARI_GAUNTLET_BOSS_COUNT", 1, true), "FAILED_BOSS_RANDOM_COUNT")
-	assert_true(levels_text:find("db 58, 62", 1, true), "FAILED_BOSS_LEVEL_RANGE")
+	assert_true(levels_text:find("db 57, 60", 1, true), "FAILED_BOSS_LEVEL_RANGE")
 
 	for index, entry in ipairs(expected) do
 		local boss_value = boss_constants[entry.boss]
@@ -268,7 +291,7 @@ local function static_verify()
 		assert_true(group_text:find("def_trainer " .. entry.trainer .. ",", 1, true), "FAILED_MISSING_PARTY_" .. entry.boss)
 	end
 
-	log("VERIFIED_BOSS_POOL count=" .. #expected .. " level_range=58-62")
+	log("VERIFIED_BOSS_POOL count=" .. #expected .. " level_range=57-60")
 end
 
 local function state_line(prefix)
@@ -307,7 +330,7 @@ local function run_frames(keys, frames)
 	for _ = 1, frames do
 		write8(W.options2, read8(W.options2) & 0x3f)
 		emu:runFrame()
-		if read8(W.crash_code) ~= 0 then
+		if read8(W.crash_code) ~= 0 or bsod_seen() then
 			fail("FAILED_CRASH")
 		end
 	end
@@ -374,7 +397,7 @@ end
 
 local function stand_at_reception()
 	for i = 1, 2400 do
-		local keys = move_toward(12, 8)
+	local keys = move_toward(12, 6)
 		if keys == 0 then
 			write8(W.player_direction, OW_UP)
 			state_line("reception_ready")
@@ -411,7 +434,7 @@ local function verify_red_boss_battle()
 			and read8(W.other_trainer_id) == 1
 			and read8(W.ot_party_mon1_level) > 0 then
 			local level = read8(W.ot_party_mon1_level)
-			if level < 58 or level > 62 then
+			if level < 57 or level > 60 then
 				fail("FAILED_RED_LEVEL_" .. level)
 			end
 			write16(W.battle_mon_max_hp, 999)

@@ -19,6 +19,7 @@ local W = {
 	map_number = 0xdcad,
 	y = 0xdcae,
 	x = 0xdcaf,
+	player_direction = 0xd4d4,
 	options2 = 0xcff5,
 	party_count = 0xdcce,
 	battle_mode = 0xd233,
@@ -27,8 +28,11 @@ local W = {
 	menu_cursor_buffer = 0xce2f,
 	enemy_hp = 0xd21c,
 	enemy_level = 0xd219,
+	enemy_catch_rate = 0xd231,
 	num_balls = 0xd90b,
 	balls = 0xd90c,
+	crash_code = 0xffe5,
+	tilemap = 0xc440,
 	time_remaining = 0xdc93,
 	step = 0xd7dc,
 	wild_cooldown = 0xd464,
@@ -42,6 +46,7 @@ local BATTLEMODE_WILD = 1
 local BATTLETYPE_SAFARI = 7
 local MASTER_BALL = 4
 local SAFARI_GAUNTLET_STEP_DRAFT = 1
+local SAFARI_GAUNTLET_DRAFT_LEVEL = 50
 
 local f = assert(io.open(log_path, "w"))
 local frame0 = emu:currentFrame()
@@ -107,20 +112,43 @@ end
 
 local function state_line(prefix)
 	log(string.format(
-		"%s map=%d/%d xy=%d,%d party=%d battle=%d type=%d level=%d step=%d steps_left=%d master=%d",
+			"%s map=%d/%d xy=%d,%d party=%d battle=%d type=%d level=%d catch_rate=%d step=%d steps_left=%d master=%d",
 		prefix,
 		read8(W.map_group),
 		read8(W.map_number),
 		read8(W.x),
 		read8(W.y),
 		read8(W.party_count),
-		read8(W.battle_mode),
-		read8(W.battle_type),
-		read8(W.enemy_level),
-		read8(W.step),
+			read8(W.battle_mode),
+			read8(W.battle_type),
+			read8(W.enemy_level),
+			read8(W.enemy_catch_rate),
+			read8(W.step),
 		read16(W.time_remaining),
 		ball_qty(MASTER_BALL)
 	))
+end
+
+local function tile_sequence_seen(sequence)
+	for y = 0, 17 do
+		for x = 0, 20 - #sequence do
+			local matched = true
+			for i, tile in ipairs(sequence) do
+				if read8(W.tilemap + y * 20 + x + i - 1) ~= tile then
+					matched = false
+					break
+				end
+			end
+			if matched then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function bsod_seen()
+	return tile_sequence_seen({ 0x84, 0x91, 0x91, 0x8e, 0x91 }) -- ERROR
 end
 
 local function set_phase(next_phase)
@@ -181,6 +209,13 @@ cbid = callbacks:add("frame", function()
 	local keys = 0
 
 	write8(W.options2, read8(W.options2) & 0x3f)
+	if read8(W.crash_code) ~= 0 or bsod_seen() then
+		state_line("FAILED_CRASH")
+		emu:screenshot(screenshot_path)
+		log("screenshot=" .. screenshot_path)
+		callbacks:remove(cbid)
+		return
+	end
 
 	if not supplies_seen and read8(W.party_count) > 0 and ball_qty(MASTER_BALL) >= 1 then
 		supplies_seen = true
@@ -197,10 +232,10 @@ cbid = callbacks:add("frame", function()
 		write8(W.battle_menu_cursor + 1, 0)
 		write8(W.menu_cursor_buffer, 1)
 		write8(W.menu_cursor_buffer + 1, 0)
-		if read8(W.battle_type) ~= BATTLETYPE_SAFARI and read8(W.enemy_level) == 50 then
+			if read8(W.battle_type) ~= BATTLETYPE_SAFARI and read8(W.enemy_level) == SAFARI_GAUNTLET_DRAFT_LEVEL and read8(W.enemy_catch_rate) > 0 then
 			if not verified_frame then
 				verified_frame = frame
-				state_line("FIELD_WILD_LEVEL_SEEN")
+				state_line("FIELD_WILD_TUNING_SEEN")
 			elseif frame - verified_frame > 180 then
 				state_line("VERIFIED_FIELD_WILD")
 				emu:screenshot(screenshot_path)
@@ -218,10 +253,13 @@ cbid = callbacks:add("frame", function()
 			keys = RIGHT
 		elseif read8(W.x) > 12 then
 			keys = LEFT
-		elseif read8(W.y) < 8 then
+		elseif read8(W.y) < 6 then
 			keys = DOWN
-		elseif read8(W.y) > 8 then
+		elseif read8(W.y) > 6 then
 			keys = UP
+		elseif read8(W.player_direction) ~= 0x04 then
+			write8(W.player_direction, 0x04)
+			keys = 0
 		elseif not hub_ready_frame then
 			hub_ready_frame = frame
 			state_line("hub_ready")

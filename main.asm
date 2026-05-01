@@ -105,10 +105,14 @@ INCLUDE "engine/overworld/map_setup.asm"
 INCLUDE "engine/events/pokecenter_pc.asm"
 INCLUDE "engine/items/mart.asm"
 INCLUDE "engine/events/money.asm"
-INCLUDE "data/items/marts.asm"
 INCLUDE "engine/events/mom.asm"
 INCLUDE "engine/events/daycare.asm"
 INCLUDE "engine/pokemon/breeding.asm"
+
+
+SECTION "Marts", ROMX
+
+INCLUDE "data/items/marts.asm"
 
 
 SECTION "Clock Reset", ROMX

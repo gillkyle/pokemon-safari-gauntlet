@@ -204,3 +204,4 @@ SpecialsPointers::
 	add_special Special_SafariGauntlet_HasUsableBalls
 	add_special Special_SafariGauntlet_CheckDraftComplete
 	add_special Special_SafariGauntlet_FinishDraft
+	add_special Special_SafariGauntlet_RollTrainerFamily
