@@ -12,30 +12,45 @@ This project is derived from the official [Polished Crystal 3.2.3](https://githu
 
 ## Download and Play
 
-The current Safari Gauntlet release target is **v1.0.6**.
+The current Safari Gauntlet release target is **v1.0.7**.
 
-Release artifacts are built with the repo-local release helper:
+Safari Gauntlet is distributed as patch files. Bring your own legally obtained Pokémon Crystal ROM, download the matching `.bps` patch from the [v1.0.7 release](https://github.com/gillkyle/pokemon-safari-gauntlet/releases/tag/v1.0.7), and apply it with a patcher such as [Rom Patcher JS](https://www.marcrobledo.com/RomPatcher.js/). Then open the patched `.gbc` file in an accurate Game Boy Color emulator such as [mGBA](https://mgba.io/), [SameBoy](https://sameboy.github.io/), [BGB](https://bgb.bircd.org/), or Gambatte.
 
-```bash
-python3 utils/build_safari_release_artifacts.py --base-rom /path/to/clean-crystal.gbc
-```
-
-The clean base ROM should be:
+Use the patch that matches your base ROM:
 
 ```text
+safari-gauntlet-1.0.7-crystal-v1.0.bps
 Pokemon - Crystal Version (UE) (V1.0) [C][!].gbc
 MD5: 9f2922b235a5eeb78d65594e82ef5dde
+
+safari-gauntlet-1.0.7-crystal-v1.1-rev1.bps
+Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc
+MD5: 301899b8087289a6436b0a241fbbb474
 ```
 
-The release helper follows Polished Crystal's release layout and writes artifacts such as:
+BPS is the recommended patch format because it verifies that the input ROM matches the expected source before writing the patched game. IPS patches are also provided for patchers that do not support BPS.
+
+If you want to build release artifacts yourself, use the repo-local release helper:
+
+```bash
+python3 utils/build_safari_release_artifacts.py --version 1.0.7 --build-pret-base-roms
+```
+
+The release helper builds local test ROMs and verified patch artifacts such as:
 
 ```text
-build/safari-gauntlet-1.0.6.gbc
-build/safari-gauntlet-1.0.6.sym
-build/safari-gauntlet-1.0.6.bps
-build/safari-gauntlet-1.0.6.ips
-build/safari-gauntlet-1.0.6.3ds-vc.patch
+build/safari-gauntlet-1.0.7.gbc
+build/safari-gauntlet-1.0.7.sym
+build/safari-gauntlet-1.0.7-crystal-v1.0.bps
+build/safari-gauntlet-1.0.7-crystal-v1.0.ips
+build/safari-gauntlet-1.0.7-crystal-v1.1-rev1.bps
+build/safari-gauntlet-1.0.7-crystal-v1.1-rev1.ips
+build/safari-gauntlet-1.0.7.3ds-vc.patch
+build/MD5SUMS
+build/SHA256SUMS
 ```
+
+Do not distribute the generated `.gbc` files. They are local verification outputs only.
 
 If you are building locally without release patches, run:
 

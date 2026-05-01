@@ -6,11 +6,11 @@ on:
       version:
         description: "Safari Gauntlet release version"
         required: true
-        default: "1.0.6"
+        default: "1.0.7"
       tag:
         description: "Release tag"
         required: true
-        default: "v1.0.6"
+        default: "v1.0.7"
       draft:
         description: "Create as draft release"
         required: true
@@ -56,7 +56,9 @@ jobs:
 
       - name: "Build release artifacts"
         run: |
-          python3 utils/build_safari_release_artifacts.py --version "${{ inputs.version }}"
+          python3 utils/build_safari_release_artifacts.py \
+            --version "${{ inputs.version }}" \
+            --build-pret-base-roms
 
       - name: "Create tag if needed"
         run: |
@@ -77,6 +79,10 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           fail_on_unmatched_files: true
           files: |
-            build/safari-gauntlet-${{ inputs.version }}.gbc
-            build/safari-gauntlet-${{ inputs.version }}.sym
+            build/safari-gauntlet-${{ inputs.version }}-crystal-v1.0.bps
+            build/safari-gauntlet-${{ inputs.version }}-crystal-v1.0.ips
+            build/safari-gauntlet-${{ inputs.version }}-crystal-v1.1-rev1.bps
+            build/safari-gauntlet-${{ inputs.version }}-crystal-v1.1-rev1.ips
             build/safari-gauntlet-${{ inputs.version }}.3ds-vc.patch
+            build/MD5SUMS
+            build/SHA256SUMS

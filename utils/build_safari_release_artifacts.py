@@ -9,18 +9,49 @@ import shutil
 import subprocess
 import sys
 import zlib
+from dataclasses import dataclass
 from pathlib import Path
 
 DEFAULT_PREFIX = "safari-gauntlet"
-DEFAULT_RELEASE_VERSION = "1.0.6"
+DEFAULT_RELEASE_VERSION = "1.0.7"
 EXPECTED_CRYSTAL_MD5 = "9f2922b235a5eeb78d65594e82ef5dde"
+PRET_POKECRYSTAL_REPO = "https://github.com/pret/pokecrystal.git"
+
+
+@dataclass(frozen=True)
+class PretBaseRom:
+    label: str
+    make_goal: str
+    rom_name: str
+    fixture_name: str
+    md5: str
+    sha1: str
+
+
+PRET_BASE_ROMS = (
+    PretBaseRom(
+        label="crystal-v1.0",
+        make_goal="crystal",
+        rom_name="pokecrystal.gbc",
+        fixture_name="pokemon-crystal-v1.0.gbc",
+        md5="9f2922b235a5eeb78d65594e82ef5dde",
+        sha1="f4cd194bdee0d04ca4eac29e09b8e4e9d818c133",
+    ),
+    PretBaseRom(
+        label="crystal-v1.1-rev1",
+        make_goal="crystal11",
+        rom_name="pokecrystal11.gbc",
+        fixture_name="pokemon-crystal-v1.1.gbc",
+        md5="301899b8087289a6436b0a241fbbb474",
+        sha1="f2f52230b536214ef7c9924f483392993e226cfb",
+    ),
+)
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Build Safari Gauntlet release artifacts, following the Polished "
-            "Crystal release layout and optionally creating ROM patches."
+            "Build Safari Gauntlet release artifacts and verified ROM patches."
         )
     )
     parser.add_argument(
@@ -50,7 +81,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help=(
             "Clean Pokemon Crystal ROM to diff against. When provided, the "
-            "script writes verified .bps and .ips patches."
+            "script writes verified .bps and .ips patches for this one base."
         ),
     )
     parser.add_argument(
@@ -67,6 +98,30 @@ def parse_args() -> argparse.Namespace:
         help="Do not require --base-rom to match --expected-base-md5.",
     )
     parser.add_argument(
+        "--build-pret-base-roms",
+        action="store_true",
+        help=(
+            "Build Pokemon Crystal v1.0 and v1.1 base ROM fixtures from "
+            "pret/pokecrystal and create separate verified patches for both."
+        ),
+    )
+    parser.add_argument(
+        "--pret-pokecrystal-dir",
+        type=Path,
+        help=(
+            "Checkout directory for pret/pokecrystal when using "
+            "--build-pret-base-roms (default: ./tmp/release-base-roms/pokecrystal)."
+        ),
+    )
+    parser.add_argument(
+        "--base-fixture-dir",
+        type=Path,
+        help=(
+            "Directory for generated local base ROM fixtures when using "
+            "--build-pret-base-roms (default: ./tmp/rom-fixtures)."
+        ),
+    )
+    parser.add_argument(
         "--no-vc-patch",
         action="store_true",
         help="Skip the 3DS Virtual Console .patch artifact.",
@@ -79,6 +134,11 @@ def run_make(repo_root: Path, version: str, jobs: int, goals: list[str]) -> None
     cmd = ["make", job_flag, f"VERSION={version}"] + goals
     print(" ".join(cmd), flush=True)
     subprocess.run(cmd, cwd=repo_root, check=True)
+
+
+def run_command(cmd: list[str], cwd: Path) -> None:
+    print(" ".join(cmd), flush=True)
+    subprocess.run(cmd, cwd=cwd, check=True)
 
 
 def move_artifact(repo_root: Path, build_dir: Path, source_name: str, dest_name: str) -> Path:
@@ -94,11 +154,73 @@ def move_artifact(repo_root: Path, build_dir: Path, source_name: str, dest_name:
 
 
 def file_md5(path: Path) -> str:
-    digest = hashlib.md5()
+    return file_digest(path, "md5")
+
+
+def file_sha1(path: Path) -> str:
+    return file_digest(path, "sha1")
+
+
+def file_sha256(path: Path) -> str:
+    return file_digest(path, "sha256")
+
+
+def file_digest(path: Path, algorithm: str) -> str:
+    digest = hashlib.new(algorithm)
     with path.open("rb") as file:
         for chunk in iter(lambda: file.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def ensure_pret_pokecrystal_checkout(checkout_dir: Path) -> None:
+    checkout_dir.parent.mkdir(parents=True, exist_ok=True)
+    if (checkout_dir / ".git").exists():
+        run_command(["git", "fetch", "--quiet", "origin"], checkout_dir)
+        run_command(["git", "checkout", "--quiet", "origin/master"], checkout_dir)
+        return
+
+    run_command(
+        ["git", "clone", "--quiet", "--depth", "1", PRET_POKECRYSTAL_REPO, str(checkout_dir)],
+        checkout_dir.parent,
+    )
+
+
+def build_pret_base_roms(
+    repo_root: Path,
+    jobs: int,
+    checkout_dir: Path,
+    fixture_dir: Path,
+) -> list[tuple[str, Path]]:
+    ensure_pret_pokecrystal_checkout(checkout_dir)
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+
+    job_flag = f"-j{jobs}" if jobs > 0 else "-j"
+    run_command(["make", job_flag, *[base.make_goal for base in PRET_BASE_ROMS]], checkout_dir)
+
+    base_roms: list[tuple[str, Path]] = []
+    for base in PRET_BASE_ROMS:
+        built_rom = checkout_dir / base.rom_name
+        fixture_rom = fixture_dir / base.fixture_name
+        if not built_rom.exists():
+            raise FileNotFoundError(f"Expected pret/pokecrystal ROM missing: {built_rom}")
+
+        shutil.copy2(built_rom, fixture_rom)
+        actual_md5 = file_md5(fixture_rom)
+        actual_sha1 = file_sha1(fixture_rom)
+        if actual_md5 != base.md5:
+            raise ValueError(
+                f"{base.label} MD5 mismatch: expected {base.md5}, got {actual_md5}"
+            )
+        if actual_sha1 != base.sha1:
+            raise ValueError(
+                f"{base.label} SHA1 mismatch: expected {base.sha1}, got {actual_sha1}"
+            )
+
+        print(f"Prepared {fixture_rom.relative_to(repo_root)} ({base.label})")
+        base_roms.append((base.label, fixture_rom))
+
+    return base_roms
 
 
 def bps_encode_number(value: int) -> bytes:
@@ -275,7 +397,7 @@ def apply_ips_patch(source: bytes, patch: bytes) -> bytes:
     return bytes(target)
 
 
-def write_rom_patches(base_rom: Path, target_rom: Path, prefix: str) -> list[Path]:
+def write_rom_patches(base_rom: Path, target_rom: Path, patch_name: str) -> list[Path]:
     source = base_rom.read_bytes()
     target = target_rom.read_bytes()
 
@@ -286,17 +408,30 @@ def write_rom_patches(base_rom: Path, target_rom: Path, prefix: str) -> list[Pat
     bps_patch = make_bps_patch(source, target, metadata)
     ips_patch = make_ips_patch(source, target)
 
-    bps_path = target_rom.with_suffix(".bps")
-    ips_path = target_rom.with_suffix(".ips")
+    bps_path = target_rom.with_name(f"{patch_name}.bps")
+    ips_path = target_rom.with_name(f"{patch_name}.ips")
     bps_path.write_bytes(bps_patch)
     ips_path.write_bytes(ips_patch)
 
     if apply_bps_patch(source, bps_patch) != target:
-        raise ValueError(f"Generated BPS patch did not reproduce {prefix}")
+        raise ValueError(f"Generated BPS patch did not reproduce {patch_name}")
     if apply_ips_patch(source, ips_patch) != target:
-        raise ValueError(f"Generated IPS patch did not reproduce {prefix}")
+        raise ValueError(f"Generated IPS patch did not reproduce {patch_name}")
 
     return [bps_path, ips_path]
+
+
+def write_checksums(build_dir: Path, paths: list[Path]) -> list[Path]:
+    unique_paths = sorted({path.resolve() for path in paths})
+    checksum_paths: list[Path] = []
+    for algorithm, filename in (("md5", "MD5SUMS"), ("sha256", "SHA256SUMS")):
+        checksum_path = build_dir / filename
+        with checksum_path.open("w", encoding="utf-8") as file:
+            for path in unique_paths:
+                if path.exists():
+                    file.write(f"{file_digest(path, algorithm)}  {path.name}\n")
+        checksum_paths.append(checksum_path)
+    return checksum_paths
 
 
 def main() -> None:
@@ -307,8 +442,9 @@ def main() -> None:
 
     jobs = args.jobs or (os.cpu_count() or 1)
     build_dir = (args.build_dir or repo_root / "build").resolve()
-    build_dir.mkdir(exist_ok=True)
+    build_dir.mkdir(parents=True, exist_ok=True)
 
+    base_roms: list[tuple[str | None, Path]] = []
     base_rom = args.base_rom.resolve() if args.base_rom else None
     if base_rom:
         if not base_rom.exists():
@@ -322,9 +458,24 @@ def main() -> None:
                     file=sys.stderr,
                 )
                 sys.exit(1)
+        base_roms.append((None, base_rom))
+
+    if args.build_pret_base_roms:
+        pret_checkout_dir = (
+            args.pret_pokecrystal_dir or repo_root / "tmp" / "release-base-roms" / "pokecrystal"
+        ).resolve()
+        base_fixture_dir = (args.base_fixture_dir or repo_root / "tmp" / "rom-fixtures").resolve()
+        try:
+            base_roms.extend(
+                build_pret_base_roms(repo_root, jobs, pret_checkout_dir, base_fixture_dir)
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as error:
+            print(error, file=sys.stderr)
+            sys.exit(1)
 
     source_prefix = f"polishedcrystal-{version}"
     dest_prefix = f"{args.prefix}-{version}"
+    generated_paths: list[Path] = []
 
     try:
         print(f"Building {dest_prefix}")
@@ -335,6 +486,7 @@ def main() -> None:
             f"{source_prefix}.gbc",
             f"{dest_prefix}.gbc",
         )
+        generated_paths.append(rom_path)
         move_artifact(
             repo_root,
             build_dir,
@@ -342,23 +494,32 @@ def main() -> None:
             f"{dest_prefix}.sym",
         )
 
-        if base_rom:
-            for patch_path in write_rom_patches(base_rom, rom_path, dest_prefix):
-                print(f"Wrote {patch_path.relative_to(repo_root)}")
+        if base_roms:
+            for base_label, patch_base_rom in base_roms:
+                patch_name = dest_prefix if base_label is None else f"{dest_prefix}-{base_label}"
+                for patch_path in write_rom_patches(patch_base_rom, rom_path, patch_name):
+                    generated_paths.append(patch_path)
+                    print(f"Wrote {patch_path.relative_to(repo_root)}")
         else:
-            print("Skipping .bps/.ips patches; pass --base-rom to generate them.")
+            print("Skipping .bps/.ips patches; pass --base-rom or --build-pret-base-roms.")
+
+        for checksum_path in write_checksums(build_dir, generated_paths):
+            print(f"Wrote {checksum_path.relative_to(repo_root)}")
 
         run_make(repo_root, version, jobs, ["tidy"])
 
         if not args.no_vc_patch:
             print(f"Building {dest_prefix} 3DS Virtual Console patch")
             run_make(repo_root, version, jobs, ["vc"])
-            move_artifact(
+            vc_patch_path = move_artifact(
                 repo_root,
                 build_dir,
                 f"{source_prefix}.patch",
                 f"{dest_prefix}.3ds-vc.patch",
             )
+            generated_paths.append(vc_patch_path)
+            for checksum_path in write_checksums(build_dir, generated_paths):
+                print(f"Wrote {checksum_path.relative_to(repo_root)}")
             run_make(repo_root, version, jobs, ["tidy"])
     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as error:
         print(error, file=sys.stderr)

@@ -39,6 +39,8 @@ data/tilesets/*_collision.bin
 
 # tool output
 bank_ends.txt
+build/
+tmp/
 
 # precompiled python
 *.pyc
@@ -62,6 +64,7 @@ bank_ends.txt
 
 # macos files
 .DS_STORE
+.DS_Store
 
 # local tools
 rgbds/

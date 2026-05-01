@@ -1,6 +1,6 @@
 # Install Guide
 
-If you just want to play Polished Crystal, use one of the .ips patches as described in [README.md](README.md#download-and-play). To build a ROM yourself from the source code, follow these instructions.
+If you just want to play Safari Gauntlet, use one of the `.bps` patches as described in [README.md](README.md#download-and-play). To build a ROM yourself from the source code, follow these instructions.
 
 > You know it's sitting back and looking at it that you realize that Gamefreak is actually really good devs.  
 > Like you have Pokemon and it's a simple formula "How can you fuck it up?" and then all of these Romhacks basically go "Like this."
