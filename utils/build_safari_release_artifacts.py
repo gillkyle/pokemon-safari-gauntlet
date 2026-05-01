@@ -421,10 +421,14 @@ def write_rom_patches(base_rom: Path, target_rom: Path, patch_name: str) -> list
     return [bps_path, ips_path]
 
 
-def write_checksums(build_dir: Path, paths: list[Path]) -> list[Path]:
+def write_checksums(
+    build_dir: Path,
+    paths: list[Path],
+    filenames: tuple[tuple[str, str], ...] = (("md5", "MD5SUMS"), ("sha256", "SHA256SUMS")),
+) -> list[Path]:
     unique_paths = sorted({path.resolve() for path in paths})
     checksum_paths: list[Path] = []
-    for algorithm, filename in (("md5", "MD5SUMS"), ("sha256", "SHA256SUMS")):
+    for algorithm, filename in filenames:
         checksum_path = build_dir / filename
         with checksum_path.open("w", encoding="utf-8") as file:
             for path in unique_paths:
@@ -475,7 +479,8 @@ def main() -> None:
 
     source_prefix = f"polishedcrystal-{version}"
     dest_prefix = f"{args.prefix}-{version}"
-    generated_paths: list[Path] = []
+    public_paths: list[Path] = []
+    local_paths: list[Path] = []
 
     try:
         print(f"Building {dest_prefix}")
@@ -486,7 +491,7 @@ def main() -> None:
             f"{source_prefix}.gbc",
             f"{dest_prefix}.gbc",
         )
-        generated_paths.append(rom_path)
+        local_paths.append(rom_path)
         move_artifact(
             repo_root,
             build_dir,
@@ -498,13 +503,11 @@ def main() -> None:
             for base_label, patch_base_rom in base_roms:
                 patch_name = dest_prefix if base_label is None else f"{dest_prefix}-{base_label}"
                 for patch_path in write_rom_patches(patch_base_rom, rom_path, patch_name):
-                    generated_paths.append(patch_path)
+                    public_paths.append(patch_path)
+                    local_paths.append(patch_path)
                     print(f"Wrote {patch_path.relative_to(repo_root)}")
         else:
             print("Skipping .bps/.ips patches; pass --base-rom or --build-pret-base-roms.")
-
-        for checksum_path in write_checksums(build_dir, generated_paths):
-            print(f"Wrote {checksum_path.relative_to(repo_root)}")
 
         run_make(repo_root, version, jobs, ["tidy"])
 
@@ -517,10 +520,18 @@ def main() -> None:
                 f"{source_prefix}.patch",
                 f"{dest_prefix}.3ds-vc.patch",
             )
-            generated_paths.append(vc_patch_path)
-            for checksum_path in write_checksums(build_dir, generated_paths):
-                print(f"Wrote {checksum_path.relative_to(repo_root)}")
+            public_paths.append(vc_patch_path)
+            local_paths.append(vc_patch_path)
             run_make(repo_root, version, jobs, ["tidy"])
+
+        for checksum_path in write_checksums(build_dir, public_paths):
+            print(f"Wrote {checksum_path.relative_to(repo_root)}")
+        for checksum_path in write_checksums(
+            build_dir,
+            local_paths,
+            (("md5", "LOCAL_MD5SUMS"), ("sha256", "LOCAL_SHA256SUMS")),
+        ):
+            print(f"Wrote {checksum_path.relative_to(repo_root)}")
     except (subprocess.CalledProcessError, FileNotFoundError, ValueError) as error:
         print(error, file=sys.stderr)
         sys.exit(1)

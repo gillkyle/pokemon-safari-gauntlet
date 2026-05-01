@@ -33,10 +33,14 @@ tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8-crystal-v1.1-rev1.ips
 tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8.3ds-vc.patch
 tmp/release-checks/v1.0.8/MD5SUMS
 tmp/release-checks/v1.0.8/SHA256SUMS
+tmp/release-checks/v1.0.8/LOCAL_MD5SUMS
+tmp/release-checks/v1.0.8/LOCAL_SHA256SUMS
 ```
 
 The generated `.gbc` files are local verification outputs only. Do not upload
-or distribute them.
+or distribute them. `LOCAL_*SUMS` includes hashes for local verification
+outputs, including the generated `.gbc`; public `MD5SUMS` and `SHA256SUMS`
+include only patch assets intended for release.
 
 ## Patch Bases
 
@@ -73,5 +77,5 @@ build/MD5SUMS
 build/SHA256SUMS
 ```
 
-The checksum manifests include the uploaded patch assets and the expected hash
-of the patched `.gbc` output so users can verify their locally generated ROM.
+The public checksum manifests include only the uploaded patch assets. Local
+test-build manifests with generated `.gbc` hashes stay under ignored `tmp/`.

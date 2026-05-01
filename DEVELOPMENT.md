@@ -32,9 +32,13 @@ build/safari-gauntlet-1.0.8-crystal-v1.1-rev1.ips
 build/safari-gauntlet-1.0.8.3ds-vc.patch
 build/MD5SUMS
 build/SHA256SUMS
+build/LOCAL_MD5SUMS
+build/LOCAL_SHA256SUMS
 ```
 
-Do not distribute the generated `.gbc` files. They are local verification outputs only.
+Do not distribute the generated `.gbc` files or `LOCAL_*SUMS` manifests. They
+are local verification outputs only. Public `MD5SUMS` and `SHA256SUMS` cover
+only the patch artifacts intended for release.
 
 Before bumping or publishing a release, prefer writing local verification builds to ignored `tmp/`:
 
