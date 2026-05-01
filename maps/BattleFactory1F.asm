@@ -512,7 +512,7 @@ SafariGauntletRound3:
 	ifequalfwd 8, .Huey4
 	ifequalfwd 9, .Gilbert
 	ifequalfwd 10, .Reena1
-	ifequalfwd 11, .Dennett
+	ifequalfwd 11, .Oskar
 	ifequalfwd 12, .Natalie
 	ifequalfwd 13, .Margaret
 	ifequalfwd 14, .Winston
@@ -567,8 +567,8 @@ SafariGauntletRound3:
 	loadtrainer HEX_MANIAC, NATALIE
 	sjumpfwd .Battle
 
-.Dennett
-	loadtrainer SCIENTIST, DENNETT
+.Oskar
+	loadtrainer SCIENTIST, OSKAR
 	sjumpfwd .Battle
 
 .Margaret
@@ -596,82 +596,82 @@ SafariGauntletRound4:
 	showtext SafariGauntletRound4Text
 	winlosstext SafariGauntletTrainerWinText, SafariGauntletTrainerLossText
 	special Special_SafariGauntlet_RollTrainerFamily
-	ifequalfwd 0, .Joey5
-	ifequalfwd 1, .Todd5
-	ifequalfwd 2, .Gina5
-	ifequalfwd 3, .Tiffany3
-	ifequalfwd 4, .Alan5
-	ifequalfwd 5, .Wade5
-	ifequalfwd 6, .Vance3
-	ifequalfwd 7, .Anthony5
-	ifequalfwd 8, .Huey4
-	ifequalfwd 9, .Gilbert
-	ifequalfwd 10, .Reena1
-	ifequalfwd 11, .Dennett
-	ifequalfwd 12, .Natalie
-	ifequalfwd 13, .Margaret
-	ifequalfwd 14, .Winston
-	loadtrainer BATTLE_GIRL, NOZOMI
+	ifequalfwd 0, .Arden
+	ifequalfwd 1, .Amos
+	ifequalfwd 2, .Dallas
+	ifequalfwd 3, .Lily
+	ifequalfwd 4, .Chad5
+	ifequalfwd 5, .Arnie5
+	ifequalfwd 6, .Mick
+	ifequalfwd 7, .Kenny
+	ifequalfwd 8, .Garrett
+	ifequalfwd 9, .Leon
+	ifequalfwd 10, .Gwen
+	ifequalfwd 11, .Braydon
+	ifequalfwd 12, .Luna
+	ifequalfwd 13, .Olga
+	ifequalfwd 14, .Tobin
+	loadtrainer BATTLE_GIRL, RONDA
 	sjumpfwd .Battle
 
-.Joey5
-	loadtrainer YOUNGSTER, JOEY5
+.Arden
+	loadtrainer YOUNGSTER, ARDEN
 	sjumpfwd .Battle
 
-.Todd5
-	loadtrainer CAMPER, TODD5
+.Amos
+	loadtrainer CAMPER, AMOS
 	sjumpfwd .Battle
 
-.Gina5
-	loadtrainer PICNICKER, GINA5
+.Dallas
+	loadtrainer PICNICKER, DALLAS
 	sjumpfwd .Battle
 
-.Tiffany3
-	loadtrainer PICNICKER, TIFFANY3
+.Lily
+	loadtrainer PICNICKER, LILY
 	sjumpfwd .Battle
 
-.Alan5
-	loadtrainer SCHOOLBOY, ALAN5
+.Chad5
+	loadtrainer SCHOOLBOY, CHAD5
 	sjumpfwd .Battle
 
-.Wade5
-	loadtrainer BUG_CATCHER, WADE5
+.Arnie5
+	loadtrainer BUG_CATCHER, ARNIE5
 	sjumpfwd .Battle
 
-.Vance3
-	loadtrainer BIRD_KEEPER, VANCE3
+.Mick
+	loadtrainer BIRD_KEEPER, MICK
 	sjumpfwd .Battle
 
-.Anthony5
-	loadtrainer HIKER, ANTHONY5
+.Kenny
+	loadtrainer HIKER, KENNY
 	sjumpfwd .Battle
 
-.Huey4
-	loadtrainer SAILOR, HUEY4
+.Garrett
+	loadtrainer SAILOR, GARRETT
 	sjumpfwd .Battle
 
-.Gilbert
-	loadtrainer PSYCHIC_T, GILBERT
+.Leon
+	loadtrainer PSYCHIC_T, LEON
 	sjumpfwd .Battle
 
-.Reena1
-	loadtrainer COOLTRAINERF, REENA1
+.Gwen
+	loadtrainer COOLTRAINERF, GWEN
 	sjumpfwd .Battle
 
-.Natalie
-	loadtrainer HEX_MANIAC, NATALIE
+.Luna
+	loadtrainer HEX_MANIAC, LUNA
 	sjumpfwd .Battle
 
-.Dennett
-	loadtrainer SCIENTIST, DENNETT
+.Braydon
+	loadtrainer SCIENTIST, BRAYDON
 	sjumpfwd .Battle
 
-.Margaret
-	loadtrainer BAKER, MARGARET
+.Olga
+	loadtrainer BAKER, OLGA
 	sjumpfwd .Battle
 
-.Winston
-	loadtrainer RICH_BOY, WINSTON
+.Tobin
+	loadtrainer RICH_BOY, TOBIN
 
 .Battle
 	loadvar VAR_BATTLETYPE, BATTLETYPE_CANLOSE

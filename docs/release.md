@@ -7,7 +7,7 @@ against the exact output before a tag is published.
 Build the full release set with:
 
 ```bash
-python3 utils/build_safari_release_artifacts.py --version 1.0.7 --build-pret-base-roms
+python3 utils/build_safari_release_artifacts.py --version 1.0.8 --build-pret-base-roms
 ```
 
 Before bumping or publishing a release, keep a local test build under ignored
@@ -15,24 +15,24 @@ Before bumping or publishing a release, keep a local test build under ignored
 
 ```bash
 python3 utils/build_safari_release_artifacts.py \
-  --version 1.0.7 \
+  --version 1.0.8 \
   --build-pret-base-roms \
-  --build-dir tmp/release-checks/v1.0.7
+  --build-dir tmp/release-checks/v1.0.8
 ```
 
 This stores local verification ROMs and patches without making them release
 assets:
 
 ```text
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7.gbc
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7.sym
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7-crystal-v1.0.bps
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7-crystal-v1.0.ips
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7-crystal-v1.1-rev1.bps
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7-crystal-v1.1-rev1.ips
-tmp/release-checks/v1.0.7/safari-gauntlet-1.0.7.3ds-vc.patch
-tmp/release-checks/v1.0.7/MD5SUMS
-tmp/release-checks/v1.0.7/SHA256SUMS
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8.gbc
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8.sym
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8-crystal-v1.0.bps
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8-crystal-v1.0.ips
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8-crystal-v1.1-rev1.bps
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8-crystal-v1.1-rev1.ips
+tmp/release-checks/v1.0.8/safari-gauntlet-1.0.8.3ds-vc.patch
+tmp/release-checks/v1.0.8/MD5SUMS
+tmp/release-checks/v1.0.8/SHA256SUMS
 ```
 
 The generated `.gbc` files are local verification outputs only. Do not upload
@@ -59,7 +59,7 @@ before applying. IPS is included for patcher compatibility.
 ## GitHub Release
 
 Run the `Safari Gauntlet Release` GitHub Actions workflow with the target
-version and tag, for example `1.0.7` and `v1.0.7`.
+version and tag, for example `1.0.8` and `v1.0.8`.
 
 The workflow builds the local `.gbc` for verification but uploads only:
 

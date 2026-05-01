@@ -167,7 +167,7 @@ assert_true(casual_supplies and casual_supplies:find("giveitem RARE_CANDY, 16", 
 assert_true(hard_supplies and hard_supplies:find("giveitem RARE_CANDY, 8", 1, true) ~= nil, "FAILED_HARD_RARE_CANDY")
 assert_true(battle_factory:find("8-16 Candies", 1, true) ~= nil, "FAILED_RULE_TEXT_CANDY_RANGE")
 assert_true(marts:find("BattleFactoryMart5:\n\tdb 4 ; # items", 1, true) ~= nil, "FAILED_BATTLE_FACTORY_MART5_COUNT")
-assert_true(marts:find("\tdb LUCKY_EGG,    10", 1, true) ~= nil, "FAILED_LUCKY_EGG_BP_PRICE")
+assert_true(marts:find("\tdb LUCKY_EGG,    12", 1, true) ~= nil, "FAILED_LUCKY_EGG_BP_PRICE")
 
 local expected_types = {
 	{ "meganium", "GRASS", "GRASS" },
@@ -223,6 +223,9 @@ end
 local _, roll_count = battle_factory:gsub("special Special_SafariGauntlet_RollTrainerFamily", "")
 assert_true(roll_count == 4, "FAILED_TRAINER_FAMILY_ROLL_COUNT_" .. roll_count)
 assert_true(not battle_factory:find("random 16", 1, true), "FAILED_ROUND_RANDOM_16_STILL_PRESENT")
+assert_true(safari_events:find("ld [wSafariGauntletTrainerMaskLo], a", 1, true) ~= nil, "FAILED_TRAINER_MASK_LO_NOT_CLEARED")
+assert_true(safari_events:find("ld [wSafariGauntletTrainerMaskHi], a", 1, true) ~= nil, "FAILED_TRAINER_MASK_HI_NOT_CLEARED")
+assert_true(safari_events:find("call SafariGauntlet_GetTrainerFamilyFlag", 1, true) ~= nil, "FAILED_TRAINER_FAMILY_FLAG_HELPER_UNUSED")
 
 local function label_block(text, start_label, end_label)
 	local start_pos = text:find(start_label .. ":", 1, true)
@@ -232,6 +235,8 @@ local function label_block(text, start_label, end_label)
 	return text:sub(start_pos, end_pos - 1)
 end
 
+local ladder_trainer_seen = {}
+
 local function loadtrainer_keys(round_label, next_label)
 	local block = label_block(battle_factory, round_label, next_label)
 	local keys = {}
@@ -239,6 +244,9 @@ local function loadtrainer_keys(round_label, next_label)
 	for class, trainer in block:gmatch("loadtrainer%s+([%w_]+),%s*([%w_]+)") do
 		local key = class .. "," .. trainer
 		assert_true(not keys[key], "FAILED_DUPLICATE_LOADTRAINER_" .. round_label .. "_" .. key)
+		local previous_round = ladder_trainer_seen[key]
+		assert_true(not previous_round, "FAILED_REPEAT_LADDER_LOADTRAINER_" .. round_label .. "_" .. key .. "_previous_" .. tostring(previous_round))
+		ladder_trainer_seen[key] = round_label
 		keys[key] = true
 		count = count + 1
 	end

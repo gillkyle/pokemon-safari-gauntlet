@@ -54,6 +54,7 @@ local marts = read_file(repo_path .. "data/items/marts.asm")
 local evos = read_file(repo_path .. "data/pokemon/evos_attacks.asm")
 local map = read_file(repo_path .. "maps/BattleFactory1F.asm")
 local wram = read_file(repo_path .. "ram/wramx.asm")
+local mart_engine = read_file(repo_path .. "engine/items/mart.asm")
 
 local evolution_items = {}
 for line in evos:gmatch("[^\n]+") do
@@ -79,8 +80,9 @@ for item in pairs(evolution_items) do
 	assert_true(factory_items[item] == 12, "FAILED_EVOLUTION_ITEM_BP_" .. item)
 end
 assert_true(factory_items.RARE_CANDY == 36, "FAILED_FACTORY_RARE_CANDY_BP")
+assert_true(factory_items.LUCKY_EGG == 12, "FAILED_FACTORY_LUCKY_EGG_BP")
 local factory_count = factory_counts.BattleFactoryMart1 + factory_counts.BattleFactoryMart4 + factory_counts.BattleFactoryMart5
-assert_true(factory_count == required_count + 1, "FAILED_FACTORY_ITEM_COUNT_" .. factory_count)
+assert_true(factory_count == required_count + 2, "FAILED_FACTORY_ITEM_COUNT_" .. factory_count)
 
 local tower_count, tower_items = parse_bp_mart(marts, "BattleTowerMart2")
 assert_true(tower_count == 9, "FAILED_TOWER_MART2_COUNT_" .. tower_count)
@@ -150,6 +152,16 @@ end
 
 assert_true(map:find("HMs       5%-6BP@") ~= nil, "FAILED_HM_MENU_ENTRY")
 assert_true(map:find("SafariGauntletHMVendorMenuData", 1, true) ~= nil, "FAILED_HM_MENU_DATA")
+
+local confirm_block = mart_engine:match("BTMartConfirmPurchase:%s*\n(.-)\n%s*ExpCandyConfirmPurchase:")
+assert_true(confirm_block ~= nil, "FAILED_BT_CONFIRM_BLOCK_MISSING")
+assert_true(confirm_block:find("call BTMartLoadPurchaseCost", 1, true) ~= nil, "FAILED_BT_CONFIRM_COST_REFRESH")
+assert_true(mart_engine:find("BTMartLoadPurchaseCost:", 1, true) ~= nil, "FAILED_BT_COST_HELPER_MISSING")
+assert_true(mart_engine:find("BTMartGetSelectedPointCost:", 1, true) ~= nil, "FAILED_BT_POINT_COST_HELPER_MISSING")
+local ask_cost_block = mart_engine:match("BTMartGetSelectedPointCost:%s*\n(.-)\n%s*BTMartLoadPurchaseCost:")
+assert_true(ask_cost_block and ask_cost_block:find("ld hl, wMartItem1BCD", 1, true), "FAILED_BT_ASK_COST_BUFFER_LOOKUP")
+local load_cost_block = mart_engine:match("BTMartLoadPurchaseCost:%s*\n(.-)\n%s*BlueCardMartComparePoints:")
+assert_true(load_cost_block and load_cost_block:find("ld a, [wBuySellPriceLo]", 1, true), "FAILED_BT_CONFIRM_UNIT_COST_SOURCE")
 
 log(string.format("VERIFIED_BP_MERCHANTS evolution_items=%d factory_count=%d", required_count, factory_count))
 if emu and emu.screenshot then

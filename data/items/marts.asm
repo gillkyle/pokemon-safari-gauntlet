@@ -549,7 +549,7 @@ BattleFactoryMart5:
 	db 4 ; # items
 	db HARD_STONE,   12
 	db CHARCOAL,     12
-	db LUCKY_EGG,    10
+	db LUCKY_EGG,    12
 	db RARE_CANDY,   36
 	db -1
 

@@ -12,53 +12,25 @@ This project is derived from the official [Polished Crystal 3.2.3](https://githu
 
 ## Download and Play
 
-The current Safari Gauntlet release target is **v1.0.7**.
+The current Safari Gauntlet release target is **v1.0.8**.
 
-Safari Gauntlet is distributed as patch files. Bring your own legally obtained Pokémon Crystal ROM, download the matching `.bps` patch from the [v1.0.7 release](https://github.com/gillkyle/pokemon-safari-gauntlet/releases/tag/v1.0.7), and apply it with a patcher such as [Rom Patcher JS](https://www.marcrobledo.com/RomPatcher.js/). Then open the patched `.gbc` file in an accurate Game Boy Color emulator such as [mGBA](https://mgba.io/), [SameBoy](https://sameboy.github.io/), [BGB](https://bgb.bircd.org/), or Gambatte.
+Safari Gauntlet is distributed as patch files. Bring your own legally obtained Pokémon Crystal ROM, download the matching `.bps` patch from the [v1.0.8 release](https://github.com/gillkyle/pokemon-safari-gauntlet/releases/tag/v1.0.8), and apply it with a patcher such as [Rom Patcher JS](https://www.marcrobledo.com/RomPatcher.js/). Then open the patched `.gbc` file in an accurate Game Boy Color emulator such as [mGBA](https://mgba.io/), [SameBoy](https://sameboy.github.io/), [BGB](https://bgb.bircd.org/), or Gambatte.
 
 Use the patch that matches your base ROM:
 
 ```text
-safari-gauntlet-1.0.7-crystal-v1.0.bps
+safari-gauntlet-1.0.8-crystal-v1.0.bps
 Pokemon - Crystal Version (UE) (V1.0) [C][!].gbc
 MD5: 9f2922b235a5eeb78d65594e82ef5dde
 
-safari-gauntlet-1.0.7-crystal-v1.1-rev1.bps
+safari-gauntlet-1.0.8-crystal-v1.1-rev1.bps
 Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc
 MD5: 301899b8087289a6436b0a241fbbb474
 ```
 
 BPS is the recommended patch format because it verifies that the input ROM matches the expected source before writing the patched game. IPS patches are also provided for patchers that do not support BPS.
 
-If you want to build release artifacts yourself, use the repo-local release helper:
-
-```bash
-python3 utils/build_safari_release_artifacts.py --version 1.0.7 --build-pret-base-roms
-```
-
-The release helper builds local test ROMs and verified patch artifacts such as:
-
-```text
-build/safari-gauntlet-1.0.7.gbc
-build/safari-gauntlet-1.0.7.sym
-build/safari-gauntlet-1.0.7-crystal-v1.0.bps
-build/safari-gauntlet-1.0.7-crystal-v1.0.ips
-build/safari-gauntlet-1.0.7-crystal-v1.1-rev1.bps
-build/safari-gauntlet-1.0.7-crystal-v1.1-rev1.ips
-build/safari-gauntlet-1.0.7.3ds-vc.patch
-build/MD5SUMS
-build/SHA256SUMS
-```
-
-Do not distribute the generated `.gbc` files. They are local verification outputs only.
-
-If you are building locally without release patches, run:
-
-```bash
-make -j8
-```
-
-Then load the built `.gbc` in an accurate Game Boy Color emulator such as [mGBA](https://mgba.io/), [SameBoy](https://sameboy.github.io/), [BGB](https://bgb.bircd.org/), or Gambatte. Do not use VBA or VBA-M.
+For source builds and release artifact generation, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## What Is Safari Gauntlet?
 
@@ -115,27 +87,23 @@ This is an unofficial fan project. Pokémon is owned by Nintendo, Game Freak, an
 
 ![Safari Gauntlet title screen](screenshots/safari-gauntlet/title.png)
 ![Safari Gauntlet hub](screenshots/safari-gauntlet/hub.png)
+![Safari Gauntlet settings menu](screenshots/safari-gauntlet/settings-menu.png)
 
 ### Draft Field and Battles
 
 ![Safari Gauntlet draft field](screenshots/safari-gauntlet/draft-field.png)
-![Safari Gauntlet Safari Zone entrance](screenshots/safari-gauntlet/safari-center.png)
-![Safari Gauntlet Safari Zone grass](screenshots/safari-gauntlet/safari-field.png)
-![Safari Gauntlet Tangela battle](screenshots/safari-gauntlet/battle-tangela.png)
-![Safari Gauntlet Kakuna battle](screenshots/safari-gauntlet/battle-kakuna.png)
-![Safari Gauntlet Dunsparce battle](screenshots/safari-gauntlet/battle-dunsparce.png)
+![Safari Gauntlet trainer battle](screenshots/safari-gauntlet/trainer-derek.png)
+![Safari Gauntlet battle move selection](screenshots/safari-gauntlet/battle-move-selection.png)
 
-### Party and Storage
+### Party, Moves, and Items
 
-![Safari Gauntlet party menu](screenshots/safari-gauntlet/party-menu.png)
-![Safari Gauntlet Pokémon summary](screenshots/safari-gauntlet/pokemon-summary.png)
+![Safari Gauntlet Pokémon summary](screenshots/safari-gauntlet/summary-feraligatr.png)
+![Safari Gauntlet Pokémon moves](screenshots/safari-gauntlet/moves-weezing.png)
+![Safari Gauntlet bag medicine](screenshots/safari-gauntlet/bag-medicine.png)
 ![Safari Gauntlet box management](screenshots/safari-gauntlet/box-management.png)
 
 ### Hub Services
 
-![Safari Gauntlet move tutor](screenshots/safari-gauntlet/move-tutor.png)
-![Safari Gauntlet BP TM shop](screenshots/safari-gauntlet/tm-shop.png)
-![Safari Gauntlet red BP merchant](screenshots/safari-gauntlet/bp-merchant-red.png)
-![Safari Gauntlet green BP merchant](screenshots/safari-gauntlet/bp-merchant-green.png)
-![Safari Gauntlet blue BP merchant](screenshots/safari-gauntlet/bp-merchant-blue.png)
+![Safari Gauntlet move reminder](screenshots/safari-gauntlet/move-reminder-service.png)
+![Safari Gauntlet BP evolution items](screenshots/safari-gauntlet/bp-evolution-items.png)
 ![Safari Gauntlet run saved](screenshots/safari-gauntlet/run-saved.png)

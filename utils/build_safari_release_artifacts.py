@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DEFAULT_PREFIX = "safari-gauntlet"
-DEFAULT_RELEASE_VERSION = "1.0.7"
+DEFAULT_RELEASE_VERSION = "1.0.8"
 EXPECTED_CRYSTAL_MD5 = "9f2922b235a5eeb78d65594e82ef5dde"
 PRET_POKECRYSTAL_REPO = "https://github.com/pret/pokecrystal.git"
 

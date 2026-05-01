@@ -956,7 +956,13 @@ StandardMartAskPurchaseQuantity:
 	jmp ExitMenu
 
 MartConfirmPurchase:
+	farcall PartyMonItemName
+	ld a, MARTTEXT_COSTS_THIS_MUCH
+	call LoadBuyMenuText
+	jmp YesNoBox
+
 BTMartConfirmPurchase:
+	call BTMartLoadPurchaseCost
 	farcall PartyMonItemName
 	ld a, MARTTEXT_COSTS_THIS_MUCH
 	call LoadBuyMenuText
@@ -1097,22 +1103,46 @@ BTMartAskPurchaseQuantity:
 	ld a, MARTTEXT_HOW_MANY
 	call LoadBuyMenuText
 
-	ld a, [wMartItemID]
-	ld e, a
-	ld d, 0
-	ld hl, wMartPointer
-	ld a, [hli]
-	ld h, [hl]
-	ld l, a
-	inc hl
-	add hl, de
-	add hl, de
-	inc hl
-	ld a, [hl]
+	call BTMartGetSelectedPointCost
 	ld c, a
 
 	farcall BT_SelectQuantityToBuy
 	jmp ExitMenu
+
+BTMartGetSelectedPointCost:
+	ld a, [wMartItemID]
+	ld c, a
+	ld b, 0
+	ld hl, wMartItem1BCD
+	add hl, bc
+	ld a, [hl]
+	ret
+
+BTMartLoadPurchaseCost:
+	ld a, [wBuySellPriceLo]
+	ld c, a
+	ld a, [wItemQuantityChangeBuffer]
+	ld b, a
+	xor a
+	ldh [hMoneyTemp], a
+	ldh [hMoneyTemp + 1], a
+	ldh [hMoneyTemp + 2], a
+	ld a, b
+	and a
+	ret z
+.loop
+	ldh a, [hMoneyTemp + 2]
+	add c
+	ldh [hMoneyTemp + 2], a
+	ldh a, [hMoneyTemp + 1]
+	adc 0
+	ldh [hMoneyTemp + 1], a
+	ldh a, [hMoneyTemp]
+	adc 0
+	ldh [hMoneyTemp], a
+	dec b
+	jr nz, .loop
+	ret
 
 BlueCardMartComparePoints:
 ; no need for a "BlueCardMartAskPurchaseQuantity"
