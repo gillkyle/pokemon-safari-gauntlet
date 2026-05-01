@@ -12,7 +12,7 @@ ROMVERSION := 0x32
 
 FILLER := 0xff
 
-COPYRIGHT = @KYLE GILL v1.0.4
+COPYRIGHT = @KYLE GILL v1.0.5
 
 ifneq ($(wildcard rgbds/.*),)
 RGBDS ?= rgbds/
