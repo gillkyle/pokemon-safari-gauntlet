@@ -9,7 +9,7 @@ endc
 if DEF(FAITHFUL)
 	db FIRE, FIRE ; type
 else
-	db FIRE, FIGHTING ; type
+	db FIRE, FIRE ; type
 endc
 	db 30 ; catch rate
 	db 199 ; base exp

@@ -57,7 +57,7 @@ BattleFactory1FRulesScript:
 
 		para "Supplies include"
 		line "Balls, healing,"
-		cont "12 Candies,"
+		cont "8-16 Candies,"
 		cont "3 Repels,"
 		cont "Eevee stones,"
 		cont "and a Super Rod."
@@ -178,7 +178,7 @@ SafariGauntletReceptionistScript:
 	giveitem FULL_HEAL, 4
 	giveitem SUPER_REPEL, 3
 	giveitem REVIVE, 2
-	giveitem RARE_CANDY, 12
+	giveitem RARE_CANDY, 16
 	giveitem THUNDERSTONE, 1
 	giveitem FIRE_STONE, 1
 	giveitem WATER_STONE, 1
@@ -199,7 +199,7 @@ SafariGauntletReceptionistScript:
 	giveitem HYPER_POTION, 2
 	giveitem FULL_HEAL, 1
 	giveitem SUPER_REPEL, 3
-	giveitem RARE_CANDY, 12
+	giveitem RARE_CANDY, 8
 	giveitem THUNDERSTONE, 1
 	giveitem FIRE_STONE, 1
 	giveitem WATER_STONE, 1

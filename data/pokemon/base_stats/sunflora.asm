@@ -9,7 +9,7 @@ endc
 if DEF(FAITHFUL)
 	db GRASS, GRASS ; type
 else
-	db GRASS, FIRE ; type
+	db GRASS, GRASS ; type
 endc
 if DEF(FAITHFUL)
 	db 120 ; catch rate

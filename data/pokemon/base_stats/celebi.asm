@@ -4,7 +4,7 @@
 if DEF(FAITHFUL)
 	db PSYCHIC, GRASS ; type
 else
-	db GRASS, FAIRY ; type
+	db PSYCHIC, GRASS ; type
 endc
 	db 45 ; catch rate
 	db 64 ; base exp

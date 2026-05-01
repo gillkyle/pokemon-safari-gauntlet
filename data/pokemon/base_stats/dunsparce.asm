@@ -4,7 +4,7 @@
 if DEF(FAITHFUL)
 	db NORMAL, NORMAL ; type
 else
-	db NORMAL, GROUND ; type
+	db NORMAL, NORMAL ; type
 endc
 	db 190 ; catch rate
 	db 75 ; base exp

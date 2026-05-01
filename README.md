@@ -12,7 +12,7 @@ This project is derived from the official [Polished Crystal 3.2.3](https://githu
 
 ## Download and Play
 
-The current Safari Gauntlet release target is **v1.0.5**.
+The current Safari Gauntlet release target is **v1.0.6**.
 
 Release artifacts are built with the repo-local release helper:
 
@@ -30,11 +30,11 @@ MD5: 9f2922b235a5eeb78d65594e82ef5dde
 The release helper follows Polished Crystal's release layout and writes artifacts such as:
 
 ```text
-build/safari-gauntlet-1.0.5.gbc
-build/safari-gauntlet-1.0.5.sym
-build/safari-gauntlet-1.0.5.bps
-build/safari-gauntlet-1.0.5.ips
-build/safari-gauntlet-1.0.5.3ds-vc.patch
+build/safari-gauntlet-1.0.6.gbc
+build/safari-gauntlet-1.0.6.sym
+build/safari-gauntlet-1.0.6.bps
+build/safari-gauntlet-1.0.6.ips
+build/safari-gauntlet-1.0.6.3ds-vc.patch
 ```
 
 If you are building locally without release patches, run:

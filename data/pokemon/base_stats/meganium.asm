@@ -9,7 +9,7 @@ endc
 if DEF(FAITHFUL)
 	db GRASS, GRASS ; type
 else
-	db GRASS, FAIRY ; type
+	db GRASS, GRASS ; type
 endc
 	db 45 ; catch rate
 	db 208 ; base exp

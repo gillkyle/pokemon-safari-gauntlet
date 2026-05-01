@@ -1,4 +1,5 @@
 Special_SafariGauntlet_BeginRun:
+	call SafariGauntlet_EnsureDefaultSettings
 	call SafariGauntlet_SaveGame
 	xor a
 	ld [wSafariGauntletDraftAttempts], a
@@ -486,12 +487,14 @@ Special_SafariGauntlet_ClampPartyHP:
 	ret
 
 Special_SafariGauntlet_EnsureHubParty:
+	call SafariGauntlet_EnsureDefaultSettings
 	call SafariGauntlet_EnsureHubParty
 	ld a, TRUE
 	ldh [hScriptVar], a
 	ret
 
 Special_SafariGauntlet_EnsureStarterPC:
+	call SafariGauntlet_EnsureDefaultSettings
 	ld a, [wSafariGauntletSettings]
 	bit SAFARI_GAUNTLET_SETTINGS_STARTER_PC_SEEDED_F, a
 	jr nz, .done
@@ -509,6 +512,17 @@ SafariGauntlet_SaveGame:
 	ld [wSavedAtLeastOnce], a
 	farcall SaveGameData
 	farcall SaveCurrentVersion
+	ret
+
+SafariGauntlet_EnsureDefaultSettings:
+	ld hl, wInitialOptions
+	set PERFECT_IVS_OPT, [hl]
+	set TRADED_AS_OT_OPT, [hl]
+	ld hl, wSafariGauntletSettings
+	bit SAFARI_GAUNTLET_SETTINGS_INITIALIZED_F, [hl]
+	ret nz
+	set SAFARI_GAUNTLET_SETTINGS_NATIONAL_F, [hl]
+	set SAFARI_GAUNTLET_SETTINGS_INITIALIZED_F, [hl]
 	ret
 
 SafariGauntlet_NormalizePartyLead:

@@ -12,7 +12,7 @@ import zlib
 from pathlib import Path
 
 DEFAULT_PREFIX = "safari-gauntlet"
-DEFAULT_RELEASE_VERSION = "1.0.5"
+DEFAULT_RELEASE_VERSION = "1.0.6"
 EXPECTED_CRYSTAL_MD5 = "9f2922b235a5eeb78d65594e82ef5dde"
 
 

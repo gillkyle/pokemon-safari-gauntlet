@@ -6573,6 +6573,7 @@ GiveExperiencePoints:
 	call z, BoostExp
 
 	call .MaybeScaleExp
+	call .BoostBalanceExp
 
 	; make sure to give at least 1 exp
 	ld hl, hQuotient
@@ -6935,6 +6936,32 @@ GiveExperiencePoints:
 
 .done_scaling
 	pop bc
+	ret
+
+.BoostBalanceExp:
+	ldh a, [hQuotient]
+	ldh [hMultiplicand], a
+	ldh a, [hQuotient + 1]
+	ldh [hMultiplicand + 1], a
+	ldh a, [hQuotient + 2]
+	ldh [hMultiplicand + 2], a
+	ld a, 5
+	ldh [hMultiplier], a
+	call Multiply
+	ldh a, [hProduct]
+	cp 2
+	jr nc, .cap_exp
+	ld a, 2
+	ldh [hDivisor], a
+	ld b, 4
+	call Divide
+	ret
+
+.cap_exp
+	ld a, $ff
+	ldh [hQuotient], a
+	ldh [hQuotient + 1], a
+	ldh [hQuotient + 2], a
 	ret
 
 .ScaleMod:

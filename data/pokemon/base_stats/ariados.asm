@@ -9,7 +9,7 @@ endc
 if DEF(FAITHFUL)
 	db BUG, POISON ; type
 else
-	db BUG, DARK ; type
+	db BUG, POISON ; type
 endc
 	db 90 ; catch rate
 	db 134 ; base exp

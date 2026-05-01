@@ -98,6 +98,9 @@ local BATTLEMODE_TRAINER = 2
 local PARTYMON_HP_OFFSET = 0x22
 local PARTYMON_MAX_HP_OFFSET = 0x24
 local PARTYMON_PP_OFFSET = 0x16
+local PARTYMON_STRUCT_LENGTH = 0x30
+local MON_FORM_OFFSET = 0x15
+local MON_LEVEL_OFFSET = 0x1f
 local MON_NAME_LENGTH = 11
 local TEXT_END = 0x53
 local POKE_BALL = 1
@@ -116,6 +119,13 @@ local trainer_level_seen = {}
 local trainer_party_seen = {}
 local trainer_seen = {}
 local current_trainer_key = nil
+local current_trainer_step = nil
+local current_trainer_player_level_start = nil
+local first_trainer_player_level = nil
+local final_trainer_player_level = nil
+local trainer_level_gain_total = 0
+local trainer_level_gain_by_step = {}
+local trainer_growth_summary_logged = false
 
 local function wram_offset(addr)
 	if addr >= 0xd000 and addr <= 0xdfff and emu.memory and emu.memory.wram then
@@ -308,6 +318,13 @@ local TRAINER_PARTY_MINIMUMS = {
 	[5] = 5,
 }
 
+local TRAINER_PARTY_EXACT_SIZES = {
+	[2] = 3,
+	[3] = 4,
+	[4] = 5,
+	[5] = 5,
+}
+
 local function trainer_levels_complete()
 	for step = 2, 6 do
 		if not trainer_level_seen[step] then
@@ -348,6 +365,26 @@ local function verify_trainer_nicknames(step, party_count)
 			stop_with_screenshot(string.format("FAILED_TRAINER_NICKNAME step=%d slot=%d name=%s", step, i + 1, trainer_name_hex(i)))
 			return false
 		end
+	end
+	return true
+end
+
+local function trainer_species_addr(index)
+	return W.ot_party_mon1_level - MON_LEVEL_OFFSET + index * PARTYMON_STRUCT_LENGTH
+end
+
+local function verify_trainer_species_unique(step, party_count)
+	local seen = {}
+	for i = 0, party_count - 1 do
+		local addr = trainer_species_addr(i)
+		local species = read8(addr)
+		local extspecies = read8(addr + MON_FORM_OFFSET) & 0xe0
+		local key = string.format("%02x:%02x", species, extspecies)
+		if seen[key] then
+			stop_with_screenshot(string.format("FAILED_TRAINER_DUPLICATE_SPECIES step=%d slot=%d species=%s", step, i + 1, key))
+			return false
+		end
+		seen[key] = true
 	end
 	return true
 end
@@ -474,6 +511,15 @@ cbid = callbacks:add("frame", function()
 			end
 			if current_trainer_key ~= trainer_key then
 				current_trainer_key = trainer_key
+				current_trainer_step = step
+				current_trainer_player_level_start = read8(W.party_mon1 + MON_LEVEL_OFFSET)
+				first_trainer_player_level = first_trainer_player_level or current_trainer_player_level_start
+				log(string.format(
+					"PLAYER_LEVEL_BEFORE_TRAINER step=%d class_id=%s level=%d",
+					step,
+					trainer_key,
+					current_trainer_player_level_start
+				))
 				if not trainer_seen[trainer_key] then
 					trainer_seen[trainer_key] = true
 					log(string.format("TRAINER_UNIQUE class_id=%s step=%d", trainer_key, step))
@@ -492,17 +538,48 @@ cbid = callbacks:add("frame", function()
 				stop_with_screenshot(string.format("FAILED_TRAINER_PARTY_SIZE step=%d count=%d expected_min=%d", step, party_count, party_min))
 				return
 			end
+			local exact_size = TRAINER_PARTY_EXACT_SIZES[step]
+			if exact_size and party_count ~= exact_size then
+				stop_with_screenshot(string.format("FAILED_TRAINER_PARTY_EXACT_SIZE step=%d count=%d expected=%d", step, party_count, exact_size))
+				return
+			end
 			if not verify_trainer_nicknames(step, party_count) then
+				return
+			end
+			if exact_size and not verify_trainer_species_unique(step, party_count) then
 				return
 			end
 			if not trainer_party_seen[step] then
 				trainer_party_seen[step] = true
 				log(string.format("TRAINER_PARTY_SIZE_VERIFIED step=%d count=%d expected_min=%d", step, party_count, party_min))
 				log(string.format("TRAINER_NICKNAMES_VERIFIED step=%d count=%d", step, party_count))
+				if exact_size then
+					log(string.format("TRAINER_SPECIES_VARIETY_VERIFIED step=%d count=%d", step, party_count))
+				end
 			end
 		end
 	else
+		if current_trainer_key then
+			local after = read8(W.party_mon1 + MON_LEVEL_OFFSET)
+			local before = current_trainer_player_level_start or after
+			local gained = after - before
+			local step = current_trainer_step or read8(W.step)
+			trainer_level_gain_total = trainer_level_gain_total + gained
+			trainer_level_gain_by_step[step] = (trainer_level_gain_by_step[step] or 0) + gained
+			final_trainer_player_level = after
+			log(string.format(
+				"PLAYER_LEVEL_AFTER_TRAINER step=%d class_id=%s before=%d after=%d gained=%d total_gained=%d",
+				step,
+				current_trainer_key,
+				before,
+				after,
+				gained,
+				trainer_level_gain_total
+			))
+		end
 		current_trainer_key = nil
+		current_trainer_step = nil
+		current_trainer_player_level_start = nil
 	end
 	check_supplies()
 	if not draft_seeded
@@ -530,6 +607,20 @@ cbid = callbacks:add("frame", function()
 	end
 
 	if victory_stats_seen and read8(W.script_running) == 0 and read8(W.battle_mode) == 0 and read8(W.map_status) == 2 then
+		if not trainer_growth_summary_logged then
+			trainer_growth_summary_logged = true
+			log(string.format(
+				"TRAINER_LEVEL_GROWTH_SUMMARY start=%s final=%s total=%d round1=%d round2=%d round3=%d round4=%d boss=%d",
+				tostring(first_trainer_player_level),
+				tostring(final_trainer_player_level),
+				trainer_level_gain_total,
+				trainer_level_gain_by_step[2] or 0,
+				trainer_level_gain_by_step[3] or 0,
+				trainer_level_gain_by_step[4] or 0,
+				trainer_level_gain_by_step[5] or 0,
+				trainer_level_gain_by_step[6] or 0
+			))
+		end
 		state_line("VERIFIED_RUN")
 		emu:screenshot(screenshot_path)
 		log("screenshot=" .. screenshot_path)

@@ -9,7 +9,7 @@ endc
 if DEF(FAITHFUL)
 	db BUG, FLYING ; type
 else
-	db BUG, PSYCHIC ; type
+	db BUG, FLYING ; type
 endc
 	db 45 ; catch rate
 if DEF(FAITHFUL)

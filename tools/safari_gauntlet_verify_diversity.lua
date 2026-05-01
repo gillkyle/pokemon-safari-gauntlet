@@ -21,6 +21,7 @@ local W = {
 	y = 0xdcae,
 	player_direction = 0xd4d4,
 	options2 = 0xcff5,
+	initial_options2 = 0xcff7,
 	settings = 0xdba1,
 	step = 0xd7dc,
 	battle_mode = 0xd233,
@@ -55,6 +56,7 @@ local SAFARI_GAUNTLET_SETTINGS_NATIONAL = 0x01
 local SAFARI_GAUNTLET_DRAFT_LEVEL = 50
 local SAFARI_GAUNTLET_JOHTO_POOL_COUNT = 251
 local BATTLEMODE_WILD = 1
+local NO_EXP_OPT = 0x04
 local EXTSPECIES_MASK = 0x20
 local FORM_AND_EXT_MASK = 0x3f
 
@@ -272,6 +274,7 @@ cbid = callbacks:add("frame", function()
 	end
 
 	write8(W.options2, read8(W.options2) & 0x3f)
+	write8(W.initial_options2, read8(W.initial_options2) | NO_EXP_OPT)
 	if read8(W.crash_code) ~= 0 or bsod_seen() then
 		state_line("FAILED_CRASH")
 		emu:screenshot(screenshot_path)

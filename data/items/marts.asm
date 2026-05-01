@@ -546,9 +546,10 @@ BattleFactoryMart4:
 	db -1
 
 BattleFactoryMart5:
-	db 3 ; # items
+	db 4 ; # items
 	db HARD_STONE,   12
 	db CHARCOAL,     12
+	db LUCKY_EGG,    10
 	db RARE_CANDY,   36
 	db -1
 

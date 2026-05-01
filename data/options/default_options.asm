@@ -16,6 +16,6 @@ endc
 ; wOptions2
 	db 0
 ; wInitialOptions
-	db (1 << NATURES_OPT) | (1 << ABILITIES_OPT) | (1 << PSS_OPT) | (1 << COLOR_VARY_OPT)
+	db (1 << NATURES_OPT) | (1 << ABILITIES_OPT) | (1 << PSS_OPT) | (1 << COLOR_VARY_OPT) | (1 << PERFECT_IVS_OPT) | (1 << TRADED_AS_OT_OPT)
 ; wInitialOptions2
 	db EVS_OPT_MODERN | (1 << RTC_OPT) | (1 << EVOLVE_IN_BATTLE_OPT)

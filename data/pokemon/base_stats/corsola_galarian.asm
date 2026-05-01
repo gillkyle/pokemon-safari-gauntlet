@@ -4,7 +4,7 @@
 if DEF(FAITHFUL)
 	db GHOST, GHOST ; type
 else
-	db GHOST, ROCK ; type
+	db GHOST, GHOST ; type
 endc
 	db 60 ; catch rate
 	db 113 ; base exp

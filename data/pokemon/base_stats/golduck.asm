@@ -4,7 +4,7 @@
 if DEF(FAITHFUL)
 	db WATER, WATER ; type
 else
-	db WATER, PSYCHIC ; type
+	db WATER, WATER ; type
 endc
 	db 75 ; catch rate
 	db 174 ; base exp
