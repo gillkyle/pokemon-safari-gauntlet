@@ -1,5 +1,9 @@
 # Pokémon Safari Gauntlet
 
+<video src="screenshots/safari-gauntlet/showcase-gameplay.mp4" controls muted playsinline></video>
+
+[Watch the Safari Gauntlet gameplay showcase](screenshots/safari-gauntlet/showcase-gameplay.mp4)
+
 Safari Gauntlet is a self-contained challenge game built on top of [Pokémon Polished Crystal](https://github.com/Rangi42/polishedcrystal), which itself is based on [the Pokémon Crystal disassembly](https://github.com/pret/pokecrystal).
 
 Instead of playing the full Johto/Kanto adventure, you enter a compact roguelite-style facility: bring or receive one Pokémon, draft a team in the Safari Zone, climb a short battle ladder, earn BP, and keep one winner for future runs.
